@@ -1,0 +1,2 @@
+/* Privacy, Terms, Cookies: the club-rules rows as a plain document page. */
+.rules--doc { padding-top: calc(var(--bar-h) + 80px); min-height: 100svh; }

@@ -1,0 +1,227 @@
+/* Round 9 booking flow (rows 6–9, 11, 12, 18, 20–24, 35): forecast line, group courts, spans of
+   hours, after-booking tiles, best-time band and sunset mark on the scrubber, the countdown in the
+   top bar and the marks over the map. Solid surfaces, square corners, even sizes, Switzer, spring. */
+
+/* ---------- Booking panel ---------- */
+
+/* A span of hours reads as one dark bar: the gaps between its tiles close up (row 21) */
+.hud-time.is-span { box-shadow: 0 12px 28px -14px rgba(0, 0, 0, 0.7), 4px 0 0 var(--night); }
+.hud-time.is-span-end { box-shadow: 0 12px 28px -14px rgba(0, 0, 0, 0.7); }
+.hud-times-hint { display: none; }
+
+/* Forecast for the picked hour (row 11): one quiet line; a likely shower gets the warm paper */
+.hud-forecast {
+  flex: 1;
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; column-gap: 12px; row-gap: 4px;
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 14px; line-height: 20px;
+  transition: background-color 0.4s var(--ease-out), color 0.3s;
+}
+.hud-forecast.is-quiet { color: var(--mute); }
+.hud-forecast__rain { color: var(--mute); }
+.hud-forecast.is-wet { background: var(--sun); }
+.hud-forecast.is-wet .hud-forecast__rain { color: var(--clay); font-weight: 500; }
+.hud-forecast__note { flex-basis: 100%; font-size: 12px; line-height: 16px; color: var(--wood); }
+.hud-forecast__line, .hud-forecast__rain { animation: hud-fade-up 0.5s var(--ease-spring); }
+@keyframes hud-fade-up { from { opacity: 0; transform: translateY(4px); } }
+
+/* Group booking (row 24): the courts next door as toggles */
+.hud-group[hidden] { display: none; }
+.hud-group .hud-seg { flex-wrap: wrap; justify-content: flex-end; }
+.hud-group .hud-seg button span { color: var(--mute); }
+
+/* After booking (rows 6, 8): two quiet tiles above Add to calendar / Done */
+.hud-more { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.hud-more__btn {
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 6px;
+  min-height: 64px; padding: 12px 16px;
+  font-size: 16px; font-weight: 500; line-height: 1.2;
+}
+.hud-more__btn small { font-size: 12px; font-weight: 400; color: var(--mute); overflow-wrap: anywhere; transition: color 0.2s; }
+.hud-more__btn span::after { content: '→'; display: inline-block; margin-left: 6px; transition: transform 0.45s var(--ease-spring); }
+@media (hover: hover) {
+  .hud-more__btn:not([disabled]):hover { transform: translateY(-2px); }
+  .hud-more__btn:not([disabled]):hover span::after { transform: translateX(4px); }
+}
+.hud-more__btn:not([disabled]):active { transform: scale(0.96); transition-duration: 0.1s; }
+.hud-more__btn[aria-pressed='true'] { background: var(--night); color: var(--snow); }
+.hud-more__btn[aria-pressed='true'] small { color: rgba(244, 243, 239, 0.6); }
+.hud-more__btn[aria-pressed='true'] span::after, .hud-more__btn[disabled] span::after { content: none; }
+.hud-more__btn[disabled]:not([aria-pressed='true']) { color: var(--mute-2); cursor: default; }
+@media (max-width: 640px) {
+  .hud-more__btn { min-height: 56px; padding: 10px 12px; font-size: 14px; }
+  .hud-group { flex-wrap: wrap; padding-top: 10px; padding-bottom: 6px; }
+  .hud-group .hud-seg { flex: 1 1 100%; justify-content: flex-start; }
+}
+.hud-time.is-span:nth-child(7n) { box-shadow: 0 12px 28px -14px rgba(0, 0, 0, 0.7); }
+
+/* ---------- Time scrubber: best time, sunset, spans (rows 9, 12, 21) ---------- */
+
+/* Best time: 2px segments along the top of the open hours; the best three stand taller and solid */
+.dock__band { position: absolute; left: 0; top: 2px; width: 192px; height: 2px; pointer-events: none; }
+.dock__band i {
+  position: absolute; top: 0;
+  width: 6px; height: 2px;
+  margin-left: 1px;
+  background: var(--snow);
+  transition: opacity 0.6s var(--ease-out), height 0.5s var(--ease-spring), top 0.5s var(--ease-spring);
+}
+.dock__band i.is-best { top: -2px; height: 4px; opacity: 1 !important; }
+
+/* A dragged span: the ticks stand up and a bar runs along the hairline under them */
+.dock__span {
+  position: absolute; left: 0; bottom: 6px;
+  width: 8px; height: 2px;
+  background: var(--snow);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.45s var(--ease-spring), width 0.45s var(--ease-spring), opacity 0.2s;
+}
+.dock__span.is-on { opacity: 1; }
+.dock__cell.is-span::before { height: 12px; background: var(--snow); }
+
+/* Sunset: a small half sun sitting on the band at the sunset minute */
+.dock__sunset {
+  position: absolute; left: 0; top: -10px;
+  width: 16px; height: 12px;
+  display: grid; place-items: end center;
+  padding: 0 0 2px;
+  border-radius: 0;
+  color: var(--sun);
+  cursor: pointer;
+  transition: transform 0.6s var(--ease-spring);
+}
+.dock__sunset svg { width: 10px; height: 6px; fill: currentColor; transform-origin: 50% 100%; transition: transform 0.45s var(--ease-spring), color 0.2s; }
+@media (hover: hover) { .dock__sunset:hover svg { transform: scale(1.4); } }
+.dock__sunset.is-on svg { transform: scale(1.4); }
+.dock__sunset:active svg { transform: scale(1.1); transition-duration: 0.1s; }
+.dock__sunset:focus-visible { outline: 1px solid rgba(244, 243, 239, 0.6); outline-offset: 0; }
+
+/* Why an hour is good: a small black plate over the scrubber, following the pointer */
+.dock__tip {
+  position: absolute; left: var(--x, 0); bottom: calc(100% + 10px);
+  display: flex; align-items: center;
+  height: 28px; padding: 0 10px;
+  background: var(--night);
+  color: var(--snow);
+  box-shadow: inset 0 0 0 1px rgba(244, 243, 239, 0.12), 0 12px 28px -14px rgba(0, 0, 0, 0.8);
+  font-size: 12px; line-height: 1; white-space: nowrap;
+  translate: -50% 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s, translate 0.45s var(--ease-spring), left 0.3s var(--ease-out);
+}
+.dock__tip.is-on { opacity: 1; translate: -50% 0; }
+@media (max-width: 640px) { .dock__tip { display: none; } }
+
+/* The span's plate over the dock: "18:00–20:00 · 2 h · 5 courts free  Book  ×" */
+.dock-range {
+  position: fixed; z-index: 31;
+  display: flex; align-items: center; gap: 4px;
+  height: 40px; padding: 4px 4px 4px 14px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.8);
+  font-size: 14px; line-height: 1; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  opacity: 0; translate: 0 8px; scale: 0.96;
+  transition: opacity 0.2s, translate 0.5s var(--ease-spring), scale 0.5s var(--ease-spring), left 0.4s var(--ease-out);
+}
+.dock-range[hidden] { display: none; }
+.dock-range.is-in { opacity: 1; translate: 0 0; scale: 1; }
+.dock-range__when { margin: 0 8px 0 0; }
+.dock-range__when b { font-weight: 500; }
+.dock-range__when span { color: var(--mute); }
+.dock-range__book, .dock-range__clear {
+  display: grid; place-items: center;
+  height: 32px;
+  border-radius: 0;
+  transition: background-color 0.2s, color 0.2s, transform 0.4s var(--ease-spring);
+}
+.dock-range__book { padding: 0 16px; background: var(--night); color: var(--snow); font-weight: 500; }
+.dock-range__book[disabled] { background: var(--paper-2); color: var(--mute-2); cursor: not-allowed; }
+.dock-range__clear { width: 32px; color: var(--mute); }
+.dock-range__clear svg { width: 14px; height: 14px; }
+@media (hover: hover) {
+  .dock-range__book:not([disabled]):hover { background: var(--ink-2); transform: translateY(-2px); }
+  .dock-range__clear:hover { background: var(--paper-2); color: var(--ink); }
+}
+.dock-range__book:not([disabled]):active, .dock-range__clear:active { transform: scale(0.92); transition-duration: 0.1s; }
+body.hud-open .dock-range, body.postcard-on .dock-range { opacity: 0; pointer-events: none; }
+@media (max-width: 640px) { .dock-range__when span { display: none; } }
+
+/* "Played before" appears once there is a court to show (row 23) */
+.dock__filter--played[hidden] { display: none; }
+
+/* ---------- Marks over the map (row 20): flat DOM pinned to ground points (flags and "Your court" are club/ annotations now) ---------- */
+.bf-layer { position: fixed; inset: 0; z-index: 34; pointer-events: none; font-family: var(--font-sans); letter-spacing: 0; transition: opacity 0.4s var(--ease-out); }
+.bf-layer.is-hidden, body.hud-open .bf-layer, body.postcard-on .bf-layer { opacity: 0; }
+.bf-mark { position: absolute; left: 0; top: 0; width: 0; height: 0; will-change: transform; }
+.bf-mark.is-off { visibility: hidden; }
+.bf-mark > span {
+  position: absolute;
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+  font-size: 12px; line-height: 1;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-out), scale 0.6s var(--ease-spring), translate 0.6s var(--ease-spring);
+}
+.bf-mark.is-in > span { opacity: 1; scale: 1; }
+
+/* The walk: the site's dash, white over a soft dark line, drawn from the car park to the gate */
+.bf-walk { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; opacity: 0; transition: opacity 0.3s; }
+.bf-walk.is-on { opacity: 1; }
+.bf-walk path { fill: none; stroke-linejoin: round; }
+.bf-walk__under { stroke: rgba(14, 14, 13, 0.4); stroke-width: 6; }
+.bf-walk__line { stroke: var(--snow); stroke-width: 2; stroke-dasharray: 6 6; }
+.bf-walk-label > span {
+  left: 0; bottom: 10px;
+  height: 28px; padding: 0 10px;
+  background: var(--night); color: var(--snow);
+  font-size: 14px;
+  box-shadow: inset 0 0 0 1px rgba(244, 243, 239, 0.12), 0 12px 28px -14px rgba(0, 0, 0, 0.8);
+  translate: -50% 8px; scale: 0.8;
+}
+.bf-walk-label.is-in > span { translate: -50% 0; }
+.bf-walk-label::after { content: ''; position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; background: var(--snow); box-shadow: 0 0 0 2px var(--night); }
+.bf-walk-start > span {
+  left: 0; top: 0;
+  justify-content: center;
+  width: 24px; height: 24px;
+  background: var(--snow); color: var(--ink);
+  font-size: 14px; font-weight: 600;
+  translate: -50% -50%; scale: 0.6;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bf-mark > span { transition: opacity 0.2s; }
+}
+
+/* ---------- Countdown to today's game (row 22): a plate in the top bar ---------- */
+.bp-countdown {
+  display: inline-flex; align-items: center;
+  height: 38px; padding: 0 14px;
+  border-radius: 0;
+  background: var(--snow);
+  color: var(--ink);
+  font-size: 14px; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: background-color 0.25s, color 0.25s, opacity 0.4s, transform 0.45s var(--ease-spring);
+}
+.bp-countdown[hidden] { display: none; }
+.bp-countdown__k { color: var(--mute); margin-right: 4px; }
+@media (hover: hover) { .bp-countdown:hover { background: var(--paper); transform: translateY(-2px); } }
+.bp-countdown:active { transform: scale(0.96); transition-duration: 0.12s; }
+.bp-countdown:focus-visible { outline: 2px solid var(--snow); outline-offset: 2px; }
+/* Ten minutes to go: clay, with a slow pulse */
+.bp-countdown.is-soon { background: var(--clay); color: var(--snow); animation: bp-soon 1.6s var(--ease-in-out) infinite; }
+.bp-countdown.is-soon .bp-countdown__k { color: rgba(244, 243, 239, 0.7); }
+@keyframes bp-soon { 50% { background: #7f3618; } }
+body.hud-open .bp-countdown { opacity: 0; pointer-events: none; }
+/* Phones: the top bar is full, so the plate hangs just under it on the right */
+@media (max-width: 640px) {
+  .bp-right { position: relative; }
+  .bp-countdown { position: absolute; right: 0; top: 44px; height: 32px; padding: 0 10px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .bp-countdown.is-soon { animation: none; } }

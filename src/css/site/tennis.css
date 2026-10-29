@@ -1,0 +1,88 @@
+/* Tennis motifs (row 16) and the big/small type pairs (row 18). Wimbledon / Roland Garros mood, no brands, no logos,
+ * inside the palette (black and white, #36251B, #9C441F, #646544, #FFF3DA). Restraint: a motif is used a few times
+ * a page, never as wallpaper.
+ *
+ *   .court-bg            faint court markings behind a section (lines, service boxes, a dashed net)
+ *   .plate-clay          terracotta plate with white court lines (one or two sections a page, no more)
+ *   .plate-grass         the same on grass green
+ *   .score-rule          a thin row 15 / 30 / 40 / Adv used as a divider
+ *   .score-n             a big score number (15, 30, 40) used as a step number
+ *   .kicker-score        the small "Ace / Let / Game, set, match" line above a finished form
+ *   .h-xl .h-xxl .note   big headings and the small caption that sits beside them
+ *
+ * The ball cursor gets seams here; cursor.js rolls it with the pointer. */
+
+:root {
+  /* A singles and doubles court seen from above: outer lines, alleys, service boxes, centre line.
+     Used as a mask so any colour can draw it (--court-color). The net is a separate dashed line. */
+  --court-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -18 784 396' fill='none' stroke='%23000' stroke-width='1.5'%3E%3Cpath vector-effect='non-scaling-stroke' d='M0 0H780V360H0Z M0 45H780 M0 315H780 M180 45V315 M600 45V315 M180 180H600 M0 172V188 M780 172V188'/%3E%3Cpath vector-effect='non-scaling-stroke' stroke-dasharray='6 6' d='M390 -16V376'/%3E%3C/svg%3E");
+}
+
+/* ---------- Court markings as a section pattern ---------- */
+.plate-grass .reviews__stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--court-color);
+  -webkit-mask: var(--court-svg) 50% 50% / min(1280px, 112%) auto no-repeat;
+  mask: var(--court-svg) 50% 50% / min(1280px, 112%) auto no-repeat;
+  pointer-events: none;
+}
+.plate-grass.section--flush { padding-block: clamp(48px, 6vw, 96px); }
+.plate-grass .reviews__stage { position: relative; isolation: isolate; --court-color: rgba(255, 243, 218, 0.2); }
+.reviews.is-scrubbed .reviews__stage { isolation: isolate; }
+
+/* ---------- Plate: grass, white lines ---------- */
+.plate-grass { background: var(--finch); color: var(--snow); --em-ink: rgba(255, 243, 218, 0.72); }
+.plate-grass ::selection { background: var(--snow); color: var(--ink); }
+.plate-grass .eyebrow { color: rgba(255, 243, 218, 0.72); }
+.plate-grass .eyebrow b { color: var(--snow); }
+
+/* ---------- Score as numbering and dividers ---------- */
+.score-rule {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--grid-gap);
+  border-top: var(--dash);
+  font-size: var(--fs-xs);
+  line-height: 16px;
+  color: var(--mute);
+  font-variant-numeric: tabular-nums;
+}
+.score-rule span { padding-top: 8px; }
+.score-rule span:nth-child(1) { grid-column: 1; }
+.score-rule span:nth-child(2) { grid-column: 4; }
+.score-rule span:nth-child(3) { grid-column: 8; }
+.score-rule span:nth-child(4) { grid-column: 11; color: var(--clay); }
+@media (max-width: 640px) {
+  .score-rule span:nth-child(2) { grid-column: 4; }
+  .score-rule span:nth-child(3) { grid-column: 7; }
+  .score-rule span:nth-child(4) { grid-column: 10; }
+}
+
+.score-n { display: block; font-size: var(--fs-mega); font-weight: 500; line-height: 0.88; font-variant-numeric: tabular-nums; }
+
+/* ---------- Form confirmations: Ace / Let / Game, set, match ---------- */
+.kicker-score { display: flex; align-items: center; gap: 12px; font-size: 14px; line-height: 20px; color: var(--mute); }
+.kicker-score::before { content: ''; width: 32px; border-top: 1px dashed currentColor; }
+
+/* ---------- Big heading + small caption ---------- */
+.h-xl { font-size: var(--fs-xl); font-weight: 500; line-height: 0.96; text-wrap: balance; }
+.h-xxl { font-size: var(--fs-xxl); font-weight: 500; line-height: 0.92; text-wrap: balance; }
+.note { max-width: 32ch; font-size: 14px; line-height: 20px; color: var(--mute); }
+.note .btn, .note .link { margin-top: 20px; }
+
+/* ---------- Ball cursor: seams (cursor.js turns it as the pointer moves) ---------- */
+.cursor { overflow: hidden; }
+.cursor::before, .cursor::after {
+  content: '';
+  position: absolute;
+  top: -8%;
+  width: 100%;
+  height: 116%;
+  border: 4px solid #000;
+  border-radius: 50%;
+}
+.cursor::before { left: -64%; }
+.cursor::after { right: -64%; }

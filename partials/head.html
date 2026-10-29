@@ -1,0 +1,13 @@
+  <script>document.documentElement.classList.add('js');</script>
+  <meta name="theme-color" content="#ffffff" />
+  <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+  <!-- The two faces every page renders (400, 500): fetched in parallel with the Fontshare CSS instead of after it, so text does not swap late and shift the layout. -->
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdn.fontshare.com/wf/BLNB4FAQFNK56DWWNF7PMGTCOTZHOEII/ST3WKSSDMBK2MIQQO3MAVYWLF4FTOLFV/6IN5WOLRCYP4G4MOCOHOMXNON6Q7MDAR.woff2" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://cdn.fontshare.com/wf/OYB4CXKJQXKTNSLJMTDQOIVUL2V5EL7S/WYO2P7DQVV5RNXGMCUO2HL4RJP4VFUAS/6XPIMU23OJVRY676OG5YVJMWEHWICATX.woff2" />
+  <!-- Switzer: only the faces the site renders (400/500, 700 for default-bold tags). Kept blocking so fonts.ready gates the layout-measuring scroll code. -->
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=switzer@400,500,700&display=swap" />
+  <link rel="stylesheet" href="/src/css/site.css" />

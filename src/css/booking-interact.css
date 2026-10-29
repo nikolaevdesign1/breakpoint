@@ -1,0 +1,173 @@
+/* Round 7 interactions on the booking map: postcard button and view, coach tag on hover.
+   Solid surfaces, square corners, even sizes, no glass. */
+
+/* A long press drops a ball (interact/ball-tap.js): no callout or text selection under the finger */
+canvas#scene { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+
+/* ---------- Postcard button: same plate as the sound toggle ---------- */
+.bp-postcard {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: 0;
+  background: var(--night);
+  color: var(--snow);
+  box-shadow: inset 0 0 0 1px rgba(244, 243, 239, 0.1);
+  transition: background-color 0.25s, transform 0.45s var(--ease-spring), opacity 0.4s;
+}
+.bp-postcard svg { width: 16px; height: 16px; transition: transform 0.5s var(--ease-spring); }
+@media (hover: hover) {
+  .bp-postcard:hover { background: var(--ink-2); }
+  .bp-postcard:hover svg { transform: rotate(-8deg) scale(1.08); }
+}
+.bp-postcard:active { transform: scale(0.96); transition-duration: 0.12s; }
+.bp-postcard:focus-visible { outline: 2px solid var(--snow); outline-offset: 2px; }
+body.hud-open .bp-postcard { opacity: 0; pointer-events: none; }
+
+/* ---------- Postcard view ---------- */
+.postcard {
+  position: fixed; inset: 0; z-index: 900; /* over every panel, under the ball cursor */
+  background: var(--night);
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+.postcard__shot {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+}
+/* The tilt-shift settles in over the sharp still, like a lens racking */
+.postcard__shot--soft { opacity: 0; transition: opacity 0.9s var(--ease-out) 0.08s; }
+.postcard.is-in .postcard__shot--soft { opacity: 1; }
+.postcard.is-out { opacity: 0; transition: opacity 0.4s var(--ease-out); }
+
+.postcard__caption {
+  position: absolute;
+  left: 24px; bottom: calc(24px + env(safe-area-inset-bottom));
+  padding: 16px 20px;
+  background: var(--paper);
+  color: var(--ink);
+  translate: 0 24px; opacity: 0;
+  transition: translate 0.8s var(--ease-spring) 0.2s, opacity 0.4s var(--ease-out) 0.2s;
+}
+.postcard__title { margin: 0; font-size: 22px; font-weight: 500; line-height: 1; }
+.postcard__meta { margin: 8px 0 0; font-size: 14px; line-height: 1; color: var(--mute); font-variant-numeric: tabular-nums; }
+
+.postcard__actions {
+  position: absolute;
+  right: 24px; bottom: calc(24px + env(safe-area-inset-bottom));
+  display: flex; gap: 8px;
+  translate: 0 24px; opacity: 0;
+  transition: translate 0.8s var(--ease-spring) 0.3s, opacity 0.4s var(--ease-out) 0.3s;
+}
+.postcard__actions .btn { --h: 40px; --pad: 20px; min-width: 96px; }
+.postcard.is-in .postcard__caption,
+.postcard.is-in .postcard__actions { translate: 0 0; opacity: 1; }
+
+@media (max-width: 640px) {
+  .postcard__caption { left: 12px; right: 12px; bottom: calc(76px + env(safe-area-inset-bottom)); }
+  .postcard__meta { line-height: 1.4; }
+  .postcard__actions { left: 12px; right: 12px; bottom: calc(16px + env(safe-area-inset-bottom)); }
+  .postcard__actions .btn { flex: 1; }
+}
+
+/* ---------- Coach tag: who is coaching on the hovered court ---------- */
+.coach-tag {
+  position: fixed; left: 0; top: 0; z-index: 35; /* over the map, under the booking tiles and top bar */
+  display: flex; gap: 12px; align-items: stretch;
+  width: 256px;
+  padding: 8px 8px 8px 8px;
+  background: var(--night);
+  color: var(--snow);
+  box-shadow: inset 0 0 0 1px rgba(244, 243, 239, 0.12), 0 24px 48px -24px rgba(0, 0, 0, 0.7);
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  pointer-events: none; /* information only: the court under it stays hovered and clickable */
+  transform-origin: 100% 0;
+  opacity: 0;
+  scale: 0.94;
+  transition: opacity 0.18s linear, scale 0.24s var(--ease-out);
+}
+.coach-tag[hidden] { display: none; }
+.coach-tag.is-in {
+  opacity: 1;
+  scale: 1;
+  transition: opacity 0.24s var(--ease-out), scale 0.6s var(--ease-spring);
+}
+.coach-tag__photo {
+  flex: none;
+  width: 48px; height: 60px;
+  object-fit: cover; object-position: 50% 0;
+  background: var(--ink-2);
+}
+.coach-tag__body { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.coach-tag__k { margin: 0; font-size: 12px; line-height: 1; color: rgba(244, 243, 239, 0.6); }
+.coach-tag__name { margin: 6px 0 0; font-size: 16px; font-weight: 500; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.coach-tag__role { margin: auto 0 0; font-size: 14px; line-height: 1.2; color: rgba(244, 243, 239, 0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.postcard-on .coach-tag, body.hud-open .coach-tag { display: none; }
+
+/* ---------- Postcard frames (round 9, row 18) ---------- */
+/* The picture sits inside the frame's margins; the caption, the frame picker and the actions share
+   the band along the bottom. Morning session: white card. Night match: black, scoreboard cream.
+   Rain delay: white, with the site's dashed line running inside the margin. */
+.postcard { --fm: 24px; --fb: 104px; --f-paper: var(--paper); --f-ink: var(--ink); --f-mute: var(--mute); background: var(--f-paper); transition: background-color 0.5s var(--ease-out); }
+.postcard[data-frame='night'] { --f-paper: var(--night); --f-ink: var(--sun); --f-mute: rgba(255, 243, 218, 0.6); }
+.postcard__shot {
+  left: var(--fm); top: var(--fm);
+  width: calc(100% - 2 * var(--fm)); height: calc(100% - var(--fm) - var(--fb));
+  object-fit: cover;
+}
+.postcard__frame { position: absolute; inset: 0; pointer-events: none; }
+.postcard__dash {
+  position: absolute; inset: calc(var(--fm) / 2);
+  border: 1px dashed var(--f-ink);
+  opacity: 0; scale: 1.02;
+  transition: opacity 0.4s var(--ease-out), scale 0.6s var(--ease-spring);
+}
+.postcard[data-frame='rain'] .postcard__dash { opacity: 0.6; scale: 1; }
+.postcard .postcard__caption {
+  left: var(--fm); bottom: calc((var(--fb) - 64px) / 2);
+  padding: 0;
+  background: none;
+  color: var(--f-ink);
+}
+.postcard .postcard__title { font-size: 32px; transition: color 0.4s; }
+.postcard .postcard__meta { margin-top: 12px; color: var(--f-mute); transition: color 0.4s; }
+.postcard .postcard__actions { right: var(--fm); bottom: calc((var(--fb) - 40px) / 2); }
+.postcard[data-frame='night'] .postcard__close { --btn-bg: var(--ink-2); color: var(--snow); }
+.postcard[data-frame='night'] .postcard__save { --btn-bg: var(--sun); color: var(--ink); }
+.postcard__frames {
+  position: absolute;
+  right: calc(var(--fm) + 216px); bottom: calc((var(--fb) - 32px) / 2);
+  display: flex; gap: 4px;
+  translate: 0 24px; opacity: 0;
+  transition: translate 0.8s var(--ease-spring) 0.25s, opacity 0.4s var(--ease-out) 0.25s;
+}
+.postcard.is-in .postcard__frames { translate: 0 0; opacity: 1; }
+.postcard__frames button {
+  height: 32px; padding: 0 12px;
+  border-radius: 0;
+  background: transparent;
+  color: var(--f-ink);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--f-ink) 24%, transparent);
+  font-size: 14px; line-height: 1;
+  transition: background-color 0.2s, color 0.2s, transform 0.4s var(--ease-spring);
+}
+.postcard__frames button[aria-checked='true'] { background: var(--f-ink); color: var(--f-paper); box-shadow: none; }
+@media (hover: hover) { .postcard__frames button:not([aria-checked='true']):hover { background: color-mix(in srgb, var(--f-ink) 8%, transparent); } }
+.postcard__frames button:active { transform: scale(0.94); transition-duration: 0.1s; }
+.postcard__frames button:focus-visible { outline: 2px solid var(--f-ink); outline-offset: 2px; }
+@media (max-width: 1100px) {
+  .postcard { --fb: 160px; }
+  .postcard .postcard__caption { bottom: calc(var(--fb) - 24px - 32px - 12px - 14px); }
+  .postcard__frames { left: var(--fm); right: auto; bottom: calc((88px - 32px) / 2); }
+  .postcard .postcard__actions { bottom: calc((88px - 40px) / 2); }
+}
+@media (max-width: 640px) {
+  .postcard { --fm: 12px; --fb: 208px; }
+  .postcard .postcard__caption { left: var(--fm); right: var(--fm); bottom: 128px; }
+  .postcard .postcard__title { font-size: 24px; }
+  .postcard .postcard__meta { margin-top: 8px; }
+  .postcard__frames { left: var(--fm); right: var(--fm); bottom: 72px; }
+  .postcard__frames button { flex: 1; padding: 0 6px; font-size: 12px; }
+  .postcard .postcard__actions { left: var(--fm); right: var(--fm); bottom: calc(16px + env(safe-area-inset-bottom)); }
+}

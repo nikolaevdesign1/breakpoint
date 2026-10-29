@@ -1,0 +1,276 @@
+/* About (row 33): "One rally". A single point played through the club in 3D; scroll follows the ball.
+   Chapters sit on the 12-column grid, a big line next to a small one, each drifting at its own depth.
+   .is-rally (set in about.html, wide capable screens with motion allowed): a tall section, a sticky stage,
+   the canvas behind the words (src/js/site/about-rally/). Without it: the same chapters stacked, photos with
+   a cut and parallax, no WebGL. Then the Book a court banner and the club rules. */
+
+/* ---------- Shared: the plain version ---------- */
+.rally { position: relative; background: var(--paper); }
+.rally__canvas { display: none; }
+.rally__rail, .rally__tags { display: none; }
+
+.rally__intro { display: grid; gap: 24px; padding: calc(var(--bar-h) + 64px) var(--edge) 64px; }
+.rally__title { font-size: var(--fs-mega); font-weight: 500; line-height: 0.9; letter-spacing: 0; }
+.rally__lead { max-width: 32ch; font-size: 16px; line-height: 24px; color: var(--mute); }
+
+.rc {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 24px var(--grid-gap);
+  padding: 64px var(--edge) 80px;
+  border-top: var(--dash);
+}
+.rc > * { grid-column: 1 / -1; min-width: 0; }
+.rc__big { font-size: var(--fs-xl); font-weight: 500; line-height: 0.95; text-wrap: balance; }
+.rc__small, .rc__sign { font-size: 14px; line-height: 20px; color: var(--mute); }
+.rc__letter, .rc__note, .rc__who, .rc__craft { max-width: 44ch; font-size: 16px; line-height: 24px; text-wrap: pretty; }
+.rc__letter p + p { margin-top: 12px; }
+.rc__note, .rc__who { padding-top: 12px; border-top: 1px dashed currentColor; }
+.rc__avatar { display: block; width: 72px; height: 90px; margin-bottom: 12px; background: var(--sun); }
+.rc__avatar img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; }
+.rc__note b, .rc__who b, .rc__sign .rc__name { display: block; margin-bottom: 4px; font-size: 18px; font-weight: 500; line-height: 24px; color: var(--ink); }
+.rc__photo { margin: 0; aspect-ratio: 4 / 5; max-height: 70svh; background: var(--paper-3); }
+.rc__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* craft: four steps, a big word and a small line */
+.rc__steps { display: grid; gap: 16px; list-style: none; margin: 0; padding: 0; }
+.rc__step { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 24px; }
+.rc__step b { font-size: var(--fs-xl); font-weight: 500; line-height: 0.95; }
+.rc__cap { max-width: 24ch; font-size: 14px; line-height: 20px; color: var(--mute); }
+
+/* numbers: a scoreboard */
+.rc__board { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; background: var(--ink); color: var(--paper); }
+.rc__board > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 8px; padding: 20px; border-top: 1px dashed var(--line-inv); }
+.rc__board > div:nth-child(-n + 2) { border-top: 0; }
+.rc__board > div:nth-child(even) { border-left: 1px dashed var(--line-inv); }
+.rc__board dt { font-size: 12px; line-height: 16px; color: var(--mute-2); }
+.rc__board dd { margin: 0; font-size: var(--fs-xl); font-weight: 500; line-height: 0.9; font-variant-numeric: tabular-nums; }
+.rc__board small { margin-left: 8px; font-size: 14px; font-weight: 400; color: var(--mute-2); }
+.rc__cta { display: grid; justify-items: start; gap: 16px; }
+.rc__cta p { max-width: 28ch; font-size: 16px; line-height: 24px; }
+
+/* ---------- Wide screens: the grid placements (plain and 3D) ---------- */
+@media (min-width: 900px) {
+  .rc { padding-top: 96px; padding-bottom: 120px; }
+  .rc > * { grid-column: auto; }
+
+  .rc--serve .rc__big { grid-column: 1 / span 8; grid-row: 1; }
+  .rc--serve .rc__letter { grid-column: 8 / span 5; grid-row: 2; align-self: end; }
+  .rc--serve .rc__sign { grid-column: 1 / span 3; grid-row: 2; align-self: end; }
+
+  .rc--return .rc__kicker { grid-column: 1 / span 2; grid-row: 1; padding-top: 24px; }
+  .rc--return .rc__big { grid-column: 3 / span 10; grid-row: 1; font-size: var(--fs-mega); }
+  .rc--return .rc__note { grid-row: 2; }
+  .rc--return .rc__note { align-self: end; }
+  .rc--return .rc__note--a { grid-column: 1 / span 3; }
+  .rc--return .rc__note--b { grid-column: 5 / span 3; }
+  .rc--return .rc__note--c { grid-column: 9 / span 3; }
+
+  .rc--rally .rc__steps { grid-column: 1 / -1; grid-row: 1 / span 2; }
+  .rc--rally .rc__step:nth-child(2) { margin-left: 18%; }
+  .rc--rally .rc__step:nth-child(3) { margin-left: 6%; }
+  .rc--rally .rc__step:nth-child(4) { margin-left: 24%; }
+  .rc--rally .rc__craft { grid-column: 9 / span 4; grid-row: 2; align-self: end; border-top: 1px dashed currentColor; padding-top: 12px; }
+
+  .rc--net .rc__big { grid-column: 3 / span 9; grid-row: 1; }
+  .rc--net .rc__who { grid-row: 2; align-self: end; }
+  .rc--net .rc__who--a { grid-column: 1 / span 3; }
+  .rc--net .rc__who--b { grid-column: 5 / span 3; align-self: center; }
+  .rc--net .rc__who--c { grid-column: 9 / span 4; }
+
+  .rc--point .rc__big { grid-column: 1 / span 6; grid-row: 1; font-size: var(--fs-xxl); }
+  .rc--point .rc__board { grid-column: 1 / span 8; grid-row: 2; align-self: end; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .rc--point .rc__board > div, .rc--point .rc__board > div:nth-child(-n + 2) { border-top: 0; }
+  .rc--point .rc__board > div + div { border-left: 1px dashed var(--line-inv); }
+  .rc--point .rc__cta { grid-column: 10 / span 3; grid-row: 2; align-self: end; }
+}
+
+/* ---------- Plain version on a wide screen: photos beside their chapter ---------- */
+@media (min-width: 900px) {
+  html:not(.is-rally) .rc__photo--a { grid-column: 9 / span 4; grid-row: 3; margin-top: 32px; }
+  html:not(.is-rally) .rc__photo--b { grid-column: 2 / span 4; grid-row: 3; margin-top: 48px; }
+  html:not(.is-rally) .rc__photo--c { grid-column: 6 / span 4; grid-row: 3; margin-top: 32px; }
+}
+
+/* ---------- Photos moved to the end of the 3D page ---------- */
+.rally-end:not(:empty) {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 48px var(--grid-gap);
+  align-items: start;
+  padding: 96px var(--edge) 64px;
+  border-top: var(--dash);
+}
+.rally-end .rc__photo { grid-column: 1 / -1; }
+@media (min-width: 900px) {
+  .rally-end .rc__photo--a { grid-column: 1 / span 4; }
+  .rally-end .rc__photo--b { grid-column: 6 / span 3; margin-top: 120px; }
+  .rally-end .rc__photo--c { grid-column: 10 / span 3; margin-top: 40px; }
+}
+
+/* ---------- 3D: a tall section, a sticky stage ---------- */
+html.is-rally .rally { height: 900svh; }
+html.is-rally .rally__stage { position: sticky; top: 0; height: 100svh; overflow: hidden; overflow: clip; background: var(--paper-2); }
+html.is-rally .rally__canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity var(--dur-5) var(--ease-soft);
+}
+html.is-rally .rally.is-live .rally__canvas { opacity: 1; }
+
+html.is-rally .rally__intro {
+  position: absolute;
+  inset: auto var(--edge) 72px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 24px var(--grid-gap);
+  align-items: end;
+  padding: 0;
+  pointer-events: none;
+}
+html.is-rally .rally__title { grid-column: 1 / span 9; font-size: var(--fs-mega); }
+html.is-rally .rally__lead { grid-column: 10 / span 3; max-width: 28ch; color: #fff; }
+
+html.is-rally .rc {
+  position: absolute;
+  inset: calc(var(--bar-h) + 24px) var(--edge) 96px;
+  grid-template-rows: auto 1fr;
+  padding: 0;
+  border: 0;
+  pointer-events: none;
+}
+html.is-rally .rc a { pointer-events: auto; }
+html.is-rally .rally [data-d] { opacity: 0; will-change: transform, opacity; }
+html.is-rally .rc__cta { visibility: hidden; }
+/* Words sit straight on the scene: white, with the render's own dark bands behind them (stage.js GRADE) and a soft shadow */
+html.is-rally .rally__stage { color: #fff; --mute: rgba(255, 255, 255, 0.82); }
+html.is-rally .rc, html.is-rally .rally__intro { text-shadow: 0 2px 24px rgba(10, 8, 6, 0.5); }
+html.is-rally .rc__board, html.is-rally .rc__board * { text-shadow: none; }
+html.is-rally .rc__sign, html.is-rally .rc__kicker, html.is-rally .rally__lead, html.is-rally .rc__sign .rc__name, html.is-rally .rc__note b, html.is-rally .rc__who b { color: #fff; }
+html.is-rally .rc__letter { max-width: 40ch; }
+html.is-rally .rc__steps { display: grid; align-content: center; }
+html.is-rally .rc__step { grid-area: 1 / 1; flex-direction: column; align-items: flex-start; gap: 8px; opacity: 0; }
+html.is-rally .rc__step b { font-size: clamp(96px, 17vw, 280px); line-height: 0.85; }
+html.is-rally .rc__cap { max-width: 28ch; font-size: 16px; line-height: 24px; color: #fff; }
+
+/* Rail: the five shots, one dashed line */
+html.is-rally .rally__rail {
+  position: absolute;
+  left: var(--edge);
+  right: 76px; /* clear of the fixed back-to-top button */
+  bottom: 20px;
+  display: flex;
+  gap: 32px;
+  padding-top: 12px;
+  border-top: var(--dash);
+}
+html.is-rally .rally__rail[hidden] { display: none; }
+.rally__rail button {
+  position: relative;
+  padding: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--mute);
+  transition: color var(--dur-1) var(--ease-out), transform var(--dur-2) var(--ease-spring);
+}
+.rally__rail button::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -14px;
+  height: 2px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform var(--dur-3) var(--ease-out);
+}
+.rally__rail button.is-on { color: var(--ink); }
+.rally__rail button.is-on::before { transform: scaleX(1); }
+@media (hover: hover) {
+  .rally__rail button:hover { color: var(--clay); transform: translateY(-2px); }
+}
+.rally__rail button:active { transform: translateY(0) scale(0.96); }
+.rally__rail button:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+
+/* Verdict tags: a small board where the ball touched down */
+html.is-rally .rally__tags { display: block; position: absolute; inset: 0; pointer-events: none; }
+.rally__tag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  min-width: 32px;
+  margin: -44px 0 0 -16px;
+  padding: 4px 8px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+.rally__tag::after { content: ''; position: absolute; left: 50%; top: 100%; height: 20px; border-left: 1px dashed var(--ink); }
+.rally__tag.is-on { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rally__rail button, .rally__tag { transition: none; }
+}
+
+/* ---------- Club rules (row 125): numbered rows on the dashed rule ---------- */
+.rules {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 40px var(--gutter);
+  align-items: start;
+}
+.rules__head { grid-column: 1 / 5; position: sticky; top: calc(var(--bar-h) + 40px); }
+.rules__title { font-size: var(--fs-h2); font-weight: 500; line-height: 1.05; }
+.rules__note { max-width: 30ch; margin-top: 20px; font-size: 16px; line-height: 1.5; color: var(--mute); }
+.rules__note .link { color: var(--ink); background-size: 100% 1px; }
+@media (hover: hover) {
+  .rules__note .link:hover { background-position: 100% 100%; background-size: 0 1px; }
+}
+
+.rules__list { grid-column: 6 / 13; border-bottom: var(--dash); }
+.rules__row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 5fr) minmax(0, 6fr);
+  gap: 8px var(--gutter);
+  align-items: baseline;
+  padding: 20px 0;
+  border-top: var(--dash);
+}
+.rules__num { font-size: 14px; color: var(--mute); font-variant-numeric: tabular-nums; transition: color var(--dur-1); }
+.rules__row b {
+  font-size: clamp(18px, 1.6vw, 24px);
+  font-weight: 500;
+  line-height: 1.2;
+  transition: transform var(--dur-3) var(--ease-spring);
+}
+.rules__row > span:last-child { max-width: 40ch; font-size: 14px; line-height: 1.5; color: var(--mute); }
+@media (hover: hover) {
+  .rules__row:hover .rules__num { color: var(--clay); }
+  .rules__row:hover b { transform: translateX(6px); }
+}
+
+@media (max-width: 900px) {
+  .rules__head, .rules__list { grid-column: 1 / -1; }
+  .rules__head { position: static; }
+}
+@media (max-width: 560px) {
+  .rules__row { grid-template-columns: 32px minmax(0, 1fr); padding: 16px 0; }
+  .rules__row > span:last-child { grid-column: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rules__row b { transition: none; }
+}
+
+.rules__head .btn { margin-top: 20px; }
+html.is-rally .rally__rail { border-top: 1px dashed rgba(255, 255, 255, 0.6); }
+html.is-rally .rally__rail button.is-on { color: #fff; }
+html.is-rally .rally__rail button::before { background: #fff; }

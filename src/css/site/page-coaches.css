@@ -1,0 +1,284 @@
+/* ---------- Coaches page (coaches.html) ---------- */
+/* Top screen (row 23): the heading and the intro share one row, the filters follow at once */
+.coaches-hero { padding-top: calc(var(--bar-h) + 48px); padding-bottom: 24px; }
+.coaches-hero__grid { align-items: end; row-gap: 24px; }
+.coaches-hero .page-hero__title { max-width: none; font-size: clamp(48px, 7.2vw, 120px); }
+.coaches-hero__side { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding-bottom: 8px; }
+.coaches-hero__side .lead { max-width: 40ch; font-size: 16px; color: var(--ink); }
+
+/* Filter bar: two groups of switches and a live count */
+.studio-bar {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+  padding: 12px 0;
+  margin-bottom: 16px;
+  border-top: var(--dash);
+  border-bottom: var(--dash);
+}
+.filters { display: flex; gap: 8px 24px; }
+.studio-bar__count { margin-left: auto; color: var(--mute); font-size: var(--fs-small); line-height: 20px; font-variant-numeric: tabular-nums; }
+
+/* Switch: square track, square knob with 4px inset on every side, in both states. Slow, soft (row 17) */
+.switch {
+  --track-w: 44px;
+  --track-h: 24px;
+  --knob: 16px;
+  --inset: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  font-size: 14px;
+  line-height: var(--track-h);
+}
+.switch__track {
+  position: relative;
+  flex: none;
+  width: var(--track-w);
+  height: var(--track-h);
+  background: var(--paper-3);
+  transition: background-color var(--dur-2) var(--ease-in-out);
+}
+.switch__knob {
+  position: absolute;
+  top: var(--inset);
+  left: var(--inset);
+  width: var(--knob);
+  height: var(--knob);
+  background: var(--paper);
+  box-shadow: 0 1px 2px rgba(14, 14, 13, 0.18);
+  transition: transform var(--dur-3) var(--ease-spring), width var(--dur-1) var(--ease-out);
+}
+/* travel = track - knob - both insets */
+.switch[aria-checked='true'] .switch__track { background: var(--ink); }
+.switch[aria-checked='true'] .switch__knob { transform: translateX(calc(var(--track-w) - var(--knob) - var(--inset) * 2)); }
+/* press: the knob stretches 4px towards the side it is heading to */
+.switch:active .switch__knob { width: calc(var(--knob) + 4px); }
+.switch[aria-checked='true']:active .switch__knob { transform: translateX(calc(var(--track-w) - var(--knob) - var(--inset) * 2 - 4px)); }
+@media (hover: hover) {
+  .switch:hover .switch__track { background: var(--studio-2); }
+  .switch[aria-checked='true']:hover .switch__track { background: var(--ink-2); }
+}
+.switch:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  .switch__track, .switch__knob { transition-duration: 0.01s; }
+}
+
+.studio-empty { padding: 64px 0; color: var(--mute); font-size: 18px; text-align: center; }
+
+/* Phone: the four switches line up in two even columns */
+@media (max-width: 720px) {
+  .studio-bar { display: grid; grid-template-columns: repeat(2, max-content); gap: 0 24px; }
+  .filters { display: contents; }
+  .studio-bar__count { grid-column: 1 / -1; margin: 4px 0 0; }
+}
+
+
+/* ---------- Coach profile: the tile grown into a spread (coaches-profile.js) ----------
+   Not a modal <dialog>: the top layer would sit above the custom cursor. z-index stays under the grain and the cursor.
+   Desktop, on the 12 columns: the name on 1-8 across the top, below it the portrait on 1-6 (cut corners, slow
+   parallax) and the page on 7-12, scrolling on its own. Vertical rhythm is 32px. Rows 22 and 32. */
+.cv {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: auto minmax(0, 1fr);
+  column-gap: var(--grid-gap);
+  padding: 0 var(--edge);
+  color: var(--ink);
+}
+.cv[hidden] { display: none; }
+.cv-open { overflow: hidden; }
+
+.cv__paper { position: fixed; inset: 0; background: var(--paper); }
+
+.cv__title { position: relative; grid-column: 1 / 9; grid-row: 1; z-index: 3; padding: 72px 0 32px; pointer-events: none; }
+.cv__name { font-size: clamp(72px, 8vw, 120px); font-weight: 500; line-height: 1; }
+
+.cv__figure {
+  position: relative;
+  grid-column: 1 / 7;
+  grid-row: 2;
+  z-index: 1;
+  display: block;
+  margin-bottom: var(--edge);
+  background: var(--studio);
+}
+.cv__pic {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(0, var(--py, 0px), 0) scale(1.06);
+  transition: transform var(--dur-3) var(--ease-out);
+}
+.cv__pic img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+  object-position: 50% 100%;
+}
+
+.cv__scroll {
+  grid-column: 7 / 13;
+  grid-row: 2;
+  position: relative;
+  z-index: 2;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.cv__body { display: flex; flex-direction: column; gap: 32px; min-height: 100%; }
+
+/* Controls: Close and the 02 / 20 stepper are black squares */
+.cv__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 48px;
+  background: var(--ink);
+  color: var(--snow);
+  font-size: 14px;
+  transition: background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+}
+.cv__btn svg, .cv__close svg { width: 16px; height: 16px; transition: transform var(--dur-2) var(--ease-spring); }
+.cv__steps {
+  grid-column: 1 / 7;
+  grid-row: 2;
+  align-self: end;
+  justify-self: start;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  margin: 0 0 calc(var(--edge) + 16px) 16px;
+  background: var(--ink);
+  color: var(--snow);
+}
+.cv__count { min-width: 72px; color: var(--mute-2); font-size: 14px; line-height: 48px; text-align: center; font-variant-numeric: tabular-nums; }
+.cv__close {
+  position: absolute;
+  top: 12px;
+  right: var(--edge);
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 16px;
+  background: var(--ink);
+  color: var(--snow);
+  font-size: 14px;
+  transition: background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+}
+@media (hover: hover) {
+  .cv__btn:hover, .cv__close:hover { background: var(--paper-3); color: var(--ink); }
+  .cv__steps .cv__btn:first-child:hover svg { transform: translateX(-4px); }
+  .cv__steps .cv__btn:last-child:hover svg { transform: translateX(4px); }
+  .cv__close:hover svg { transform: rotate(90deg); }
+}
+.cv__btn:active svg, .cv__close:active svg { transform: scale(0.86); transition-duration: 0.12s; }
+
+/* Editorial column: big numbers, small labels */
+.cv__role { font-size: 24px; line-height: 32px; }
+.cv__tags { display: flex; flex-wrap: wrap; gap: 4px 24px; margin-top: 8px; }
+.cv__tags li { color: var(--mute); font-size: 14px; line-height: 20px; border-bottom: var(--dash); }
+
+.cv__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: var(--dash); border-bottom: var(--dash); }
+.cv__stat { padding: 24px; }
+.cv__stat:first-child { padding-left: 0; }
+.cv__stat + .cv__stat { border-left: var(--dash); }
+.cv__stat b { display: block; font-size: clamp(56px, 6vw, 96px); font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
+.cv__stat span { display: block; margin-top: 8px; color: var(--mute); font-size: 14px; line-height: 20px; }
+
+.cv__rows { border-bottom: var(--dash); }
+.cv__rows > div { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 4fr); gap: 16px; padding: 16px 0; border-top: var(--dash); }
+.cv__rows dt { color: var(--mute); font-size: 14px; line-height: 28px; }
+.cv__rows dd { margin: 0; font-size: 20px; line-height: 28px; }
+.cv__rows dd span { display: block; }
+
+.cv__label { margin-bottom: 16px; color: var(--mute); font-size: 14px; font-weight: 400; line-height: 20px; }
+.cv__slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+/* A slot reads like a court: the net runs through the middle in dashes */
+.slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 112px;
+  padding: 12px 16px;
+  border: var(--dash);
+  font-variant-numeric: tabular-nums;
+  transition: background-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
+}
+.slot::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; border-top: var(--dash); opacity: 0.6; }
+.slot__day { color: var(--mute); font-size: 14px; line-height: 20px; transition: color var(--dur-2) var(--ease-out); }
+.slot__time { font-size: 28px; font-weight: 500; line-height: 32px; }
+@media (hover: hover) {
+  .slot:hover { background: var(--ink); color: var(--snow); border-color: var(--ink); }
+  .slot:hover .slot__day { color: rgba(244, 243, 239, 0.7); }
+}
+
+.cv__review { padding: 24px 0; border-top: var(--dash); }
+.cv__review p { font-size: 32px; font-weight: 500; line-height: 40px; }
+.cv__review p::before { content: '\201C'; }
+.cv__review p::after { content: '\201D'; }
+.cv__review footer { margin-top: 16px; color: var(--mute); font-size: 14px; line-height: 20px; }
+
+.cv__cta {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  padding: 32px 0 var(--edge);
+  background: var(--paper);
+}
+/* The booking button: tall, big label, centred, black; hover swaps the colours (row 42) */
+.cv__book {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 104px;
+  background: var(--ink);
+  color: var(--snow);
+  box-shadow: inset 0 0 0 1px var(--ink);
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 32px;
+  text-align: center;
+  transition: background-color var(--dur-2) var(--ease-in-out), color var(--dur-2) var(--ease-in-out);
+}
+@media (hover: hover) { .cv__book:hover { background: var(--paper); color: var(--ink); } }
+.cv__book:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+
+@media (max-width: 1280px) {
+  .cv__review p { font-size: 28px; line-height: 36px; }
+  .cv__rows > div { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}
+
+/* Phone and portrait tablet: one scrolling column, portrait on top, the name below it */
+@media (max-width: 900px) {
+  .cv { --cv-fig: 60svh; display: block; overflow-y: auto; overscroll-behavior: contain; }
+  .cv__figure { height: var(--cv-fig); margin: var(--edge) 0 0; }
+  .cv__title { padding: 24px 0 16px; }
+  .cv__name { font-size: clamp(48px, 15vw, 64px); }
+  .cv__scroll { overflow: visible; }
+  .cv__body { gap: 32px; min-height: 0; padding-top: 8px; }
+  .cv__steps { position: absolute; top: calc(var(--edge) + var(--cv-fig) - 64px); left: calc(var(--edge) + 16px); margin: 0; }
+  .cv__close { position: fixed; }
+  .cv__rows > div { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .cv__stat b { font-size: 56px; }
+  .cv__stat { padding: 16px; }
+  .cv__stat:first-child { padding-left: 0; }
+  .cv__slots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cv__review p { font-size: 24px; line-height: 32px; }
+  .cv__cta { padding-top: 64px; }
+  .cv__book { height: 80px; font-size: 24px; line-height: 28px; }
+}

@@ -1,0 +1,173 @@
+/* Catch-the-cat popups on the booking map (rows 133, 136). One slot: bottom left, just above the dock,
+   clear of the cookie card in the bottom right; under the top bar on narrow screens.
+   Solid panels, square corners, no glass; they spring in and drop out. */
+
+.cat-pop {
+  position: fixed;
+  left: var(--frame);
+  bottom: calc(var(--frame) + 4px + 38px + 12px + env(safe-area-inset-bottom)); /* above the dock */
+  z-index: 50;
+  width: 340px;
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
+  transform-origin: 0 100%;
+  translate: 0 24px;
+  scale: 0.94;
+  opacity: 0;
+  transition: translate 0.32s var(--ease-out), scale 0.32s var(--ease-out), opacity 0.2s linear;
+}
+.cat-pop.is-in {
+  translate: 0 0;
+  scale: 1;
+  opacity: 1;
+  transition: translate 0.7s var(--ease-spring), scale 0.7s var(--ease-spring), opacity 0.3s var(--ease-out);
+}
+
+.cat-pop__title { margin: 0; padding-right: 32px; font-size: 22px; font-weight: 500; line-height: 1.2; }
+.cat-pop__text { margin: 8px 0 0; font-size: 14px; line-height: 1.5; }
+
+/* × in a square of its own, so it reads on the portrait as well as on the panel */
+.cat-pop__close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: currentColor;
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease-out);
+}
+.cat-pop__close span,
+.cat-pop__close span::after {
+  position: absolute;
+  left: 12px;
+  top: calc(50% - 1px); /* 2px bar centred in the 40px square */
+  width: 16px;
+  height: 2px;
+  background: currentColor;
+  rotate: 45deg;
+  transition: rotate 0.5s var(--ease-spring);
+  content: '';
+}
+.cat-pop__close span::after { left: 0; top: 0; rotate: 90deg; }
+@media (hover: hover) {
+  .cat-pop__close:hover span { rotate: 135deg; }
+}
+.cat-pop__close:active span { rotate: 160deg; transition-duration: 0.12s; }
+.cat-pop__close:focus-visible { outline: 2px solid currentColor; outline-offset: -4px; }
+
+/* ---------- Reward: "You caught the cat!" (row 133), ink with a dashed coupon ---------- */
+.cat-card {
+  padding: 18px 18px 18px;
+  background: var(--ink);
+  color: var(--snow);
+  box-shadow: inset 0 0 0 1px var(--line-inv), 0 30px 60px -30px rgba(0, 0, 0, 0.8);
+}
+.cat-card .cat-pop__text { color: rgba(244, 243, 239, 0.7); }
+.cat-card .cat-pop__close { color: rgba(244, 243, 239, 0.7); }
+@media (hover: hover) { .cat-card .cat-pop__close:hover { color: var(--snow); background: var(--ink-2); } }
+
+.cat-card__code {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 6px 6px 6px 14px;
+  border: var(--dash-inv); /* the coupon's perforation, same dash as the pricing block */
+  transition: background-color 0.3s var(--ease-out);
+}
+.cat-card__value {
+  flex: 1;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--sun);
+  user-select: all;
+}
+.cat-card__copy { flex: none; min-width: 96px; }
+.cat-card.is-copied .cat-card__code { background: rgba(255, 243, 218, 0.08); }
+.cat-card.is-copied .cat-card__copy { --btn-bg: #d7ff3a; }
+
+/* ---------- Rules: "Find the club cat" (row 136), paper with the cat's portrait ---------- */
+.cat-contest {
+  background: var(--paper);
+  color: var(--ink);
+}
+@media (hover: hover) { .cat-contest .cat-pop__close:hover { background: var(--paper-2); } }
+.cat-contest.has-media .cat-pop__close { background: var(--paper); }
+@media (hover: hover) { .cat-contest.has-media .cat-pop__close:hover { background: var(--paper-2); } }
+
+.cat-contest__media {
+  position: relative;
+  aspect-ratio: 3 / 2; /* fixed box: nothing moves when the image decodes */
+  overflow: hidden;
+  background: var(--sun);
+}
+.cat-contest__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  scale: 1.06;
+  transition: scale 1.6s var(--ease-out);
+}
+.cat-contest.is-in .cat-contest__media img { scale: 1; }
+.cat-contest__tag {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 8px 10px;
+  background: var(--ink);
+  color: var(--snow);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.cat-contest__body { padding: 16px 18px 18px; }
+.cat-contest .cat-pop__text { color: var(--mute); }
+.cat-contest.has-media .cat-pop__title { padding-right: 0; }
+.cat-contest__go { margin-top: 16px; }
+
+/* Narrow screens: under the top bar, the portrait goes to the side */
+@media (max-width: 860px) {
+  .cat-pop {
+    top: calc(var(--frame) + 38px + 8px + env(safe-area-inset-top));
+    bottom: auto;
+    width: min(400px, calc(100vw - 2 * var(--frame)));
+    transform-origin: 0 0;
+    translate: 0 -16px;
+  }
+  .cat-contest.has-media { display: grid; grid-template-columns: 112px minmax(0, 1fr); }
+  .cat-contest.has-media .cat-contest__media { aspect-ratio: auto; min-height: 100%; }
+  .cat-contest.has-media .cat-contest__body { padding: 14px 14px 14px 16px; }
+  .cat-contest.has-media .cat-pop__title { padding-right: 28px; font-size: 20px; }
+  .cat-contest__tag { padding: 6px 8px; font-size: 12px; }
+  .cat-contest__go { margin-top: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat-pop, .cat-pop.is-in { translate: 0 0; scale: 1; transition: opacity 0.2s linear; }
+  .cat-contest__media img, .cat-contest.is-in .cat-contest__media img { scale: 1; transition: none; }
+  .cat-pop__close span, .cat-pop__close span::after { transition: none; }
+}
+
+/* Catching the cat (row 133): squares of the site's motif burst from where it was caught. */
+.cat-burst {
+  position: fixed;
+  z-index: 40;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.cat-burst i {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  display: block;
+}

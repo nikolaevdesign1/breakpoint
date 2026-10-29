@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Break Point — logo concepts</title>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=switzer@500,800&display=swap" />
+<style>
+  :root { --ink: #0e0e0d; --paper: #f4f3ef; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: #d9d8d3; font-family: 'Switzer', sans-serif; color: var(--ink); padding: 24px; }
+  h1 { font-size: 15px; font-weight: 500; margin: 0 0 20px; max-width: 80ch; }
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .grid > :first-child { grid-column: 1 / -1; aspect-ratio: 8 / 3; }
+  .card { position: relative; aspect-ratio: 4 / 3; border-radius: 18px; display: grid; place-items: center; overflow: hidden; }
+  .card--ink { background: var(--ink); color: var(--paper); }
+  .card--paper { background: var(--paper); color: var(--ink); }
+  .tag { position: absolute; left: 18px; top: 16px; font-size: 13px; font-weight: 500; opacity: 0.55; }
+  .note { position: absolute; left: 18px; bottom: 16px; right: 18px; font-size: 13px; opacity: 0.55; }
+  .mark { font-weight: 800; line-height: 0.86; white-space: nowrap; }
+  .row { display: block; }
+  /*
+    Script glyphs live in font units (1000/em): viewBox y from -720 (ascender) to 221 (descender),
+    baseline at 0, so a 0.941em-tall SVG lines up with Switzer 800. Stroke = stem width (173).
+  */
+  .g { display: inline-block; height: 0.941em; vertical-align: -0.221em; overflow: visible; }
+  .g path, .g circle { fill: none; stroke: currentColor; stroke-width: 173; stroke-linecap: round; stroke-linejoin: round; }
+  .g .seam { stroke-width: 30; }
+  .g .disc { fill: currentColor; stroke: none; }
+  .g .cut { stroke: var(--bg); }
+  .card--ink .g { --bg: var(--ink); }
+  .card--paper .g { --bg: var(--paper); }
+  .icons { display: flex; gap: 24px; align-items: end; }
+  .icons figure { display: grid; justify-items: center; gap: 8px; font-size: 12px; opacity: 0.9; }
+</style>
+</head>
+<body>
+<h1>Break Point — logo concepts, black &amp; white. Bold Switzer 800 with a few letters replaced by monoline strokes of the same weight, as in the references. The swaps are tennis: a ball for a round letter, a serve toss for a loop.</h1>
+<div class="grid">
+
+  <!-- A: stacked lowercase; "a" = ball + stem with a flick, "o" = ball with seams -->
+  <section class="card card--ink">
+    <span class="tag">A · Stacked</span>
+    <div class="mark" style="font-size: 150px">
+      <span class="row">bre<svg class="g" viewBox="0 -720 640 941" style="width:0.64em"><circle cx="271" cy="-271" r="185"/><path d="M456 -456 L456 -190 C456 -110 500 -86 560 -86"/></svg>k</span>
+      <span class="row" style="padding-left:0.5em">p<svg class="g" viewBox="0 -720 600 941" style="width:0.6em"><circle class="disc" cx="300" cy="-271" r="271"/><path class="seam cut" d="M170 -500 C300 -400 300 -142 170 -42 M430 -500 C300 -400 300 -142 430 -42"/></svg>int</span>
+    </div>
+    <p class="note">“a” is a ball with a stem and a flick off the baseline; “o” is a ball with its seams cut out.</p>
+  </section>
+
+
+  <!-- C: one line, ball O + bouncing N -->
+  <section class="card card--paper">
+    <span class="tag">B · Wordmark</span>
+    <div class="mark" style="font-size: 104px">BREAK P<svg class="g" viewBox="0 -720 700 941" style="width:0.7em"><circle class="disc" cx="350" cy="-340" r="340"/><path class="seam cut" d="M190 -630 C350 -500 350 -180 190 -50 M510 -630 C350 -500 350 -180 510 -50"/></svg>I<svg class="g" viewBox="0 -720 760 941" style="width:0.76em"><path d="M90 -86 L90 -480 C90 -640 250 -640 300 -470 C350 -300 380 -86 500 -86 C620 -86 660 -200 660 -594"/></svg>T</div>
+    <p class="note">“O” is the ball; “N” is one stroke that bounces off the floor.</p>
+  </section>
+
+  <!-- D: ball mark = favicon -->
+  <section class="card card--ink">
+    <span class="tag">C · Mark / favicon</span>
+    <svg viewBox="-300 -300 600 600" style="height:280px; color: var(--paper)" class="g" aria-label="Ball mark">
+      <circle class="disc" cx="0" cy="0" r="270"/>
+      <path class="seam cut" style="--bg: var(--ink); stroke-width: 34" d="M-140 -228 C20 -110 20 110 -140 228 M140 -228 C-20 -110 -20 110 140 228"/>
+    </svg>
+    <div class="icons" style="position:absolute; right:22px; bottom:18px">
+      <figure><img src="favicon.svg" width="48" height="48" alt="" /><span>48</span></figure>
+      <figure><img src="favicon.svg" width="32" height="32" alt="" /><span>32</span></figure>
+      <figure><img src="favicon.svg" width="16" height="16" alt="" /><span>16</span></figure>
+    </div>
+    <p class="note">The ball from the wordmark on its own: favicon, app icon, preloader ball, cursor.</p>
+  </section>
+
+</div>
+</body>
+</html>

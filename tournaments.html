@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Tournaments | Break Point by Alexander Milevski</title>
+  <meta name="description" content="Amateur tennis and padel tournaments at Break Point, Miami. Draws by years of play and age group, a live calendar and online entry." />
+<!-- include:partials/head.html -->
+</head>
+<body data-page="tournaments">
+<!-- include:partials/nav.html -->
+
+  <main id="main">
+    <!-- Hero: the next draw with a live countdown -->
+    <section class="thero cut cut--c" style="--cut-x: 6%" aria-labelledby="tournaments-title">
+      <div class="thero__media" data-cells data-cells-corner="tr">
+        <img src="/media/clips/tournaments-night.jpg" width="1280" height="720" fetchpriority="high" alt="Clay courts under the floodlights at dusk" />
+        <video muted loop playsinline preload="none" aria-hidden="true" data-hero-video data-src="/media/clips/tournaments-night.mp4"></video>
+      </div>
+      <div class="thero__top">
+        <h1 class="thero__title" id="tournaments-title" data-lines data-parallax="0.5">Draws by years <em>played.</em></h1>
+        <p class="thero__lead">Every event is split by how long you’ve played and your age group, so you meet people at your level.</p>
+      </div>
+      <div class="thero__next" data-next>
+        <div class="thero__event">
+          <p class="thero__eyebrow">Next draw · <span data-next-dates></span></p>
+          <h2 class="thero__name" data-next-name></h2>
+          <p class="thero__meta" data-next-meta></p>
+          <div class="thero__actions">
+            <button class="btn btn--light" type="button" data-apply data-next-apply><span class="btn__bg"></span><span class="btn__label">Apply</span></button>
+            <a class="thero__link" href="#calendar">All dates</a>
+            <span class="thero__spots" data-next-spots></span>
+          </div>
+        </div>
+        <div class="countdown" data-countdown role="timer" aria-label="Time until the next draw starts">
+          <span class="countdown__unit"><b data-cd="d">00</b><small data-cd-label="d">days</small></span>
+          <span class="countdown__unit"><b data-cd="h">00</b><small data-cd-label="h">hrs</small></span>
+          <span class="countdown__unit"><b data-cd="m">00</b><small>min</small></span>
+          <span class="countdown__unit"><b data-cd="s">00</b><small>sec</small></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Calendar -->
+    <section class="section cal-section" id="calendar" aria-labelledby="calendar-title">
+      <div class="grid grid--rows cal-section__head">
+        <h2 class="h2 h-xl col-8" id="calendar-title" data-lines data-parallax="0.5">Fourteen events, four <em>months.</em></h2>
+        <p class="note cal-section__lead col-3 start-10 p-shift-1">Fourteen amateur events over the next four months. Filter by how long you’ve played and your age, then pick a date.</p>
+      </div>
+
+      <div class="cal" data-cal aria-keyshortcuts="ArrowLeft ArrowRight">
+        <div class="cal__filters">
+          <div class="cal__filter" role="group" aria-label="Years playing" data-filter="level">
+            <span class="cal__filter-label">Playing for</span>
+          </div>
+          <div class="cal__filter" role="group" aria-label="Age group" data-filter="age">
+            <span class="cal__filter-label">Age group</span>
+          </div>
+        </div>
+
+        <div class="cal__bar">
+          <h3 class="cal__month" aria-live="polite"><span data-cal-month></span></h3>
+          <p class="cal__count" data-cal-count aria-live="polite"></p>
+          <p class="cal__hint" aria-hidden="true"><span class="cal__hint-keys">Swipe or press <kbd>←</kbd> <kbd>→</kbd></span><span class="cal__hint-touch">Swipe for more</span></p>
+          <div class="cal__nav">
+            <button class="cal__arrow" type="button" data-cal-prev aria-label="Previous month"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M9 2L4 7l5 5"/></svg></button>
+            <button class="cal__arrow" type="button" data-cal-next aria-label="Next month"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5 2l5 5-5 5"/></svg></button>
+          </div>
+        </div>
+
+        <div class="cal__body" data-cal-body>
+          <div class="cal__week" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+          <div class="cal__grid" data-cal-grid></div>
+          <div class="cal__empty" data-cal-empty hidden>
+            <p>Nothing at this level this month.</p>
+            <button class="link" type="button" data-cal-reset>Show every level</button>
+          </div>
+          <div class="tcard" data-tcard hidden></div>
+        </div>
+        <ul class="cal__agenda" data-cal-agenda aria-label="Events this month"></ul>
+        <ul class="cal__legend" aria-label="Legend">
+          <li><i class="tone--singles"></i>Singles</li>
+          <li><i class="tone--doubles"></i>Doubles</li>
+          <li><i class="tone--padel"></i>Padel</li>
+          <li><i class="tone--junior"></i>Juniors</li>
+          <li class="cal__legend-fill"><i></i>The darker part shows spots taken</li>
+        </ul>
+      </div>
+      <div class="score-rule" aria-hidden="true"><span>15</span><span>30</span><span>40</span><span>Adv</span></div>
+    </section>
+
+    <!-- Reviews as texts (row 73), on a grass plate -->
+    <section class="section section--flush plate-grass" aria-labelledby="reviews-title">
+      <div class="reviews" data-reviews="tournaments">
+<!-- include:partials/reviews.html -->
+      </div>
+    </section>
+
+    <!-- FAQ (shared component) -->
+    <section class="section faq" data-faq aria-labelledby="faq-title">
+      <div class="faq__head">
+        <h2 class="faq__word" id="faq-title" data-lines>FAQ</h2>
+        <p class="faq__caption">Answers before you ask</p>
+      </div>
+      <dl class="faq__list">
+        <dt>Do I need to be a member to enter?</dt><dd>No. Members get the first week to apply, then every open spot goes to guests. Guests pay the same entry fee.</dd>
+        <dt>How do you decide my level?</dt><dd>By how many years you’ve played regularly and your age group. If you’re between two levels, pick the lower one. The desk can move you before the draw is made.</dd>
+        <dt>When is the draw published?</dt><dd>Entries close three days before the event. The draw and your first match time arrive by e-mail the evening after.</dd>
+        <dt>Can I get a refund?</dt><dd>Yes, in full up to 72 hours before the event. After that we refund only if we can fill your spot from the waitlist.</dd>
+        <dt>What if it rains?</dt><dd>Clay matches move to the indoor hard courts. If those are full, we finish the next day or refund the rounds you didn’t play.</dd>
+        <dt>Do I need a doubles partner?</dt><dd>Not always. Leave the partner field empty and we’ll pair you with a player at your level.</dd>
+        <dt>What should I bring?</dt><dd>Your racket, clay shoes for the red courts and water. New balls are at the referee’s desk.</dd>
+      </dl>
+    </section>
+  </main>
+
+  <!-- Application form (multi-step modal), driven by src/js/site/tournament-apply.js -->
+  <div class="apply" data-apply-modal hidden>
+    <div class="apply__backdrop" data-apply-close></div>
+    <div class="apply__panel" role="dialog" aria-modal="true" aria-labelledby="apply-title" data-lenis-prevent>
+      <div class="apply__head">
+        <div>
+          <p class="apply__event" data-apply-event></p>
+          <h2 class="apply__title" id="apply-title" tabindex="-1">Apply for a draw</h2>
+        </div>
+        <button class="apply__close" type="button" data-apply-close aria-label="Close the application"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
+      </div>
+
+      <div class="apply__progress" data-apply-progress>
+        <ol class="apply__steps">
+          <li>Personal</li><li>Level</li><li>Entry</li><li>Safety</li>
+        </ol>
+        <div class="apply__bar"><i data-apply-bar></i></div>
+      </div>
+
+      <form class="apply__form" data-apply-form novalidate>
+        <fieldset class="apply__step" data-step>
+          <legend class="apply__legend">Who’s playing?</legend>
+          <div class="apply__grid">
+            <div class="field"><label for="a-first">First name</label><input id="a-first" name="first" autocomplete="given-name" required /><p class="field__error" aria-live="polite"></p></div>
+            <div class="field"><label for="a-last">Last name</label><input id="a-last" name="last" autocomplete="family-name" required /><p class="field__error" aria-live="polite"></p></div>
+            <div class="field"><label for="a-dob">Date of birth</label><input id="a-dob" name="dob" type="date" autocomplete="bday" required /><p class="field__error" aria-live="polite"></p></div>
+            <div class="field"><label for="a-gender">Gender</label>
+              <select id="a-gender" name="gender" required><option value="">Choose</option><option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select>
+              <p class="field__error" aria-live="polite"></p></div>
+            <div class="field"><label for="a-phone">Phone</label><input id="a-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="{{fact:phoneExample}}" required /><p class="field__error" aria-live="polite"></p></div>
+            <div class="field"><label for="a-email">E-mail</label><input id="a-email" name="email" type="email" autocomplete="email" required /><p class="field__error" aria-live="polite"></p></div>
+          </div>
+        </fieldset>
+
+        <fieldset class="apply__step" data-step hidden>
+          <legend class="apply__legend">Your level</legend>
+          <div class="apply__grid">
+            <div class="field field--wide" data-choice="years"><span class="field__label" id="a-years-l">How long have you played?</span>
+              <div class="choices" role="radiogroup" aria-labelledby="a-years-l" data-options="years"></div>
+              <p class="field__error" aria-live="polite"></p></div>
+            <div class="field field--wide" data-choice="age"><span class="field__label" id="a-age-l">Age group <small data-age-hint></small></span>
+              <div class="choices" role="radiogroup" aria-labelledby="a-age-l" data-options="age"></div>
+              <p class="field__error" aria-live="polite"></p></div>
+            <div class="field field--wide" data-choice="hand"><span class="field__label" id="a-hand-l">Dominant hand</span>
+              <div class="choices" role="radiogroup" aria-labelledby="a-hand-l">
+                <label class="choice"><input type="radio" name="hand" value="Right" /><span>Right</span></label>
+                <label class="choice"><input type="radio" name="hand" value="Left" /><span>Left</span></label>
+                <label class="choice"><input type="radio" name="hand" value="Both" /><span>Both</span></label>
+              </div>
+              <p class="field__error" aria-live="polite"></p></div>
+            <p class="apply__note field--wide" data-fit-note hidden></p>
+          </div>
+        </fieldset>
+
+        <fieldset class="apply__step" data-step hidden>
+          <legend class="apply__legend">Your entry</legend>
+          <div class="apply__grid">
+            <div class="field field--wide"><label for="a-event">Tournament</label><select id="a-event" name="event" required></select><p class="field__error" aria-live="polite"></p></div>
+            <div class="field" data-choice="entry"><span class="field__label" id="a-entry-l">Draw</span>
+              <div class="choices" role="radiogroup" aria-labelledby="a-entry-l" data-options="entry"></div>
+              <p class="field__error" aria-live="polite"></p></div>
+            <div class="field" data-when="doubles" hidden><label for="a-partner">Partner’s full name <small>(empty: we’ll pair you)</small></label><input id="a-partner" name="partner" autocomplete="off" /><p class="field__error" aria-live="polite"></p></div>
+            <div class="field" data-choice="member"><span class="field__label" id="a-member-l">Club member?</span>
+              <div class="choices" role="radiogroup" aria-labelledby="a-member-l">
+                <label class="choice"><input type="radio" name="member" value="yes" /><span>Yes</span></label>
+                <label class="choice"><input type="radio" name="member" value="no" /><span>No</span></label>
+              </div>
+              <p class="field__error" aria-live="polite"></p></div>
+            <div class="field" data-when="member" hidden><label for="a-card">Member card number</label><input id="a-card" name="card" inputmode="numeric" autocomplete="off" placeholder="6 digits on the back" maxlength="6" /><p class="field__error" aria-live="polite"></p></div>
+            <div class="field field--wide" data-choice="shirt"><span class="field__label" id="a-shirt-l">T-shirt size</span>
+              <div class="choices" role="radiogroup" aria-labelledby="a-shirt-l" data-options="shirt"></div>
+              <p class="field__error" aria-live="polite"></p></div>
+          </div>
+        </fieldset>
+
+        <fieldset class="apply__step" data-step hidden>
+          <legend class="apply__legend">Safety and notes</legend>
+          <div class="apply__grid">
+            <div class="field field--wide"><label for="a-medical">Medical notes <small>(optional: injuries, allergies, medication)</small></label><textarea id="a-medical" name="medical" rows="3"></textarea></div>
+            <div class="field"><label for="a-ice-name">Emergency contact</label><input id="a-ice-name" name="iceName" autocomplete="off" required /><p class="field__error" aria-live="polite"></p></div>
+            <div class="field"><label for="a-ice-phone">Their phone</label><input id="a-ice-phone" name="icePhone" type="tel" inputmode="tel" autocomplete="off" required /><p class="field__error" aria-live="polite"></p></div>
+            <div class="field field--wide"><label for="a-comment">Comment <small>(optional)</small></label><textarea id="a-comment" name="comment" rows="3" placeholder="Times you can’t play, a doubles request, anything else"></textarea></div>
+            <div class="field field--wide" data-choice="rules">
+              <label class="check"><input type="checkbox" name="rules" value="yes" /><span class="check__box" aria-hidden="true"></span><span>I agree to the tournament rules and the refund policy: full refund up to 72 hours before the event.</span></label>
+              <p class="field__error" aria-live="polite"></p></div>
+          </div>
+        </fieldset>
+
+        <div class="apply__foot">
+          <button class="apply__back" type="button" data-apply-back>Back</button>
+          <p class="apply__count" data-apply-count>Step 1 of 4</p>
+          <button class="btn" type="submit" data-apply-next><span class="btn__bg"></span><span class="btn__label">Continue</span></button>
+        </div>
+      </form>
+
+      <div class="apply__done" data-apply-done hidden tabindex="-1">
+        <span class="apply__ball" aria-hidden="true"></span>
+        <p class="kicker-score" data-apply-kicker>Ace</p>
+        <h3 class="apply__done-title">Application received.</h3>
+        <p class="apply__done-text" data-apply-summary></p>
+        <div class="apply__done-actions">
+          <button class="btn" type="button" data-apply-close><span class="btn__bg"></span><span class="btn__label">Back to the calendar</span></button>
+          <button class="apply__back" type="button" data-apply-again>Apply for someone else</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- include:partials/footer.html -->
+
+  <script type="module" src="/src/js/pages/tournaments.js"></script>
+</body>
+</html>

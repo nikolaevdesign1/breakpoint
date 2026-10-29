@@ -1,0 +1,91 @@
+/* The form language of the site (rows 118, 128, 61): contacts, memberships and the review form share it, logic in
+   src/js/site/line-form.js. A field is a small label over a large value on its own dashed rule; focus draws a
+   solid ink line over the dash from the left, an error turns it clay. Two half fields sit on 6 + 6 columns.
+   Custom select, date picker and checkbox come from custom-select.css / components.css. */
+.lf { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--grid-gap); }
+.lf__field {
+  position: relative;
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-top: 24px;
+  border-bottom: var(--dash);
+}
+.lf__field--half { grid-column: auto; }
+.lf__field[hidden] { display: none; }
+
+.lf__label { padding-right: 8px; font-size: 14px; line-height: 20px; color: var(--mute); transition: color var(--dur-1); }
+.lf__label small { font-size: 14px; color: var(--mute-2); }
+@media (hover: hover) { .lf__field:hover .lf__label { color: var(--ink); } }
+.lf__field:focus-within .lf__label { color: var(--ink); }
+
+.lf__input {
+  width: 100%;
+  min-width: 0;
+  height: 52px;
+  padding: 6px 0 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 20px;
+  line-height: 28px;
+  appearance: none;
+  outline: none;
+}
+.lf__input::placeholder { color: var(--mute-2); opacity: 1; }
+.lf__input:-webkit-autofill { -webkit-text-fill-color: var(--ink); transition: background-color 600000s 0s; }
+textarea.lf__input { height: auto; min-height: 112px; resize: vertical; }
+/* The ink line drawn over the dash */
+.lf__line {
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-3) var(--ease-out), background-color var(--dur-1);
+  pointer-events: none;
+}
+.lf__field:focus-within .lf__line { transform: scaleX(1); }
+.lf__field.is-invalid .lf__line { transform: scaleX(1); background: var(--clay); }
+.lf__field.is-invalid .lf__label { color: var(--clay); }
+
+.lf__field.is-invalid { padding-bottom: 24px; }
+.lf__error { /* between the value and the line, room is made only while there is an error */
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--clay);
+  pointer-events: none;
+}
+
+/* Choice chips and the agreement box reuse .choice and .check (page-tournaments.css) */
+.lf .choices { padding: 10px 0 16px; }
+.lf .choice { position: relative; font-size: 14px; color: var(--ink); cursor: pointer; }
+.lf .check { display: flex; align-items: flex-start; gap: 12px; padding: 16px 0; font-size: 14px; line-height: 20px; color: var(--ink); cursor: pointer; }
+.lf .check .link { background-size: 100% 1px; }
+.lf__field--check { border-bottom: 0; padding-top: 4px; }
+.lf__field--check.is-invalid { padding-bottom: 0; }
+.lf__field--check .lf__error { position: static; margin: -8px 0 0; }
+
+.lf__foot { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 16px 24px; margin-top: 32px; }
+.lf__foot .btn { --h: 72px; --pad: 40px; font-size: 16px; } /* the one big submit, right-aligned under the fields */
+.lf__note { max-width: 40ch; font-size: 14px; line-height: 20px; color: var(--mute); }
+
+/* Success panel, swapped in by showDone() */
+.lf-done { display: none; }
+.is-sent .lf { display: none; }
+.is-sent .lf-done { display: block; }
+.lf-done [tabindex='-1']:focus { outline: none; }
+
+@media (max-width: 640px) {
+  .lf__field--half { grid-column: 1 / -1; }
+  .lf__input { font-size: 18px; }
+  .lf__foot { flex-direction: column; align-items: stretch; }
+  .lf__foot .btn { --h: 64px; width: 100%; }
+}

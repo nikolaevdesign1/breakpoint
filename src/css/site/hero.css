@@ -1,0 +1,156 @@
+.hero {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  min-height: 560px;
+  padding: var(--frame);
+}
+
+.hero__card {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--r-card);
+  background: var(--night);
+  color: var(--snow);
+  clip-path: inset(0 round var(--r-card));
+  will-change: clip-path;
+}
+
+.hero__media,
+.hero__media video,
+.hero__media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hero__media { will-change: transform; }
+
+.hero__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 22%),
+    linear-gradient(20deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 45%, rgba(0, 0, 0, 0) 75%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 40%);
+}
+
+.hero__content {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: var(--gutter);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 32px;
+}
+
+/* Row 44: a big line, and under it the club in four small score cells (big figure, small label) */
+.hero__main { min-width: 0; }
+.hero__title {
+  font-size: var(--fs-xxl); /* row 18: huge title over small 14px labels */
+  font-weight: 500;
+  line-height: 0.94;
+  margin-left: -0.05em;
+}
+.hero__facts { display: flex; gap: clamp(20px, 2.5vw, 40px); margin-top: clamp(24px, 3vw, 40px); }
+.hero__facts li { padding-left: 12px; border-left: 1px dashed rgba(255, 243, 218, 0.5); }
+.hero__facts b { display: block; font-size: var(--fs-lg); font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
+.hero__facts span { display: block; margin-top: 4px; font-size: 14px; line-height: 20px; color: rgba(244, 243, 239, 0.8); }
+
+/* Next free court (rows 37, 44): translucent plate, corner brackets, scanlines and a slow float, no blur behind it.
+   Opens after the intro with a short glitch; the same look as the map hints in booking-club.css. */
+.hero-alert { --edge-c: rgba(255, 243, 218, 0.55); --bright-c: #fff3da; --glow-c: rgba(255, 243, 218, 0.28); position: relative; flex: none; width: min(280px, 100%); }
+.hero-alert[hidden] { display: none; }
+.hero-alert__box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 12px 40px 12px 14px;
+  background: rgba(14, 14, 13, 0.5);
+  color: var(--snow);
+  box-shadow: inset 0 0 0 1px var(--edge-c), 0 0 16px var(--glow-c);
+  text-shadow: 0 0 6px var(--glow-c);
+  clip-path: inset(0 100% 0 0);
+  animation: hero-float 5.2s ease-in-out infinite;
+  transition: clip-path var(--dur-4) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+}
+.hero-alert__box::before { /* corner brackets */
+  content: ''; position: absolute; inset: -1px; pointer-events: none;
+  --b: linear-gradient(var(--bright-c), var(--bright-c));
+  background:
+    var(--b) 0 0 / 8px 1px, var(--b) 0 0 / 1px 8px,
+    var(--b) 100% 0 / 8px 1px, var(--b) 100% 0 / 1px 8px,
+    var(--b) 0 100% / 8px 1px, var(--b) 0 100% / 1px 8px,
+    var(--b) 100% 100% / 8px 1px, var(--b) 100% 100% / 1px 8px;
+  background-repeat: no-repeat;
+}
+.hero-alert__box::after { /* scanlines */
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(255, 243, 218, 0.07) 0 1px, transparent 1px 4px);
+}
+.hero-alert.is-in .hero-alert__box { clip-path: inset(0); animation: hero-float 5.2s ease-in-out infinite, hero-glitch 0.6s steps(1, end) 1; }
+@keyframes hero-float { 50% { transform: translateY(-2px); } }
+@keyframes hero-glitch {
+  0% { translate: -4px 0; opacity: 0.4; }
+  25% { translate: 4px 0; opacity: 1; }
+  50% { translate: -2px 0; opacity: 0.6; }
+  75% { translate: 2px 0; opacity: 1; }
+  100% { translate: 0 0; opacity: 1; }
+}
+.hero-alert__l { position: relative; z-index: 1; opacity: 0; translate: 0 6px; font-size: 14px; line-height: 20px; transition: opacity var(--dur-1) var(--ease-out), translate var(--dur-1) var(--ease-out); }
+.hero-alert.is-in .hero-alert__l { opacity: 1; translate: 0 0; transition: opacity var(--dur-3) var(--ease-out) calc(0.9s + var(--i, 0) * 0.18s), translate var(--dur-3) var(--ease-out) calc(0.9s + var(--i, 0) * 0.18s); }
+.hero-alert__l:nth-child(2) { --i: 1; }
+.hero-alert__l:nth-child(3) { --i: 2; }
+.hero-alert__l:nth-child(4) { --i: 3; }
+.hero-alert__l.k { width: 100%; padding-bottom: 4px; border-bottom: 1px dashed var(--edge-c); font-size: var(--fs-xs); line-height: 16px; color: rgba(255, 243, 218, 0.8); }
+.hero-alert__l.b { margin-top: 4px; font-size: 28px; font-weight: 500; line-height: 32px; }
+.hero-alert__l.s { color: rgba(244, 243, 239, 0.85); font-variant-numeric: tabular-nums; }
+.hero-alert__l.go { margin-top: 4px; text-decoration: underline dashed; text-underline-offset: 4px; }
+.hero-alert__close {
+  position: absolute; top: 6px; right: 6px; z-index: 2;
+  display: grid; place-items: center; width: 28px; height: 28px;
+  color: var(--snow); opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-out) 1.4s, background-color var(--dur-1), color var(--dur-1);
+}
+.hero-alert.is-in .hero-alert__close { opacity: 1; }
+.hero-alert__close svg { width: 12px; height: 12px; }
+@media (hover: hover) {
+  .hero-alert__box:hover { box-shadow: inset 0 0 0 1px var(--bright-c), 0 0 24px var(--glow-c); }
+  .hero-alert__close:hover { background: var(--snow); color: var(--ink); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-alert__box, .hero-alert.is-in .hero-alert__box { animation: none; }
+}
+
+/* still used by the booking banner */
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #8fd18b;
+  box-shadow: 0 0 0 0 rgba(143, 209, 139, 0.6);
+  animation: live-pulse 2s var(--ease-out) infinite;
+}
+@keyframes live-pulse { 70% { box-shadow: 0 0 0 8px rgba(143, 209, 139, 0); } 100% { box-shadow: 0 0 0 0 rgba(143, 209, 139, 0); } }
+
+@media (max-width: 820px) {
+  .hero__content { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 520px) {
+  .hero__facts { gap: 16px; }
+  .hero__facts b { font-size: 28px; }
+  .hero__facts span { font-size: 12px; line-height: 16px; }
+}
+
+/* Row 21: after the intro the card takes the cut (cut.css); .hero__card sets its own clip-path, so repeat it here */
+.hero__card.cut--a { clip-path: polygon(0 0, calc(100% - var(--cut-dx)) 0, 100% var(--cut-dy), 100% 100%, 0 100%); transition: none; }
+
+/* Pre-JS state for the intro so nothing flashes before the timeline takes over */
+html.intro .hero__card { clip-path: inset(50% 50% 50% 50% round 12px); }
+html.intro [data-hero-fade],
+html.intro .nav > * { opacity: 0; }
+html.intro .hero__title { visibility: hidden; }

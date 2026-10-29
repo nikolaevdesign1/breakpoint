@@ -1,0 +1,36 @@
+/* Film grain over the whole site (row 93, noise.js). One small tile on a fixed layer that jumps to a new
+   offset about 12 times a second: a stepped transform, so it runs on the compositor and costs nothing on scroll.
+   The layer overhangs the screen by one tile on every side, so any offset within a tile still covers it. */
+.grain-frame {
+  position: fixed;
+  inset: 0;
+  z-index: 300; /* above the page and header, below page transitions and the cursor */
+  overflow: hidden;
+  pointer-events: none;
+}
+.grain {
+  --tile: 180px;
+  position: absolute;
+  inset: calc(var(--tile) * -1);
+  background-size: var(--tile) var(--tile);
+  opacity: 0.055;
+  will-change: transform;
+  animation: grain-shift 0.8s steps(1) infinite;
+}
+
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  10% { transform: translate(calc(var(--tile) * -0.42), calc(var(--tile) * 0.31)); }
+  20% { transform: translate(calc(var(--tile) * 0.27), calc(var(--tile) * -0.64)); }
+  30% { transform: translate(calc(var(--tile) * -0.71), calc(var(--tile) * -0.18)); }
+  40% { transform: translate(calc(var(--tile) * 0.58), calc(var(--tile) * 0.47)); }
+  50% { transform: translate(calc(var(--tile) * -0.13), calc(var(--tile) * 0.82)); }
+  60% { transform: translate(calc(var(--tile) * 0.86), calc(var(--tile) * -0.29)); }
+  70% { transform: translate(calc(var(--tile) * -0.55), calc(var(--tile) * -0.77)); }
+  80% { transform: translate(calc(var(--tile) * 0.36), calc(var(--tile) * 0.12)); }
+  90% { transform: translate(calc(var(--tile) * -0.24), calc(var(--tile) * 0.59)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain { animation: none; }
+}

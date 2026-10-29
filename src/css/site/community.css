@@ -1,0 +1,201 @@
+/* clip, not hidden: the reviews stage inside is sticky (row 116) */
+.community { overflow: clip; }
+.community .reviews { margin-top: clamp(64px, 8vw, 128px); }
+/* Row 24: the heading takes columns 3-12, the small caption and button sit under it from column 1 */
+.community__head { --grid-row: 32px; margin-bottom: clamp(48px, 7vw, 112px); } /* row 52: heading, paragraph and button share one left edge, 32px apart */
+.community__head .note { max-width: none; font-size: 16px; line-height: 24px; }
+.community__head .note .btn { margin-top: 32px; }
+.community__head .note__lead { max-width: 44ch; }
+.community .score-rule { margin-top: clamp(64px, 8vw, 128px); }
+
+/* Editorial grid of six club moments (row 115): uneven cells on a 12-column page,
+   dashed rules under every photo (row 110). */
+.cgrid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(40px, 5vw, 80px) var(--gutter);
+  align-items: start;
+  padding-top: clamp(24px, 3vw, 40px);
+  border-top: var(--dash);
+}
+.cgrid__item { min-width: 0; }
+.cgrid__media { aspect-ratio: 4 / 3; }
+.cgrid__media img { position: absolute; inset: 0; }
+.cgrid__cap {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: var(--dash);
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--mute);
+}
+.cgrid__cap b { font-weight: 500; color: var(--ink); }
+.cgrid__cap span::before { content: '·'; margin-right: 6px; }
+
+.cgrid__item--a { grid-column: 1 / 6; }
+.cgrid__item--b { grid-column: 7 / 10; margin-top: clamp(64px, 8vw, 128px); }
+.cgrid__item--b .cgrid__media { aspect-ratio: 3 / 4; }
+.cgrid__item--c { grid-column: 10 / 13; }
+.cgrid__item--c .cgrid__media { aspect-ratio: 4 / 5; }
+.cgrid__item--d { grid-column: 2 / 5; }
+.cgrid__item--d .cgrid__media { aspect-ratio: 1; }
+.cgrid__item--e { grid-column: 5 / 9; margin-top: clamp(48px, 6vw, 96px); }
+.cgrid__item--e .cgrid__media { aspect-ratio: 4 / 5; }
+.cgrid__item--f { grid-column: 9 / 13; margin-top: clamp(-120px, -6vw, -48px); }
+.cgrid__item--f .cgrid__media { aspect-ratio: 16 / 10; }
+
+@media (max-width: 760px) {
+  .cgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 12px; }
+  .cgrid .cgrid__item { grid-column: auto; margin-top: 0; }
+  .cgrid .cgrid__item--a, .cgrid .cgrid__item--d { grid-column: 1 / -1; }
+  .cgrid .cgrid__item--c, .cgrid .cgrid__item--f { margin-top: 48px; }
+  .cgrid .cgrid__media { aspect-ratio: 3 / 4; }
+  .cgrid .cgrid__item--a .cgrid__media, .cgrid .cgrid__item--d .cgrid__media { aspect-ratio: 4 / 3; }
+  .cgrid__cap { flex-direction: column; gap: 2px; }
+  .cgrid__cap span::before { content: none; }
+}
+
+/* ---------- Gallery strip (row 43, gallery-strip.js) ----------
+   The stage sticks for as long as the strip needs to run past; vertical scroll and drag both move it
+   sideways (1 px of scroll = 1 px of strip). JS sets --travel and the section height, and per frame
+   the bend (--bend, from speed) on the track and the entry wipe on each photo. No frames, square corners. */
+.cgal { position: relative; margin: 0 calc(var(--gutter) * -1); border-top: var(--dash); }
+.cgal__stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.cgal.is-dragging .cgal__stage { cursor: grabbing; }
+.cgal__track {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(24px, 4vw, 72px);
+  width: max-content;
+  padding: 40px var(--gutter) 0;
+  will-change: transform;
+}
+.cgal__item { flex: none; position: relative; will-change: transform, clip-path; }
+.cgal__in { transform-origin: 50% 100%; }
+.cgal__media {
+  position: relative;
+  display: block;
+  height: var(--h, 56vh);
+  aspect-ratio: var(--ar, 4 / 3);
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: var(--paper-3);
+  cursor: inherit;
+  transform: skewX(calc(var(--bend, 0) * 1deg));
+}
+.cgal__media img {
+  position: absolute;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
+  max-width: none;
+  object-fit: cover;
+  transform: translate3d(var(--px, 0px), var(--py, 0px), 0) scale(var(--zoom, 1));
+  transition: transform var(--dur-4) var(--ease-out);
+  pointer-events: none;
+}
+/* Row 53: the block says what it is (a heading and one line), each group of photos carries its season */
+.cgal__head { padding: 0 var(--gutter); margin-bottom: 8px; }
+.cgal__title { font-size: var(--fs-lg); font-weight: 500; line-height: 1; }
+.cgal__sub { margin-top: 8px; font-size: 14px; line-height: 20px; color: var(--mute); }
+.cgal__season { position: absolute; top: -28px; left: 0; display: flex; align-items: center; gap: 8px; font-size: var(--fs-xs); line-height: 16px; color: var(--mute); white-space: nowrap; }
+.cgal__season::before { content: ''; width: 24px; border-top: 1px dashed currentColor; }
+.cgal__cap {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: var(--dash);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--mute);
+}
+.cgal__cap b { font-size: 24px; font-weight: 500; line-height: 28px; color: var(--ink); } /* name big, role small (rows 18, 21) */
+.cgal__hint { position: absolute; right: var(--gutter); bottom: 24px; display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--mute); transition: opacity var(--dur-3) var(--ease-out); }
+.cgal__hint svg { width: 24px; height: 8px; }
+.cgal.is-moved .cgal__hint { opacity: 0; }
+
+/* Rhythm: tall and wide photos, set at different heights on the strip */
+.cgal__item--a { --ar: 4 / 3; --h: 44vh; }
+.cgal__item--b { --ar: 3 / 4; --h: 52vh; margin-top: 6vh; }
+.cgal__item--c { --ar: 4 / 5; --h: 42vh; }
+.cgal__item--d { --ar: 1; --h: 34vh; margin-top: 14vh; }
+.cgal__item--e { --ar: 4 / 5; --h: 50vh; margin-top: 2vh; }
+.cgal__item--f { --ar: 16 / 10; --h: 38vh; margin-top: 10vh; }
+
+@media (hover: hover) {
+  .cgal__media:hover { --zoom: 1.08; }
+}
+.cgal__media:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+
+@media (max-width: 760px) {
+  .cgal__track { gap: 16px; }
+  .cgal__item--a { --h: 36svh; }
+  .cgal__item--b { --h: 44svh; margin-top: 4svh; }
+  .cgal__item--c { --h: 38svh; }
+  .cgal__item--d { --h: 30svh; margin-top: 10svh; }
+  .cgal__item--e { --h: 42svh; }
+  .cgal__item--f { --h: 28svh; margin-top: 8svh; }
+}
+
+/* Reduced motion: a plain sideways strip you swipe, no pinning */
+.cgal.is-static .cgal__stage { position: static; height: auto; padding: 48px 0; overflow-x: auto; cursor: auto; touch-action: auto; }
+
+/* Full screen view: the photo grows out of its place on the strip (FLIP) */
+.cgal-view {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  background: rgba(14, 14, 13, 0);
+  transition: background-color var(--dur-2) var(--ease-out);
+}
+.cgal-view.is-open { background: rgba(14, 14, 13, 0.96); }
+.cgal-view__img { position: fixed; left: 0; top: 0; object-fit: cover; transform-origin: 0 0; will-change: transform; }
+.cgal-view__bar {
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px var(--gutter);
+  color: var(--snow);
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-3) var(--ease-spring);
+}
+.cgal-view.is-open .cgal-view__bar { opacity: 1; transform: none; transition-delay: 0.45s; }
+.cgal-view__cap b { font-weight: 500; }
+.cgal-view__cap span { color: rgba(244, 243, 239, 0.6); margin-left: 8px; }
+.cgal-view__nav { display: flex; gap: 2px; }
+.cgal-view__btn {
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  background: var(--snow);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out), transform var(--dur-2) var(--ease-spring);
+}
+@media (hover: hover) { .cgal-view__btn:hover { background: var(--ink); color: var(--snow); box-shadow: inset 0 0 0 1px var(--snow); } }
+.cgal-view__btn:active { transform: scale(0.94); }

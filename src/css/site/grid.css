@@ -1,0 +1,118 @@
+/* Site grid (row 24). One grid for the header, every section and the footer, so their edges line up.
+ *
+ *   Tokens (tokens.css)   --edge       16px from the screen edge on desktop, 12px on phones (<= 640px)
+ *                         --grid-cols  12
+ *                         --grid-gap   16px between columns
+ *                         --gutter / --frame are aliases of --edge, so old paddings follow the grid.
+ *
+ *   Container   .container   full width, padding-inline: var(--edge). Use it for a block outside .section
+ *                            (.section already pads its sides with the same edge).
+ *   Grid        .grid        12 equal columns, column-gap 16px. Put it INSIDE the padded container/section.
+ *                            .grid--rows adds a row gap (--grid-row, default 24px).
+ *   Span        .col-1 ... .col-12       how many columns a child covers
+ *   Start       .start-1 ... .start-12   which column it begins on (combine: "col-5 start-7")
+ *   Tablet      .t-col-N  .t-start-N     override from 641px to 1000px
+ *   Phone       .p-col-N  .p-start-N     override at 640px and below. Without them every child takes the
+ *                                        full row; .p-shift-1 / .p-shift-2 indent it by 1-2 of 12 columns.
+ *   Full bleed  .grid-bleed  pulls a child out to the screen edges (negative edge margins) when the
+ *                            parent is already padded; its inner text can sit back on .container.
+ *   Dev         press G on a dev server to show the 12 columns (grid-dev.js, not shipped to production).
+ *
+ * Staggered layouts: heading "col-6", paragraph "col-4 start-8", caption "col-2 start-11"; the next section
+ * mirrors it ("start-5" heading). Always snap to a column start, never to arbitrary margins. Source order is
+ * reading order, so the phone stack reads the same. Full notes: docs/grid.md. */
+
+.container { width: 100%; padding-inline: var(--edge); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+  column-gap: var(--grid-gap);
+}
+.grid--rows { row-gap: var(--grid-row, 24px); }
+.grid-bleed { margin-inline: calc(var(--edge) * -1); }
+
+/* Desktop and up: columns as written. */
+.col-1 { grid-column-end: span 1; }
+.col-2 { grid-column-end: span 2; }
+.col-3 { grid-column-end: span 3; }
+.col-4 { grid-column-end: span 4; }
+.col-5 { grid-column-end: span 5; }
+.col-6 { grid-column-end: span 6; }
+.col-7 { grid-column-end: span 7; }
+.col-8 { grid-column-end: span 8; }
+.col-9 { grid-column-end: span 9; }
+.col-10 { grid-column-end: span 10; }
+.col-11 { grid-column-end: span 11; }
+.col-12 { grid-column-end: span 12; }
+.start-1 { grid-column-start: 1; }
+.start-2 { grid-column-start: 2; }
+.start-3 { grid-column-start: 3; }
+.start-4 { grid-column-start: 4; }
+.start-5 { grid-column-start: 5; }
+.start-6 { grid-column-start: 6; }
+.start-7 { grid-column-start: 7; }
+.start-8 { grid-column-start: 8; }
+.start-9 { grid-column-start: 9; }
+.start-10 { grid-column-start: 10; }
+.start-11 { grid-column-start: 11; }
+.start-12 { grid-column-start: 12; }
+
+/* Tablet */
+@media (min-width: 641px) and (max-width: 1000px) {
+  .t-col-1 { grid-column-end: span 1; }
+  .t-col-2 { grid-column-end: span 2; }
+  .t-col-3 { grid-column-end: span 3; }
+  .t-col-4 { grid-column-end: span 4; }
+  .t-col-5 { grid-column-end: span 5; }
+  .t-col-6 { grid-column-end: span 6; }
+  .t-col-7 { grid-column-end: span 7; }
+  .t-col-8 { grid-column-end: span 8; }
+  .t-col-9 { grid-column-end: span 9; }
+  .t-col-10 { grid-column-end: span 10; }
+  .t-col-11 { grid-column-end: span 11; }
+  .t-col-12 { grid-column-end: span 12; }
+  .t-start-1 { grid-column-start: 1; }
+  .t-start-2 { grid-column-start: 2; }
+  .t-start-3 { grid-column-start: 3; }
+  .t-start-4 { grid-column-start: 4; }
+  .t-start-5 { grid-column-start: 5; }
+  .t-start-6 { grid-column-start: 6; }
+  .t-start-7 { grid-column-start: 7; }
+  .t-start-8 { grid-column-start: 8; }
+  .t-start-9 { grid-column-start: 9; }
+  .t-start-10 { grid-column-start: 10; }
+  .t-start-11 { grid-column-start: 11; }
+  .t-start-12 { grid-column-start: 12; }
+}
+
+/* Phone: one column of content, a small shift for rhythm. */
+@media (max-width: 640px) {
+  .grid > [class*='col-'], .grid > [class*='start-'] { grid-column: 1 / -1; }
+  .grid > .p-col-1 { grid-column-end: span 1; }
+  .grid > .p-col-2 { grid-column-end: span 2; }
+  .grid > .p-col-3 { grid-column-end: span 3; }
+  .grid > .p-col-4 { grid-column-end: span 4; }
+  .grid > .p-col-5 { grid-column-end: span 5; }
+  .grid > .p-col-6 { grid-column-end: span 6; }
+  .grid > .p-col-7 { grid-column-end: span 7; }
+  .grid > .p-col-8 { grid-column-end: span 8; }
+  .grid > .p-col-9 { grid-column-end: span 9; }
+  .grid > .p-col-10 { grid-column-end: span 10; }
+  .grid > .p-col-11 { grid-column-end: span 11; }
+  .grid > .p-col-12 { grid-column-end: span 12; }
+  .grid > .p-start-1 { grid-column-start: 1; }
+  .grid > .p-start-2 { grid-column-start: 2; }
+  .grid > .p-start-3 { grid-column-start: 3; }
+  .grid > .p-start-4 { grid-column-start: 4; }
+  .grid > .p-start-5 { grid-column-start: 5; }
+  .grid > .p-start-6 { grid-column-start: 6; }
+  .grid > .p-start-7 { grid-column-start: 7; }
+  .grid > .p-start-8 { grid-column-start: 8; }
+  .grid > .p-start-9 { grid-column-start: 9; }
+  .grid > .p-start-10 { grid-column-start: 10; }
+  .grid > .p-start-11 { grid-column-start: 11; }
+  .grid > .p-start-12 { grid-column-start: 12; }
+  .grid > .p-shift-1 { grid-column: 2 / -1; }
+  .grid > .p-shift-2 { grid-column: 3 / -1; }
+}

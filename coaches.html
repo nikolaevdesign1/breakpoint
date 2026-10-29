@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Coaches | Break Point by Alexander Milevski</title>
+  <meta name="description" content="Twenty tennis and padel coaches in Miami, for kids and adults. Compare languages, prices and the next free hours, then book a session." />
+<!-- include:partials/head.html -->
+</head>
+<body data-page="coaches">
+<!-- include:partials/nav.html -->
+
+  <main id="main">
+    <section class="page-hero coaches-hero" aria-labelledby="coaches-title">
+      <div class="grid coaches-hero__grid">
+        <h1 class="page-hero__title col-8" id="coaches-title" data-lines>Tennis and padel <em>coaches.</em></h1>
+        <div class="coaches-hero__side col-4 start-9">
+          <p class="lead">Twenty coaches for tennis and padel, from first lessons at five to tournament prep. Open a profile for prices, languages and the next free hours.</p>
+          <a class="link" href="/contacts.html?topic=coaching#form">Not sure who to pick? Book a free assessment</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--flush coaches-list" aria-label="All coaches">
+      <div class="studio-bar">
+        <div class="filters" role="group" aria-label="Sport">
+          <button class="switch" type="button" role="switch" aria-checked="false" data-filter="tennis"><span class="switch__track" aria-hidden="true"><span class="switch__knob"></span></span>Tennis</button>
+          <button class="switch" type="button" role="switch" aria-checked="false" data-filter="padel"><span class="switch__track" aria-hidden="true"><span class="switch__knob"></span></span>Padel</button>
+        </div>
+        <div class="filters" role="group" aria-label="Age group">
+          <button class="switch" type="button" role="switch" aria-checked="false" data-filter="kids"><span class="switch__track" aria-hidden="true"><span class="switch__knob"></span></span>Kids</button>
+          <button class="switch" type="button" role="switch" aria-checked="false" data-filter="adults"><span class="switch__track" aria-hidden="true"><span class="switch__knob"></span></span>Adults</button>
+        </div>
+        <p class="studio-bar__count" aria-live="polite" data-studio-count>20 coaches</p>
+      </div>
+
+      <div class="studio" data-studio></div>
+      <p class="studio-empty" data-studio-empty hidden>No coach matches every switch. Turn one off to see more.</p>
+    </section>
+  </main>
+
+  <div class="cv" data-coach-view role="dialog" aria-modal="true" aria-labelledby="cv-name" data-lenis-prevent hidden>
+    <div class="cv__paper" aria-hidden="true"></div>
+    <a class="cv__figure cut cut--d" data-cv-figure data-cursor="Book a session"><span class="cv__pic" data-cv-pic></span></a>
+    <div class="cv__title" data-cv-title></div>
+    <div class="cv__steps" data-cv-ctrl>
+      <button class="cv__btn" type="button" data-cv-step="-1" aria-label="Previous coach"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg></button>
+      <p class="cv__count" data-cv-count aria-hidden="true"></p>
+      <button class="cv__btn" type="button" data-cv-step="1" aria-label="Next coach"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></button>
+    </div>
+    <button class="cv__close" type="button" data-cv-close data-cv-ctrl>Close<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+    <div class="cv__scroll" data-cv-scroll data-lenis-prevent>
+      <article class="cv__body" data-cv-body></article>
+    </div>
+  </div>
+
+<!-- include:partials/footer.html -->
+
+  <script type="module" src="/src/js/pages/coaches.js"></script>
+</body>
+</html>

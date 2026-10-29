@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Memberships | Break Point by Alexander Milevski</title>
+  <meta name="description" content="Break Point memberships in Miami: book courts 14 days ahead, lower coaching rates, member nights, guest passes and a family plan. Try a week free." />
+<!-- include:partials/head.html -->
+</head>
+<body data-page="memberships">
+<!-- include:partials/nav.html -->
+
+  <main id="main">
+    <!-- 1. First screen (row 128): what joining gives you, a member card, four facts -->
+    <section class="mhero" aria-labelledby="memberships-title">
+      <div class="mhero__copy">
+        <h1 class="mhero__title" id="memberships-title" data-lines data-parallax="0.5"><span class="mhero__l">Book first.</span> <span class="mhero__l">Pay less.</span><br />Stay <em>longer.</em></h1>
+        <p class="mhero__lead">Members see the calendar further ahead, pay less for lessons and extra hours, and have someone at their level to play with. Your first week is free.</p>
+        <div class="mhero__actions">
+          <a class="btn" href="#apply"><span class="btn__bg"></span><span class="btn__label">Become a member</span></a>
+          <a class="link" href="#compare">Compare plans</a>
+        </div>
+      </div>
+
+      <div class="mhero__card">
+<!-- include:partials/member-card.html -->
+      </div>
+
+      <ul class="mhero__facts" aria-label="Membership in numbers">
+        <li><b><span data-count="14">14</span><small>days</small></b><span>Booking window on Club and Family. Guests get three.</span></li>
+        <li class="is-accent"><b><span data-count="20">20</span><small>%</small></b><span>Off lessons on the Club plan.</span></li>
+        <li><b><span data-count="2">2</span><small>guests</small></b><span>A month on the Club plan, one on Weekday.</span></li>
+        <li><b><span data-count="7">7</span><small>days</small></b><span>Free to try. Leave and you pay nothing.</span></li>
+      </ul>
+    </section>
+
+    <!-- 2. Plans: the shared pricing block (partials/pricing.html); its FAQ is hidden here, the page FAQ is below -->
+    <section class="section mplans" id="plans" aria-labelledby="plans-title">
+      <div class="mplans__head">
+        <h2 class="h2 h-xl" id="plans-title" data-lines data-parallax="0.5">Four <em>plans.</em></h2>
+        <p class="mplans__lead">Four plans, one of them free. Switch any month, freeze for travel or injury, save {{fact:annual}} when you pay for the year.</p>
+      </div>
+<!-- include:partials/pricing.html -->
+    </section>
+
+    <!-- 3. Comparison: rendered from src/js/site/membership-compare.js; the plan row sticks while you read -->
+    <section class="section section--flush mcompare" id="compare" aria-labelledby="compare-title">
+      <div class="mhead">
+        <h2 class="h2 h-xl" id="compare-title" data-lines data-parallax="0.5">Compare the <em>plans.</em></h2>
+        <p class="mhead__note">Prices follow the Monthly / Annual switch above.</p>
+      </div>
+      <div class="cmp" role="table" aria-labelledby="compare-title" data-compare></div>
+    </section>
+
+    <!-- 4. Perks -->
+    <section class="section mperks" aria-labelledby="perks-title">
+      <div class="mhead mhead--r">
+        <h2 class="h2 h-xl" id="perks-title" data-lines data-parallax="0.5">What members <em>get.</em></h2>
+      </div>
+      <ul class="perks">
+        <li class="perk" data-perk-fig="clock"><p class="perk__fig"><svg class="perk__clock" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" /><path class="perk__hand" d="M24 24V8" /><path class="perk__hand perk__hand--s" d="M24 24V13" /></svg><span>Thu</span><small>7 PM</small></p><div class="perk__body"><h3 class="perk__title">Member nights</h3><p class="perk__text">A round robin on four courts, a coach rotating between them.</p></div></li>
+        <li class="perk" data-perk-fig="level"><p class="perk__fig"><span>All</span><small>levels</small><i class="perk__level" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b><b></b><b></b></i></p><div class="perk__body"><h3 class="perk__title">Partners at your level</h3><p class="perk__text">Tell the desk your level and free hours. We text you players who match.</p></div></li>
+        <li class="perk"><p class="perk__fig"><span data-count="12">12</span><small>hours</small></p><div class="perk__body"><h3 class="perk__title">Peak hours included</h3><p class="perk__text">Club has {{fact:club.hours}} court hours a month, evenings and weekends too.</p></div></li>
+        <li class="perk"><p class="perk__fig"><span data-count="6">6</span><small>AM</small></p><div class="perk__body"><h3 class="perk__title">Lounge and terrace</h3><p class="perk__text">A lounge that opens with the first court and a terrace over the main court.</p></div></li>
+        <li class="perk"><p class="perk__fig"><span data-count="4">4</span><small>hours</small></p><div class="perk__body"><h3 class="perk__title">Hours that roll over</h3><p class="perk__text">Up to {{fact:rollover}} unused hours move to next month on Club and Family.</p></div></li>
+        <li class="perk"><p class="perk__fig"><span data-count="4">4</span><small>players</small></p><div class="perk__body"><h3 class="perk__title">One plan for the family</h3><p class="perk__text">Two adults and two juniors share 20 hours, with {{fact:juniorOff}} off the junior academy.</p></div></li>
+      </ul>
+    </section>
+
+    <!-- 5. How to join: a ball hops along the dashed line as you scroll -->
+    <section class="section section--flush mjoin" aria-labelledby="join-title" data-join>
+      <div class="mhead">
+        <h2 class="h2 h-xl" id="join-title" data-lines data-parallax="0.5">How it <em>starts.</em></h2>
+      </div>
+      <div class="join">
+        <div class="join__track" aria-hidden="true"><span class="join__line"></span><svg class="join__ball" data-join-ball><use href="#bp-ball"/></svg></div>
+        <ol class="join__steps">
+          <li class="join__step" data-join-step><span class="score-n join__n" aria-hidden="true">15</span><h3 class="join__title">Choose a plan.</h3><p class="join__text">Weekday, Club or Family. Pay monthly, or for the year and save {{fact:annual}}.</p></li>
+          <li class="join__step" data-join-step><span class="score-n join__n" aria-hidden="true">30</span><h3 class="join__title">Try a week free.</h3><p class="join__text">Seven days as a full member: book, play, meet people. Walk away and you pay nothing.</p></li>
+          <li class="join__step" data-join-step><span class="score-n join__n" aria-hidden="true">40</span><h3 class="join__title">Play.</h3><p class="join__text">Your card waits at the desk on day one. Club and Family see the calendar fourteen days ahead.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 6. Reviews as texts from members -->
+    <section class="section section--flush" aria-labelledby="reviews-title">
+      <div class="score-rule" aria-hidden="true"><span>15</span><span>30</span><span>40</span><span>Adv</span></div>
+      <div class="reviews" data-reviews="members">
+<!-- include:partials/reviews.html -->
+      </div>
+    </section>
+
+    <!-- 7. FAQ (shared component) -->
+    <section class="section faq" data-faq aria-labelledby="faq-title">
+      <div class="faq__head">
+        <h2 class="faq__word" id="faq-title" data-lines>FAQ</h2>
+        <p class="faq__caption">Answers before you ask</p>
+      </div>
+      <dl class="faq__list">
+        <dt>How does the free week work?</dt><dd>Apply below and pick a start date. For seven days you play as a full member of the plan you chose. Before the week ends the desk asks if you want to stay. If you don’t, you pay nothing.</dd>
+        <dt>Can I book without a membership?</dt><dd>Yes. Pay as you play costs nothing a month: book any free court up to {{fact:payg.windowWord}} days ahead at the drop-in rate.</dd>
+        <dt>How does annual billing work?</dt><dd>You pay for twelve months upfront and save {{fact:annual}}. Your court hours still reset every month.</dd>
+        <dt>Do unused court hours roll over?</dt><dd>On Club and Family, up to four unused hours move to the next month. On Weekday they reset.</dd>
+        <dt>Can I freeze or cancel?</dt><dd>Monthly plans cancel any time before the next billing date. Weekday freezes for up to {{fact:weekday.freeze}} a year, Club and Family for up to {{fact:club.freeze}}, for travel or injury.</dd>
+        <dt>Can I switch plans?</dt><dd>Yes, from the next billing date. Moving up in the middle of a month, you pay only the difference.</dd>
+        <dt>Who counts as family?</dt><dd>Two adults and up to two juniors under 18 at the same address. Each extra junior is {{fact:price.junior}} a month.</dd>
+        <dt>What counts as peak time?</dt><dd>Weekdays from 4 PM until close. Weekends have one flat rate all day.</dd>
+      </dl>
+    </section>
+
+    <!-- 8. Application: thin-line form (line-form.css), the member card on the left fills in as you type -->
+    <section class="section section--flush mapply" id="apply" aria-labelledby="apply-title">
+      <div class="mapply__aside">
+        <h2 class="h2 h-xl" id="apply-title" data-lines data-parallax="0.5">Start your free <em>week.</em></h2>
+        <p class="mapply__lead">Send the form and the desk calls you the same day to start your free week. No card details now.</p>
+        <div class="mapply__card" data-live-card>
+<!-- include:partials/member-card.html -->
+        </div>
+      </div>
+
+      <div class="mapply__form" data-apply-wrap>
+        <form class="lf" novalidate data-apply-form>
+          <div class="lf__field lf__field--half" data-field="name"><label class="lf__label" for="m-name">Full name</label><input class="lf__input" id="m-name" name="name" autocomplete="name" maxlength="40" required /><span class="lf__line" aria-hidden="true"></span><p class="lf__error" aria-live="polite"></p></div>
+          <div class="lf__field lf__field--half" data-field="email"><label class="lf__label" for="m-email">E-mail</label><input class="lf__input" id="m-email" name="email" type="email" autocomplete="email" required /><span class="lf__line" aria-hidden="true"></span><p class="lf__error" aria-live="polite"></p></div>
+          <div class="lf__field lf__field--half" data-field="phone"><label class="lf__label" for="m-phone">Phone</label><input class="lf__input" id="m-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" data-mask="phone" placeholder="{{fact:phoneExample}}" required /><span class="lf__line" aria-hidden="true"></span><p class="lf__error" aria-live="polite"></p></div>
+          <div class="lf__field lf__field--half" data-field="start"><label class="lf__label" for="m-start">Start date</label><input class="lf__input" id="m-start" name="start" type="date" required /><span class="lf__line" aria-hidden="true"></span><p class="lf__error" aria-live="polite"></p></div>
+          <div class="lf__field" data-field="plan"><label class="lf__label" for="m-plan">Plan</label>
+            <select class="lf__input" id="m-plan" name="plan" required>
+              <option value="" disabled selected>Choose a plan</option>
+              <option value="weekday">Weekday · ${{fact:weekday.price}} a month</option>
+              <option value="club">Club · ${{fact:club.price}} a month</option>
+              <option value="family">Family · ${{fact:family.price}} a month</option>
+            </select><span class="lf__line" aria-hidden="true"></span><p class="lf__error" aria-live="polite"></p></div>
+          <div class="lf__field" data-field="household" data-when-plan="family" hidden><span class="lf__label" id="m-household-l">Players in your household</span>
+            <div class="choices" role="radiogroup" aria-labelledby="m-household-l">
+              <label class="choice"><input type="radio" name="household" value="2" /><span>2</span></label>
+              <label class="choice"><input type="radio" name="household" value="3" /><span>3</span></label>
+              <label class="choice"><input type="radio" name="household" value="4" /><span>4</span></label>
+              <label class="choice"><input type="radio" name="household" value="5" /><span>5</span></label>
+              <label class="choice"><input type="radio" name="household" value="6" /><span>6</span></label>
+            </div>
+            <p class="lf__hint">The plan covers two adults and two juniors. Each extra junior is {{fact:price.junior}} a month.</p>
+            <p class="lf__error" aria-live="polite"></p></div>
+          <div class="lf__field" data-field="comment"><label class="lf__label" for="m-comment">Comment <small>(optional)</small></label><textarea class="lf__input" id="m-comment" name="comment" rows="3" placeholder="Your level, the hours you like to play, anything else"></textarea><span class="lf__line" aria-hidden="true"></span></div>
+          <div class="lf__field lf__field--check" data-field="agree">
+            <label class="check"><input type="checkbox" name="agree" value="yes" /><span class="check__box" aria-hidden="true"></span><span>I agree to the <a class="link" href="/about.html#rules">club rules</a> and the membership terms.</span></label>
+            <p class="lf__error" aria-live="polite"></p></div>
+          <div class="lf__foot">
+            <p class="lf__note">No payment now. The desk confirms the plan and billing by phone.</p>
+            <button class="btn" type="submit" data-bounce="press"><span class="btn__bg"></span><span class="btn__label">Start my free week</span></button>
+          </div>
+        </form>
+
+        <div class="lf-done mapply__done" role="status" aria-live="polite">
+          <p class="kicker-score">Game, set, match</p>
+          <h3 tabindex="-1">Welcome in, <span data-done-name>you</span>.</h3>
+          <p data-done-text>Your free week is booked. The desk will call you the same day.</p>
+          <div class="mapply__done-actions">
+            <a class="btn" href="/booking.html"><span class="btn__bg"></span><span class="btn__label">Book your first court</span></a>
+            <a class="link" href="/coaches.html">Meet the coaches</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<!-- include:partials/footer.html -->
+
+  <script type="module" src="/src/js/pages/memberships.js"></script>
+</body>
+</html>

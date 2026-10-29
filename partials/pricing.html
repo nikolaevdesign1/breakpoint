@@ -1,0 +1,93 @@
+      <!-- Plans (row 94): four memberships, Monthly / Annual switch, court-hour strip, then the shared FAQ. Logic: src/js/site/pricing.js -->
+      <div class="plans-bar">
+        <p class="plans-bar__note">Prices in USD, tax included. Cancel any month.</p>
+        <div class="billing" role="group" aria-label="Billing period" data-billing>
+          <span class="billing__thumb" aria-hidden="true"></span>
+          <button class="billing__opt" type="button" data-period="monthly" aria-pressed="true">Monthly</button>
+          <button class="billing__opt" type="button" data-period="annual" aria-pressed="false">Annual <span class="billing__save">−{{fact:annual}}</span></button>
+        </div>
+      </div>
+
+      <div class="plans">
+        <article class="plan" data-bounce="land">
+          <h3 class="plan__name">Pay as you play</h3>
+          <p class="plan__price"><b>$<span data-price="{{fact:payg.price}}">{{fact:payg.price}}</span></b><span class="plan__per">/ month</span></p>
+          <p class="plan__bill">No card on file</p>
+          <p class="plan__desc">Book a free court when you feel like playing.</p>
+          <p class="plan__label">What’s included</p>
+          <ul class="plan__list">
+            <li>Court hours from <span data-rate="padel.offPeak">{{fact:rate.padel}}</span> at drop-in rates</li>
+            <li>Book up to {{fact:payg.window}} days ahead</li>
+            <li>Balls at the desk</li>
+            <li>Open draws as a guest</li>
+          </ul>
+          <a class="btn btn--ghost btn--block plan__cta" href="/booking.html"><span class="btn__bg"></span><span class="btn__label">Book a court</span></a>
+        </article>
+
+        <article class="plan" data-bounce="land">
+          <h3 class="plan__name">Weekday</h3>
+          <p class="plan__price"><b>$<span data-price="{{fact:weekday.price}}">{{fact:weekday.price}}</span></b><span class="plan__per">/ month</span></p>
+          <p class="plan__bill" data-bill="{{fact:weekday.price}}">Billed monthly</p>
+          <p class="plan__desc">For early mornings and lunch breaks before 4 PM.</p>
+          <p class="plan__label">What’s included</p>
+          <ul class="plan__list">
+            <li>{{fact:weekday.hours}} court hours a month, before 4 PM</li>
+            <li>Book up to {{fact:weekday.window}} days ahead</li>
+            <li>{{fact:weekday.coachOff}} off coaching</li>
+            <li>{{fact:weekday.guests}}</li>
+          </ul>
+          <a class="btn btn--ghost btn--block plan__cta" href="/memberships.html#apply"><span class="btn__bg"></span><span class="btn__label">Choose Weekday</span></a>
+        </article>
+
+        <article class="plan plan--feature" data-bounce="land">
+          <div class="plan__glow" aria-hidden="true"></div>
+          <div class="plan__top"><h3 class="plan__name">Club</h3><span class="plan__tag">Most popular</span></div>
+          <p class="plan__price"><b>$<span data-price="{{fact:club.price}}">{{fact:club.price}}</span></b><span class="plan__per">/ month</span></p>
+          <p class="plan__bill" data-bill="{{fact:club.price}}">Billed monthly</p>
+          <p class="plan__desc">Play three times a week, at any hour.</p>
+          <p class="plan__label">What’s included</p>
+          <ul class="plan__list">
+            <li>{{fact:club.hours}} court hours a month, peak included</li>
+            <li>{{fact:club.coachOff}} off coaching and extra hours</li>
+            <li>Book up to {{fact:club.window}} days ahead</li>
+            <li>Member nights and early entry to draws</li>
+            <li>{{fact:club.guests}}</li>
+          </ul>
+          <a class="btn btn--block plan__cta" href="/memberships.html#apply"><span class="btn__bg"></span><span class="btn__label">Become a member</span></a>
+        </article>
+
+        <article class="plan" data-bounce="land">
+          <h3 class="plan__name">Family</h3>
+          <p class="plan__price"><b>$<span data-price="{{fact:family.price}}">{{fact:family.price}}</span></b><span class="plan__per">/ month</span></p>
+          <p class="plan__bill" data-bill="{{fact:family.price}}">Billed monthly</p>
+          <p class="plan__desc">Two adults and up to two juniors on one plan.</p>
+          <p class="plan__label">What’s included</p>
+          <ul class="plan__list">
+            <li>{{fact:family.hours}} shared court hours a month</li>
+            <li>{{fact:juniorOff}} off the junior academy</li>
+            <li>Book up to {{fact:club.window}} days ahead</li>
+            <li>Monthly racket restring</li>
+          </ul>
+          <a class="btn btn--ghost btn--block plan__cta" href="/memberships.html#apply"><span class="btn__bg"></span><span class="btn__label">Talk to the desk</span></a>
+        </article>
+      </div>
+
+      <div class="rate-strip" data-reveal>
+        <p class="rate-strip__title">Court hour without a plan<small>Weekdays before 4 PM · peak from 4 PM</small></p>
+        <ul class="rate-strip__list" data-rates></ul>
+      </div>
+
+      <div class="faq pricing-faq" data-faq>
+        <div class="faq__head">
+          <h2 class="faq__word" id="pricing-faq-title" data-lines>FAQ</h2>
+          <p class="faq__caption">Answers before you ask</p>
+        </div>
+        <dl class="faq__list">
+          <dt>Can I book without a membership?</dt><dd>Yes. Pay as you play costs nothing a month: book any free court up to {{fact:payg.windowWord}} days ahead at the drop-in rate.</dd>
+          <dt>How does annual billing work?</dt><dd>You pay for twelve months upfront and save {{fact:annual}}. Your court hours still reset every month.</dd>
+          <dt>Do unused court hours roll over?</dt><dd>On Club and Family, up to four unused hours move to the next month. On Weekday they reset.</dd>
+          <dt>Can I pause or cancel?</dt><dd>Monthly plans cancel any time before the next billing date. Weekday pauses for up to {{fact:weekday.freeze}} a year, Club and Family for up to {{fact:club.freeze}}, for travel or injury.</dd>
+          <dt>What counts as peak time?</dt><dd>Weekdays from 4 PM until close. Weekends have one flat rate all day.</dd>
+          <dt>Can my partner use my hours?</dt><dd>On Family, all four players share the hours. On Club and Family, bring two guests a month: they pay their share of the court.</dd>
+        </dl>
+      </div>

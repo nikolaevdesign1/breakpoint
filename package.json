@@ -1,0 +1,28 @@
+{
+  "name": "silva-tennis-club",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5183",
+    "build": "vite build",
+    "preview": "vite preview",
+    "model": "node scripts/optimize-model.mjs"
+  },
+  "dependencies": {
+    "gsap": "^3.15.0",
+    "locomotive-scroll": "^5.0.1",
+    "three": "^0.185.0"
+  },
+  "devDependencies": {
+    "@fontsource/anton": "^5.3.0",
+    "@fontsource/big-shoulders-display": "^5.3.0",
+    "@gltf-transform/core": "^4.5.1",
+    "@gltf-transform/extensions": "^4.5.1",
+    "@gltf-transform/functions": "^4.5.1",
+    "meshoptimizer": "^1.3.0",
+    "opentype.js": "^2.0.0",
+    "sharp": "^0.35.5",
+    "vite": "^5.4.0"
+  }
+}

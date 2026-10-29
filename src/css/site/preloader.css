@@ -1,0 +1,53 @@
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--paper);
+  color: var(--ink);
+}
+.preloader.is-done { background: transparent; pointer-events: none; }
+
+.preloader__count {
+  position: absolute;
+  top: calc(var(--edge) + 20px);
+  right: var(--edge);
+  font-size: 28px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Greeting: big two-line title flips in letter by letter, a small line rises under it (flap.js, intro.js). */
+.preloader__greet {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 var(--edge);
+}
+html.intro .preloader__greet { visibility: hidden; }
+.preloader__title {
+  margin: 0;
+  font-size: clamp(64px, 12vw, 160px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+}
+.preloader__line { display: block; }
+.preloader__line:first-child { overflow: hidden; }
+.preloader__sub {
+  margin: 24px 0 0;
+  font-size: clamp(16px, 1.6vw, 20px);
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+.fl-word { display: inline-block; white-space: nowrap; }
+.fl {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.16em;
+  margin-bottom: -0.16em;
+}
+.fl > span { display: block; text-align: center; will-change: transform; }

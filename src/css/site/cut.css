@@ -1,0 +1,45 @@
+/* Cut-corner photos and videos (row 21). Photos and video only: text, buttons, fields and plates stay square.
+ *
+ *   <figure class="cut cut--a"><img ...></figure>
+ *
+ *   .cut          needs a box with a size (aspect-ratio or height) and overflow hidden
+ *   .cut--a       top right corner cut at 45 degrees
+ *   .cut--b       bottom left, 45 degrees
+ *   .cut--c       top left, shallow (long, low slope)
+ *   .cut--d       two corners: top left and bottom right
+ *   .cut--e       bottom right, steep
+ *   .cut--f       two corners: top right and bottom left, uneven depths
+ *
+ * Depth is --cut-x (default 9% of the width). cut.js sets --cut-y so the slope is a true 45 degrees whatever
+ * the aspect ratio. Override per element: style="--cut-x: 8%". Hover or keyboard focus eases the cut towards
+ * flat, slowly. The cut sits on the container; parallax (parallax.js) moves the picture inside it, so the
+ * two never fight over the same transform. Docs: docs/cut.md. */
+
+.cut {
+  --k: 1; /* cut size factor: 1 at rest, lower on hover */
+  --cut-dx: calc(var(--cut-x, 9%) * var(--k));
+  --cut-dy: calc(var(--cut-y, 9%) * var(--k) * var(--cut-s, 1));
+  overflow: hidden;
+  transition: clip-path var(--dur-5) var(--ease-soft);
+}
+@media (hover: hover) {
+  .cut:hover { --k: 0.35; }
+}
+.cut:focus-within { --k: 0.35; }
+
+.cut--a { clip-path: polygon(0 0, calc(100% - var(--cut-dx)) 0, 100% var(--cut-dy), 100% 100%, 0 100%); }
+.cut--b { clip-path: polygon(0 0, 100% 0, 100% 100%, var(--cut-dx) 100%, 0 calc(100% - var(--cut-dy))); }
+.cut--c { --cut-s: 0.6; clip-path: polygon(var(--cut-dx) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut-dy)); }
+.cut--d { clip-path: polygon(var(--cut-dx) 0, 100% 0, 100% calc(100% - var(--cut-dy)), calc(100% - var(--cut-dx)) 100%, 0 100%, 0 var(--cut-dy)); }
+.cut--e { --cut-s: 1.5; clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut-dy)), calc(100% - var(--cut-dx)) 100%, 0 100%); }
+.cut--f {
+  clip-path: polygon(0 0, calc(100% - var(--cut-dx)) 0, 100% var(--cut-dy), 100% 100%, calc(var(--cut-dx) * 0.7) 100%, 0 calc(100% - var(--cut-dy) * 0.7));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cut { transition: none; }
+}
+
+/* Parallax (parallax.js): the picture drifts with the individual properties, so it keeps its own transform
+ * (hover zoom, gallery follow) and the frame keeps its clip-path. */
+[data-px] { translate: 0 var(--par-y, 0px); scale: var(--par-s, 1); }

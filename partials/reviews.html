@@ -1,0 +1,42 @@
+      <!-- Reviews as text messages (rows 73, 116, 54). The wrapper sets the set: <div class="reviews" data-reviews="home|coaching|tournaments">. Filled by src/js/site/reviews.js; the stage sticks while the messages arrive with the scroll. The "Send a review" modal is src/js/site/review-form.js. -->
+      <div class="reviews__stage">
+        <div class="reviews__head">
+          <h2 class="reviews__title" id="reviews-title" data-reviews-title data-lines>What members text us after a <em>match.</em></h2>
+          <p class="reviews__lead">Played here? Tell us how it went. The desk reads every one.</p>
+          <button class="btn" type="button" data-review-open aria-haspopup="dialog" data-bounce="press"><span class="btn__bg"></span><span class="btn__label">Send a review</span></button>
+        </div>
+        <div class="reviews__window">
+          <ol class="reviews__chat" data-reviews-chat aria-label="Reviews"></ol>
+        </div>
+      </div>
+      <div class="apply rv-modal" data-review-modal hidden>
+        <div class="apply__backdrop" data-review-close></div>
+        <div class="apply__panel" role="dialog" aria-modal="true" aria-labelledby="rv-title" data-lenis-prevent>
+          <div class="apply__head">
+            <h2 class="apply__title" id="rv-title" tabindex="-1">Send a review</h2>
+            <button class="apply__close" type="button" data-review-close aria-label="Close"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
+          </div>
+          <form class="lf rv-form" novalidate data-review-form>
+            <div class="lf__field lf__field--half" data-field="name"><label class="lf__label" for="rv-name">Name</label><input class="lf__input" id="rv-name" name="name" autocomplete="name" required /><span class="lf__line" aria-hidden="true"></span><p class="lf__error" aria-live="polite"></p></div>
+            <div class="lf__field lf__field--half" data-field="about"><label class="lf__label" for="rv-about">About</label>
+              <select class="lf__input" id="rv-about" name="about" required>
+                <option value="">Choose one</option><option>The club</option><option>Coaching</option><option>A tournament</option><option>Membership</option>
+              </select><span class="lf__line" aria-hidden="true"></span><p class="lf__error" aria-live="polite"></p></div>
+            <div class="lf__field" data-field="rating"><span class="lf__label" id="rv-rating-l">How was it?</span>
+              <div class="choices" role="radiogroup" aria-labelledby="rv-rating-l">
+                <label class="choice"><input type="radio" name="rating" value="1" /><span>1</span></label><label class="choice"><input type="radio" name="rating" value="2" /><span>2</span></label><label class="choice"><input type="radio" name="rating" value="3" /><span>3</span></label><label class="choice"><input type="radio" name="rating" value="4" /><span>4</span></label><label class="choice"><input type="radio" name="rating" value="5" /><span>5</span></label>
+              </div><p class="lf__error" aria-live="polite"></p></div>
+            <div class="lf__field" data-field="text"><label class="lf__label" for="rv-text">Your review</label><textarea class="lf__input" id="rv-text" name="text" rows="3" required></textarea><span class="lf__line" aria-hidden="true"></span><p class="lf__error" aria-live="polite"></p></div>
+            <div class="lf__field lf__field--check" data-field="consent"><label class="check"><input type="checkbox" name="consent" /><span class="check__box"></span><span>The club may publish this with my first name and last initial.</span></label><p class="lf__error" aria-live="polite"></p></div>
+            <div class="lf__foot">
+              <p class="lf__note">Reviews are read by the front desk before they go up.</p>
+              <button class="btn" type="submit" data-bounce="press"><span class="btn__bg"></span><span class="btn__label">Send review</span></button>
+            </div>
+          </form>
+          <div class="lf-done" role="status" aria-live="polite">
+            <h3 tabindex="-1">Thanks, <span data-review-name>you</span>.</h3>
+            <p>Your review is with the front desk. We publish the good ones and answer the rest.</p>
+            <button class="btn" type="button" data-review-close><span class="btn__bg"></span><span class="btn__label">Close</span></button>
+          </div>
+        </div>
+      </div>

@@ -1,0 +1,132 @@
+/* Reviews as text messages (row 73): partials/reviews.html + src/js/site/reviews.js.
+   Bubbles are square (row 54); the tail is one cut corner, avatars are squares with a cut corner. */
+.reviews {
+  --bubble-cut: 12px;
+  position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+/* The block ends right after the last message (row 54): an ordinary gap, not the big section padding */
+.section:has(> .reviews) { padding-bottom: 64px; }
+
+/* Scroll-driven arrival (row 116, reviews.js adds .is-scrubbed): the track is as tall as the
+   messages need, the stage sticks for one screen, the feed slides inside a soft-edged window. */
+.reviews.is-scrubbed { height: calc(100vh + var(--msgs, 8) * var(--per-msg, 0.3) * 100vh); }
+.reviews.is-scrubbed .reviews__stage {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100svh;
+  padding-top: calc(var(--bar-h) + clamp(24px, 5vh, 64px));
+}
+.reviews.is-scrubbed .reviews__window {
+  flex: 1;
+  min-height: 0;
+  /* room for the bubbles' shadows and tilt, never wider than the page gutter */
+  margin: clamp(32px, 5vh, 64px) calc(var(--gutter) * -1) 0;
+  padding: 0 var(--gutter);
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(transparent 0, #000 40px, #000 calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(transparent 0, #000 40px, #000 calc(100% - 16px), transparent 100%);
+}
+.reviews.is-scrubbed .reviews__chat { position: relative; margin-top: 0; padding-top: 32px; will-change: transform; }
+
+/* Rows 18, 24: a big heading on the left edge, the thread of small texts centred under it */
+.reviews__head { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+.reviews__title {
+  max-width: 14ch;
+  font-size: var(--fs-xl);
+  font-weight: 500;
+  line-height: 0.96;
+  text-wrap: balance;
+}
+/* the small step under the big one (row 18), then the button, before the feed */
+.reviews__lead { max-width: 34ch; margin-top: 24px; font-size: 16px; line-height: 1.5; color: var(--mute); }
+.reviews__head .btn { margin-top: 24px; }
+.plate-grass .reviews__lead { color: rgba(255, 243, 218, 0.8); }
+
+/* On a grass plate (tournaments): the text under the bubbles turns cream */
+.plate-grass .msg__meta { color: rgba(255, 243, 218, 0.72); }
+.plate-grass .msg__typing { background: rgba(255, 243, 218, 0.18); }
+
+/* Row 44: one centred thread, messages alternate sides, every bubble inside the column.
+   Tilt is only part of the arrival (reviews.js); at rest every bubble sits straight. */
+.reviews__chat {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+  max-width: 880px;
+  margin: clamp(56px, 7vw, 112px) auto 0;
+}
+
+/* Layers: .msg → .msg__tilt (hover lift) → .msg__arrive (springs in, JS). */
+.msg { position: relative; display: flex; max-width: min(520px, 72%); align-self: flex-start; }
+.msg:nth-child(even) { align-self: flex-end; }
+.msg:hover { z-index: 2; }
+
+.msg__tilt { position: relative; min-width: 0; transition: transform var(--dur-3) var(--ease-spring); }
+.msg__arrive { transform-origin: 0% 100%; }
+.msg:nth-child(even) .msg__arrive { transform-origin: 100% 100%; }
+
+.msg__bubble {
+  --bg: var(--ink);
+  --fg: var(--snow);
+  position: relative;
+  padding: 14px 18px 16px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: clamp(16px, 1.25vw, 20px);
+  line-height: 1.36;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, var(--bubble-cut) 100%, 0 calc(100% - var(--bubble-cut)));
+}
+.msg:nth-child(even) .msg__bubble { clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--bubble-cut)), calc(100% - var(--bubble-cut)) 100%, 0 100%); }
+.msg--sun .msg__bubble { --bg: var(--sun); --fg: var(--wood); }
+.msg--clay .msg__bubble { --bg: var(--clay); --fg: var(--snow); }
+
+.msg__by { display: flex; align-items: center; gap: 10px; height: 32px; margin-top: 10px; padding-left: 2px; font-size: 14px; line-height: 1; white-space: nowrap; }
+.msg:nth-child(even) .msg__by { justify-content: flex-end; padding: 0 2px 0 0; }
+.msg:nth-child(even) .msg__avatar { clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px); }
+.msg__avatar { flex: none; width: 32px; height: 32px; object-fit: cover; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%); filter: grayscale(1) contrast(1.05); background: var(--paper-3); }
+.msg__name { font-weight: 500; }
+.msg__meta { color: var(--mute); overflow: hidden; text-overflow: ellipsis; }
+
+/* "Typing…" bubble, shown where the message is about to land */
+.msg__typing {
+  position: absolute;
+  left: 0;
+  bottom: 42px;
+  z-index: 1;
+  display: flex;
+  gap: 6px;
+  padding: 14px 16px;
+  background: var(--paper-2);
+  visibility: hidden;
+  pointer-events: none;
+}
+.msg:nth-child(even) .msg__typing { left: auto; right: 0; }
+.msg__typing i { width: 8px; height: 8px; background: var(--mute-2); animation: msg-dot 1s ease-in-out infinite; }
+.msg__typing i:nth-child(2) { animation-delay: 0.15s; }
+.msg__typing i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes msg-dot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.45; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+@media (hover: hover) {
+  .msg:hover .msg__tilt { transform: translateY(-6px); }
+}
+
+@media (max-width: 720px) {
+  .reviews__chat { gap: 22px; padding: 0 8px; }
+  .msg { max-width: 86%; }
+  .msg__bubble { font-size: 16px; padding: 12px 16px 14px; }
+}
+
+/* "Send a review" modal (review-form.js): the shared .apply shell and thin-line fields; the thanks screen replaces the title */
+.rv-modal .apply__close { margin-left: auto; }
+.rv-modal .is-sent .apply__title { display: none; }
+.rv-modal .lf-done { margin-top: 32px; }
+.rv-modal .lf-done h3 { font-size: var(--fs-lg); font-weight: 500; line-height: 1; }
+.rv-modal .lf-done p { max-width: 36ch; margin-top: 16px; color: var(--mute); }
+.rv-modal .lf-done .btn { margin-top: 32px; }

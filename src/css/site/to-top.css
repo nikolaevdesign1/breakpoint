@@ -1,0 +1,32 @@
+/* ---------- Back to top (row 45, to-top.js) ----------
+   A square black plate in the bottom right corner, shown after about a screen of scroll.
+   It rises above the cookie card while that card is open (--lift), and steps aside while the menu is open. */
+.to-top {
+  --size: 48px;
+  position: fixed;
+  right: var(--gutter);
+  bottom: calc(var(--gutter) + env(safe-area-inset-bottom));
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  width: var(--size);
+  height: var(--size);
+  background: var(--night);
+  color: var(--snow);
+  box-shadow: inset 0 0 0 1px rgba(244, 243, 239, 0.1), 0 16px 32px -20px rgba(0, 0, 0, 0.6);
+  translate: 0 calc(var(--lift, 0px) * -1);
+  transition: background-color var(--dur-1), translate var(--dur-3) var(--ease-spring), opacity var(--dur-1);
+}
+.to-top[hidden] { display: none; }
+.to-top svg { width: 16px; height: 16px; overflow: visible; }
+.to-top svg path { transition: transform var(--dur-2) var(--ease-spring); }
+@media (hover: hover) {
+  .to-top:hover { background: var(--ink-2); }
+  .to-top:hover svg path { transform: translateY(-4px); }
+}
+body.menu-open .to-top { opacity: 0; pointer-events: none; }
+
+@media (max-width: 520px) {
+  .to-top { --size: 40px; }
+  .to-top svg { width: 14px; height: 14px; }
+}

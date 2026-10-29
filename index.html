@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Break Point by Alexander Milevski | Tennis Club, Miami</title>
+  <meta name="description" content="Sixteen courts in Miami: red clay, indoor hard, grass and padel. Book a court, train with a coach, play in club tournaments." />
+<!-- include:partials/head.html -->
+  <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="preload" as="image" href="/media/hero-clay-park.jpg" fetchpriority="high" />
+  <script>
+    // Hide the hero before first paint so the preloader → intro hand-off never flashes.
+    (function (root) {
+      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) root.classList.add('intro');
+    })(document.documentElement);
+  </script>
+</head>
+<body class="is-loading" data-page="home">
+<!-- include:partials/nav.html -->
+
+  <!-- Preloader -->
+  <div class="preloader" aria-hidden="true">
+    <div class="preloader__count"><span data-count>0</span>%</div>
+    <div class="preloader__greet">
+      <h1 class="preloader__title"><span class="preloader__line">Welcome to</span><span class="preloader__line">Break Point</span></h1>
+      <p class="preloader__sub">Tennis club of Alexander Milevski</p>
+    </div>
+  </div>
+
+  <main id="main">
+    <!-- 01 Hero -->
+    <section class="hero" aria-label="Intro">
+      <div class="hero__card" data-hero-card>
+        <div class="hero__media" data-hero-media>
+          <video data-media-video="hero" poster="/media/hero-clay-park.jpg" muted loop playsinline preload="auto" aria-hidden="true"></video>
+        </div>
+        <div class="hero__shade"></div>
+        <div class="hero__content">
+          <div class="hero__main">
+            <h1 class="hero__title" data-hero-title>Clay, grass, hard.<br /><em>No rush.</em></h1>
+            <ul class="hero__facts" data-hero-fade aria-label="The club in numbers">
+              <li><b>16</b><span>courts</span></li>
+              <li><b>4</b><span>surfaces</span></li>
+              <li><b>6–23</b><span>open Mon–Fri</span></li>
+              <li><b>7–22</b><span>open Sat–Sun</span></li>
+            </ul>
+          </div>
+          <!-- Next free court (rows 40, 44): a small holographic note, opens after the intro; closes; live data in next-slot.js -->
+          <div class="hero-alert" data-next-slot hidden>
+            <a class="hero-alert__box" href="/booking.html" data-cursor="Book this court">
+              <span class="hero-alert__l k">Next free court</span>
+              <span class="hero-alert__l b" data-slot-court>Checking the courts</span>
+              <span class="hero-alert__l s" data-slot-when></span>
+              <span class="hero-alert__l s go"><span data-slot-price></span> · Book</span>
+            </a>
+            <button class="hero-alert__close" type="button" data-slot-close aria-label="Close this note"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 Club (rows 107, 41, 45): one paragraph that inks in as you read, then four score cells with the facts (club-notes.js) -->
+    <section class="section club" id="club" aria-labelledby="club-title">
+      <h2 class="visually-hidden" id="club-title">The club</h2>
+      <div class="grid grid--rows club__grid">
+        <p class="club__text col-10 start-3 p-shift-1" data-words="ink">Break Point is a club for people who play after work. Book a court in under a minute, find a partner at your level, train with a coach who remembers last week, then cool off on the terrace. Sixteen courts, lit until <em>closing time.</em></p>
+        <ul class="club__board col-12" aria-label="The club in numbers" data-club-board>
+          <li class="club__note" data-club-note><span class="club__v">16</span><span class="club__k">courts</span></li>
+          <li class="club__note" data-club-note><span class="club__v">4</span><span class="club__k">surfaces: clay, hard, grass, padel</span></li>
+          <li class="club__note" data-club-note><span class="club__v">6–23</span><span class="club__k">open Mon–Fri, 7–22 on weekends</span></li>
+          <li class="club__note" data-club-note><span class="club__v">Miami</span><span class="club__k">Coconut Grove, 80 parking spaces</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 03 Services drum -->
+    <section class="section services" id="services" aria-label="Services &amp; formats">
+      <div class="services__pin" data-services>
+        <div class="services__head">
+          <p class="eyebrow services__count"><b data-services-index>01</b> / <span data-services-total>06</span></p>
+        </div>
+
+        <div class="ruler ruler--left" aria-hidden="true"><span class="ruler__mark" data-ruler-mark></span></div>
+        <div class="ruler ruler--right" aria-hidden="true"><span class="ruler__mark" data-ruler-mark></span></div>
+
+        <div class="services__aside services__aside--left">
+          <div class="media services__thumb cut cut--c" data-services-thumbs></div>
+        </div>
+
+        <ul class="drum" data-drum aria-label="Services"></ul>
+
+        <div class="services__aside services__aside--right">
+          <p class="eyebrow services__meta swap" data-services-meta></p>
+          <p class="services__desc swap" data-services-desc></p>
+          <p class="services__price swap"><b data-services-price></b><sup data-services-unit></sup></p>
+          <p class="services__note swap" data-services-note></p>
+          <a class="btn btn--sm" href="#book" data-services-cta><span class="btn__bg"></span><span class="btn__label">Book</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 Memberships & pricing -->
+    <section class="section" id="pricing" aria-labelledby="pricing-title">
+<!-- include:partials/member.html -->
+<!-- include:partials/pricing.html -->
+    </section>
+
+    <!-- 05 Book a court: a low banner into the 3D map (rows 87, 113) -->
+<!-- include:partials/book-banner.html -->
+
+    <!-- 06 Coaches: depth cloud (coaches-cloud.js) -->
+    <section class="coach-cloud" id="coaches" aria-labelledby="coaches-title" data-coach-cloud>
+      <div class="coach-cloud__stage">
+        <div class="coach-cloud__field" data-cloud-field aria-hidden="true"></div>
+        <div class="coach-cloud__copy">
+          <h2 class="h2 coach-cloud__title" id="coaches-title" data-lines><span>Twenty coaches.</span> <span>One of them is <em>yours.</em></span></h2>
+          <p class="coach-cloud__lead">Tennis and padel, first lessons to tournament prep. Pick by level, language or the hour you are free.</p>
+          <a class="btn" href="/coaches.html"><span class="btn__bg"></span><span class="btn__label">Meet the coaches</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 Community & reviews -->
+    <section class="section community" id="community" aria-labelledby="community-title">
+      <div class="grid grid--rows community__head">
+        <h2 class="h2 h-xl col-10 start-3" id="community-title" data-lines>Draws, finals and the <em>occasional</em> upset.</h2>
+        <div class="note col-5 start-3">
+          <p class="note__lead" data-lines>Friday Night Doubles, the Club Open and the Club Championship. Members apply first; guests take every open spot.</p>
+          <a class="btn" href="/tournaments.html"><span class="btn__bg"></span><span class="btn__label">Tournament calendar</span></a>
+        </div>
+      </div>
+
+      <!-- Gallery (rows 115, 43): six moments of club life on a strip that runs sideways while you scroll
+           or drag it. Photos fly in, bend a little with speed and open full screen (gallery-strip.js). -->
+      <div class="cgal" data-cgal>
+        <div class="cgal__stage" data-cgal-stage>
+          <div class="cgal__head">
+            <h3 class="cgal__title">Club life</h3>
+            <p class="cgal__sub">Six moments from the season, in the order they happened.</p>
+          </div>
+          <ul class="cgal__track" data-cgal-track aria-label="Club moments">
+          <li class="cgal__item cgal__item--a" data-cgal-item>
+            <span class="cgal__season" aria-hidden="true">Spring</span>
+            <div class="cgal__in">
+              <button class="cgal__media cut cut--a" type="button" data-cgal-open data-cursor="Open" aria-label="Open photo: Club Open"><img data-media="community.0" data-w="1200" data-sizes="(max-width: 760px) 80vw, 40vw" alt="Club Open, April" loading="lazy" draggable="false" /></button>
+              <p class="cgal__cap"><b>Club Open</b><span>April</span></p>
+            </div>
+          </li>
+          <li class="cgal__item cgal__item--b" data-cgal-item>
+            <div class="cgal__in">
+              <button class="cgal__media cut cut--b" type="button" data-cgal-open data-cursor="Open" aria-label="Open photo: Doubles night"><img data-media="community.1" data-w="1200" data-sizes="(max-width: 760px) 80vw, 40vw" alt="Doubles night, May" loading="lazy" draggable="false" /></button>
+              <p class="cgal__cap"><b>Doubles night</b><span>May</span></p>
+            </div>
+          </li>
+          <li class="cgal__item cgal__item--c" data-cgal-item>
+            <span class="cgal__season" aria-hidden="true">Summer</span>
+            <div class="cgal__in">
+              <button class="cgal__media cut cut--c" type="button" data-cgal-open data-cursor="Open" aria-label="Open photo: Mixed doubles"><img data-media="services.5" data-w="1200" data-sizes="(max-width: 760px) 80vw, 40vw" alt="Mixed doubles, June" loading="lazy" draggable="false" /></button>
+              <p class="cgal__cap"><b>Mixed doubles</b><span>June</span></p>
+            </div>
+          </li>
+          <li class="cgal__item cgal__item--d" data-cgal-item>
+            <div class="cgal__in">
+              <button class="cgal__media cut cut--d" type="button" data-cgal-open data-cursor="Open" aria-label="Open photo: Junior Circuit"><img data-media="community.2" data-w="1200" data-sizes="(max-width: 760px) 80vw, 40vw" alt="Junior Circuit, July" loading="lazy" draggable="false" /></button>
+              <p class="cgal__cap"><b>Junior Circuit</b><span>July</span></p>
+            </div>
+          </li>
+          <li class="cgal__item cgal__item--e" data-cgal-item>
+            <div class="cgal__in">
+              <button class="cgal__media cut cut--e" type="button" data-cgal-open data-cursor="Open" aria-label="Open photo: Evening singles"><img data-media="community.5" data-w="1200" data-sizes="(max-width: 760px) 80vw, 40vw" alt="Evening singles, August" loading="lazy" draggable="false" /></button>
+              <p class="cgal__cap"><b>Evening singles</b><span>August</span></p>
+            </div>
+          </li>
+          <li class="cgal__item cgal__item--f" data-cgal-item>
+            <span class="cgal__season" aria-hidden="true">Autumn</span>
+            <div class="cgal__in">
+              <button class="cgal__media cut cut--f" type="button" data-cgal-open data-cursor="Open" aria-label="Open photo: Club Championship"><img data-media="community.4" data-w="1200" data-sizes="(max-width: 760px) 80vw, 40vw" alt="Club Championship, October" loading="lazy" draggable="false" /></button>
+              <p class="cgal__cap"><b>Club Championship</b><span>October</span></p>
+            </div>
+          </li>
+          </ul>
+          <p class="cgal__hint" aria-hidden="true">Scroll or drag<svg viewBox="0 0 24 8" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M0 4h22M18 1l4 3-4 3"/></svg></p>
+        </div>
+      </div>
+
+      <div class="reviews" data-reviews="home">
+<!-- include:partials/reviews.html -->
+      </div>
+    </section>
+  </main>
+
+<!-- include:partials/footer.html -->
+
+  <script type="module" src="/src/js/pages/home.js"></script>
+</body>
+</html>

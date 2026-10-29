@@ -1,0 +1,93 @@
+/* Round 9 map details (src/js/booking/fun): the surface note over the dock (row 10) and the
+   little scoreboard over a court with a rally on it (row 13). Information only: no pointer events. */
+
+/* ---------- Surface note: how the hovered surface plays ---------- */
+.surface-note {
+  position: fixed; left: 0; bottom: 0; z-index: 36;
+  display: flex; flex-direction: column; gap: 6px;
+  margin: 0;
+  max-width: calc(100vw - 24px);
+  padding: 10px 12px;
+  background: var(--night);
+  color: var(--snow);
+  box-shadow: inset 0 0 0 1px rgba(244, 243, 239, 0.12), 0 24px 48px -24px rgba(0, 0, 0, 0.7);
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  transform-origin: 0 100%;
+  opacity: 0;
+  translate: 0 8px;
+  scale: 0.96;
+  transition: opacity 0.16s linear, translate 0.24s var(--ease-out), scale 0.24s var(--ease-out);
+}
+.surface-note[hidden] { display: none; }
+.surface-note.is-in {
+  opacity: 1;
+  translate: 0 0;
+  scale: 1;
+  transition: opacity 0.22s var(--ease-out), translate 0.56s var(--ease-spring), scale 0.56s var(--ease-spring);
+}
+.surface-note__line { font-size: 16px; font-weight: 500; line-height: 1.2; }
+.surface-note__court {
+  padding-top: 6px;
+  border-top: 1px dashed rgba(244, 243, 239, 0.2);
+  font-size: 12px; line-height: 1;
+  color: rgba(244, 243, 239, 0.6);
+}
+
+/* ---------- Rally scoreboard: the score of the rally on the hovered court ---------- */
+.rally-board {
+  position: fixed; left: 0; top: 0; z-index: 35; /* with the coach tag: over the map, under the tiles */
+  width: 208px;
+  margin: 0;
+  padding: 8px 10px 10px;
+  background: var(--night);
+  color: var(--snow);
+  box-shadow: inset 0 0 0 1px rgba(244, 243, 239, 0.12), 0 24px 48px -24px rgba(0, 0, 0, 0.7);
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+  pointer-events: none;
+  transform-origin: 0 0;
+  opacity: 0;
+  scale: 0.94;
+  transition: opacity 0.18s linear, scale 0.24s var(--ease-out);
+}
+.rally-board[hidden] { display: none; }
+.rally-board.is-in {
+  opacity: 1;
+  scale: 1;
+  transition: opacity 0.24s var(--ease-out), scale 0.6s var(--ease-spring);
+}
+.rally-board__k {
+  display: flex; justify-content: space-between; gap: 8px;
+  margin: 0 0 6px;
+  font-size: 12px; line-height: 1;
+  color: rgba(244, 243, 239, 0.6);
+}
+.rally-board__k em { font-style: normal; }
+.rally-board__rows { margin: 0; padding: 0; list-style: none; }
+.rally-board__row {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 6px 0;
+  font-size: 14px; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.rally-board__row + .rally-board__row { border-top: 1px dashed rgba(244, 243, 239, 0.2); }
+.rally-board__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rally-board__set { width: 12px; text-align: center; color: rgba(244, 243, 239, 0.6); }
+.rally-board__set.is-now { color: var(--snow); }
+.rally-board__pts {
+  width: 28px; text-align: right;
+  font-weight: 600;
+  color: var(--sun);
+}
+.rally-board__pts.is-bump { animation: rally-bump 0.5s var(--ease-spring); }
+@keyframes rally-bump { from { transform: translateY(-6px); opacity: 0; } to { transform: none; opacity: 1; } }
+body.postcard-on .rally-board, body.hud-open .rally-board,
+body.postcard-on .surface-note, body.hud-open .surface-note { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .surface-note, .surface-note.is-in, .rally-board, .rally-board.is-in { transition: opacity 0.2s linear; translate: none; scale: 1; }
+  .rally-board__pts.is-bump { animation: none; }
+}

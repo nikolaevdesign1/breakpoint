@@ -1,0 +1,128 @@
+/* Custom select (row 11), logic in src/js/site/custom-select.js. The native <select> stays inside as
+   .cs__native (hidden, holds value and change). Square corners, dashed dividers, no glass. The button
+   takes the field's own class, so it looks like its inputs (.lf__input underline, .field filled box). */
+.cs { position: relative; width: 100%; }
+.cs .cs__native { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+.cs__btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+}
+.cs__btn:disabled { cursor: default; opacity: 0.5; }
+.cs__value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cs__btn.is-empty .cs__value { color: var(--mute-2); }
+.cs__chev { flex: none; transition: transform var(--dur-2) var(--ease-spring); }
+.cs.is-open .cs__chev { transform: rotate(180deg); }
+@media (hover: hover) { .cs__btn:not(:disabled):hover .cs__chev { transform: translateY(2px); } .cs.is-open .cs__btn:hover .cs__chev { transform: rotate(180deg); } }
+
+/* Underline variant */
+.cs__btn.lf__input { padding-right: 4px; }
+/* Filled variant (tournament application) */
+.field .cs__btn { padding: 16px 18px; background: var(--paper-2); font-size: 16px; line-height: 24px; box-shadow: inset 0 0 0 1px transparent; transition: box-shadow var(--dur-1), background-color var(--dur-1); }
+.field .cs__btn:focus-visible, .field .cs.is-open .cs__btn { background: var(--paper); box-shadow: inset 0 0 0 2px var(--ink); }
+.field.is-invalid .cs__btn { box-shadow: inset 0 0 0 2px var(--clay); }
+
+/* Listbox */
+.cs__list {
+  position: fixed;
+  z-index: 400;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--ink), 0 24px 32px -24px rgba(14, 14, 13, 0.5);
+  clip-path: inset(0 0 100% 0);
+  visibility: hidden;
+  transition: clip-path var(--dur-2) var(--ease-out), visibility 0s linear var(--dur-2);
+}
+.cs__list.is-up { clip-path: inset(100% 0 0 0); }
+.cs__list.is-open { clip-path: inset(0); visibility: visible; transition-delay: 0s; }
+.cs__opt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 48px;
+  padding: 12px 16px;
+  border-top: var(--dash);
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color var(--dur-1);
+}
+.cs__opt:first-child { border-top: 0; }
+.cs__opt.is-active { background: var(--paper-2); }
+.cs__opt[aria-disabled='true'] { color: var(--mute-2); cursor: default; }
+.cs__tick { flex: none; width: 16px; height: 16px; fill: none; stroke: var(--ink); stroke-width: 1.6; stroke-linecap: square; }
+.cs__tick path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset var(--dur-1) var(--ease-in-out); }
+.cs__list.is-open .cs__opt[aria-selected='true'] .cs__tick path { stroke-dashoffset: 0; transition: stroke-dashoffset var(--dur-2) var(--ease-in-out) 0.2s; }
+.cs__scrim { display: none; }
+
+/* Phone: a sheet from the bottom with big rows */
+@media (max-width: 640px) {
+  .cs__scrim { display: block; position: fixed; inset: 0; z-index: 399; background: rgba(14, 14, 13, 0.4); opacity: 0; visibility: hidden; transition: opacity var(--dur-2), visibility 0s linear var(--dur-2); }
+  .cs__scrim.is-open { opacity: 1; visibility: visible; transition-delay: 0s; }
+  .cs__list { inset: auto 0 0 0 !important; width: auto !important; max-height: 70vh !important; padding-bottom: env(safe-area-inset-bottom); clip-path: none !important; transform: translateY(100%); transition: transform var(--dur-3) var(--ease-out), visibility 0s linear var(--dur-3); }
+  .cs__list.is-open { transform: none; transition-delay: 0s; }
+  .cs__opt { min-height: 64px; padding: 16px 20px; font-size: 18px; }
+  .cs__tick { width: 20px; height: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cs__list, .cs__scrim, .cs__chev, .cs__tick path { transition-duration: 0.01s !important; transition-delay: 0s !important; }
+}
+
+/* ---------- Date picker (date-picker.js): the button reuses .cs__btn; the calendar is a square dashed grid ---------- */
+.dp__icon { flex: none; }
+.dp {
+  position: fixed;
+  z-index: 400;
+  width: 336px;
+  padding: 16px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink), 0 24px 32px -24px rgba(14, 14, 13, 0.5);
+  clip-path: inset(0 0 100% 0);
+  visibility: hidden;
+  transition: clip-path var(--dur-2) var(--ease-out), visibility 0s linear var(--dur-2);
+}
+.dp.is-up { clip-path: inset(100% 0 0 0); }
+.dp.is-open { clip-path: inset(0); visibility: visible; transition-delay: 0s; }
+.dp__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.dp__title { flex: 1; height: 40px; font-size: 16px; font-weight: 500; text-align: center; transition: background-color var(--dur-1); }
+.dp__nav { display: grid; place-items: center; width: 40px; height: 40px; transition: background-color var(--dur-1), transform var(--dur-2) var(--ease-spring); }
+@media (hover: hover) { .dp__title:hover, .dp__nav:hover { background: var(--paper-2); } .dp__nav:hover { transform: scale(1.08); } }
+.dp__title:focus-visible, .dp__nav:focus-visible, .dp__year:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.dp__week { display: grid; grid-template-columns: repeat(7, 1fr); font-size: 12px; line-height: 24px; text-align: center; color: var(--mute); }
+.dp__grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: var(--dash); border-left: var(--dash); }
+.dp__day, .dp__year { position: relative; display: grid; place-items: center; height: 40px; border-right: var(--dash); border-bottom: var(--dash); font-size: 14px; font-variant-numeric: tabular-nums; transition: background-color var(--dur-1), color var(--dur-1); }
+.dp__day--blank { background: repeating-linear-gradient(135deg, transparent 0 6px, rgba(14, 14, 13, 0.05) 6px 7px); }
+@media (hover: hover) { .dp__day:not(:disabled):not(.is-sel):hover, .dp__year:not(:disabled):not(.is-sel):hover { background: var(--paper-2); } }
+.dp__day:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.dp__day:disabled, .dp__year:disabled { color: var(--mute-2); cursor: default; text-decoration: line-through; }
+.dp__day.is-today::after { content: ''; position: absolute; left: 10px; right: 10px; bottom: 6px; border-bottom: 1px solid currentColor; }
+.dp__day.is-sel, .dp__year.is-sel { background: var(--ink); color: var(--snow); animation: dp-pop var(--dur-2) var(--ease-spring); }
+@keyframes dp-pop { from { transform: scale(0.8); } to { transform: none; } }
+.dp__years { display: grid; grid-template-columns: repeat(3, 1fr); border-top: var(--dash); border-left: var(--dash); }
+.dp__year { height: 56px; font-size: 16px; }
+
+@media (max-width: 640px) {
+  .dp { inset: auto 0 0 0 !important; width: auto !important; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); clip-path: none !important; transform: translateY(100%); transition: transform var(--dur-3) var(--ease-out), visibility 0s linear var(--dur-3); }
+  .dp.is-open { transform: none; transition-delay: 0s; }
+  .dp__day { height: 48px; font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .dp { transition-duration: 0.01s !important; } .dp__day.is-sel, .dp__year.is-sel { animation: none; } }

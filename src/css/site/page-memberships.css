@@ -1,0 +1,221 @@
+/* ---------- Memberships (row 128) ----------
+   First screen with a member card, the shared plans, a comparison table, perks, three steps to join,
+   member texts, FAQ and the application. The form itself is line-form.css. */
+
+/* Section heads on this page: heading left, a short note right */
+.mhead {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--grid-gap);
+  align-items: end;
+  margin-bottom: clamp(32px, 4vw, 64px);
+}
+.mhead .h2 { grid-column: 1 / 9; }
+.mhead--r .h2 { grid-column: 4 / 13; } /* mirrors the neighbours: this one starts on column 4 */
+.mhead__note { grid-column: 10 / 13; font-size: 14px; line-height: 20px; color: var(--mute); }
+.mplans__head { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--grid-gap); margin-bottom: 32px; }
+.mplans__head .h2 { grid-column: 1 / 10; }
+.mplans__lead { grid-column: 1 / 6; margin-top: 24px; font-size: 16px; line-height: 24px; color: var(--mute); }
+
+/* 1. First screen */
+.mhero {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 48px var(--grid-gap);
+  align-items: center;
+  padding: calc(var(--bar-h) + 88px) var(--gutter) 0;
+}
+.mhero__copy { grid-column: 1 / 9; }
+.mhero__title {
+  font-size: clamp(44px, 5.6vw, 104px);
+  font-weight: 500;
+  line-height: 0.96;
+  margin-left: -0.05em;
+}
+ .mhero__lead { max-width: 46ch; margin-top: clamp(24px, 3vw, 40px); font-size: 18px; line-height: 1.45; }
+.mhero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-top: 28px; }
+.mhero__card { grid-column: 10 / 13; perspective: 1200px; padding: 24px 0; }
+
+.mhero__card { align-self: start; }
+/* Row 56: four scoreboard cells on one line, dashed dividers, number on one baseline, a two-line caption */
+.mhero__facts {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: clamp(8px, 2vw, 32px);
+  border-block: var(--dash);
+}
+.mhero__facts li { display: flex; flex-direction: column; padding: 24px 24px 24px 0; }
+.mhero__facts li + li { padding-left: 24px; border-left: var(--dash); }
+.mhero__facts b { display: flex; align-items: baseline; gap: 8px; font-size: var(--fs-xl); font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
+.mhero__facts b small { font-size: 16px; font-weight: 400; line-height: 24px; color: var(--mute); }
+.mhero__facts .is-accent b, .mhero__facts .is-accent b small { color: var(--clay); }
+.mhero__facts li > span { display: block; max-width: 24ch; min-height: 40px; margin-top: 16px; font-size: 14px; line-height: 20px; color: var(--mute); }
+
+/* 2. Plans: the page FAQ replaces the pricing block's own */
+body[data-page='memberships'] .pricing-faq { display: none; }
+
+/* 3. Comparison (membership-compare.js) */
+.cmp { --cols: minmax(200px, 1.3fr) repeat(4, minmax(0, 1fr)); position: relative; }
+.cmp__row { display: grid; grid-template-columns: var(--cols); border-bottom: var(--dash); }
+.cmp__head { position: sticky; top: 0; z-index: 3; background: var(--paper); transition: top var(--dur-3) var(--ease-out); }
+body:has(.nav:not(.is-hidden)) .cmp__head { top: var(--bar-h); }
+.cmp__head .cmp__row { border-bottom: 1px solid var(--ink); }
+.cmp__cell { padding: 18px 16px; font-size: 16px; line-height: 22px; }
+.cmp__cell.is-club { background: var(--sun); }
+.cmp__key { padding: 18px 16px 18px 0; font-size: 16px; font-weight: 500; line-height: 22px; }
+.cmp__key small { display: block; margin-top: 2px; font-size: 14px; font-weight: 400; line-height: 20px; color: var(--mute); }
+
+.cmp__plan { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 16px; }
+.cmp__plan b { font-size: 16px; font-weight: 500; line-height: 22px; }
+.cmp__plan small { font-size: 14px; line-height: 20px; color: var(--mute); font-variant-numeric: tabular-nums; }
+.cmp__plan.is-club { background: var(--ink); color: var(--snow); }
+.cmp__plan.is-club small { color: rgba(244, 243, 239, 0.6); }
+.cmp__tag { position: absolute; top: 16px; right: 16px; padding: 0 8px; background: var(--sun); color: var(--wood); font-size: 14px; line-height: 22px; }
+
+.cmp__yes { display: inline-flex; width: 18px; height: 18px; vertical-align: middle; }
+.cmp__yes svg { width: 100%; height: 100%; }
+.cmp__no { display: inline-block; width: 12px; height: 1px; background: var(--mute-2); vertical-align: middle; }
+
+.cmp__body .cmp__row { transition: background-color var(--dur-1); }
+@media (hover: hover) { .cmp__body .cmp__row:not(.cmp__row--foot):hover { background: var(--paper-2); } }
+.cmp__row--foot { border-bottom: 0; }
+.cmp__row--foot .cmp__cell { padding-top: 20px; padding-bottom: 24px; }
+.cmp__row--foot .btn { width: 100%; }
+
+/* 4. Perks (row 59): a 3 x 2 board of compact cells; hover or tap fills a cell with clay from the left */
+.perks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: var(--dash); border-left: var(--dash); }
+.perk {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 24px;
+  min-height: 224px;
+  padding: 24px;
+  overflow: hidden;
+  border-right: var(--dash);
+  border-bottom: var(--dash);
+  cursor: default;
+  transition: color var(--dur-2) var(--ease-out);
+}
+.perk::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--clay);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-3) var(--ease-in-out);
+}
+.perk__fig { display: flex; align-items: center; gap: 12px; min-height: 64px; font-size: clamp(48px, 4.4vw, 72px); font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
+.perk__fig small { align-self: flex-end; padding-bottom: 6px; font-size: 14px; font-weight: 400; line-height: 20px; color: var(--mute); transition: color var(--dur-2); }
+.perk__body { align-self: end; }
+.perk__title { font-size: 20px; font-weight: 500; line-height: 24px; }
+.perk__text { max-width: 34ch; margin-top: 8px; font-size: 14px; line-height: 20px; color: var(--mute); transition: color var(--dur-2); }
+.perk.is-hot { color: var(--sun); }
+.perk.is-hot::before { transform: scaleX(1); }
+.perk.is-hot .perk__text, .perk.is-hot .perk__fig small { color: rgba(255, 243, 218, 0.8); }
+@media (hover: hover) {
+  .perk:hover { color: var(--sun); }
+  .perk:hover::before { transform: scaleX(1); }
+  .perk:hover .perk__text, .perk:hover .perk__fig small { color: rgba(255, 243, 218, 0.8); }
+}
+/* 7 squares: the level fills to 3.5 */
+.perk__level { display: grid; grid-template-columns: repeat(7, 8px); gap: 4px; align-self: flex-end; padding-bottom: 8px; }
+.perk__level b { height: 16px; box-shadow: inset 0 0 0 1px currentColor; background: linear-gradient(currentColor, currentColor) left / 0 100% no-repeat; transition: background-size var(--dur-3) var(--ease-out); }
+.perk__level.is-in b:nth-child(-n + 3) { background-size: 100% 100%; }
+.perk__level.is-in b:nth-child(4) { background-size: 50% 100%; }
+.perk__level b:nth-child(2) { transition-delay: 0.15s; } .perk__level b:nth-child(3) { transition-delay: 0.3s; } .perk__level b:nth-child(4) { transition-delay: 0.45s; }
+/* a clock showing 7 */
+.perk__clock { flex: none; width: 48px; height: 48px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: square; }
+.perk__hand { transform-origin: 24px 24px; transition: transform var(--dur-5) var(--ease-in-out); }
+.perk__clock.is-in .perk__hand { transform: rotate(360deg); } /* the minute hand does a lap and rests on 12 */
+.perk__clock.is-in .perk__hand--s { transform: rotate(210deg); } /* the hour hand stops on 7 */
+
+/* 5. Three steps (row 60): paper again, the score 15 / 30 / 40 on one line, the ball hops along the dashed rule */
+.join__track { position: relative; height: 72px; margin-bottom: 16px; }
+.join__line { position: absolute; left: 0; right: 0; top: 50%; border-top: var(--dash); }
+.join__ball { position: absolute; left: 0; top: calc(50% - 22px); width: 28px; height: 34px; color: var(--ink); overflow: visible; transform-origin: 50% 62%; }
+.join__steps { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px var(--grid-gap); align-items: start; }
+.join__step { grid-column: span 4; transition: opacity var(--dur-3) var(--ease-out), translate var(--dur-3) var(--ease-spring); }
+.join__n { margin-bottom: 24px; }
+.js .join__step:not(.is-on) { opacity: 0.28; translate: 0 8px; }
+.join__title { font-size: var(--fs-lg); font-weight: 500; line-height: 1; }
+.join__text { max-width: 32ch; margin-top: 12px; font-size: 14px; line-height: 20px; color: var(--mute); }
+
+/* 8. Application */
+.mapply {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 48px var(--grid-gap);
+  align-items: start;
+}
+.mapply__aside { grid-column: 1 / 6; }
+.mapply__form { grid-column: 7 / 13; }
+.mapply__aside { position: sticky; top: calc(var(--bar-h) + 32px); }
+.mapply__lead { max-width: 36ch; margin-top: 20px; font-size: 14px; line-height: 20px; line-height: 1.45; color: var(--mute); }
+.mapply__card { max-width: 440px; margin-top: 40px; }
+.mapply__form { min-width: 0; }
+.lf__hint { padding-bottom: 14px; font-size: 14px; line-height: 20px; color: var(--mute); }
+.mapply__done .kicker-score { margin-bottom: 16px; }
+.mapply__done { padding: 40px 0 24px; border-top: var(--dash); }
+.mapply__done h3 { font-size: var(--fs-h2); font-weight: 500; line-height: 1; }
+.mapply__done p { max-width: 44ch; margin-top: 16px; font-size: 18px; line-height: 1.45; color: var(--mute); }
+.mapply__done-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-top: 28px; }
+
+/* Tablet */
+@media (max-width: 1000px) {
+  .mhero__copy, .mhero__card { grid-column: 1 / -1; }
+  .mhero__card { max-width: 400px; }
+  .mhero__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mhero__facts li:nth-child(odd) { padding-left: 0; border-left: 0; }
+  .mhero__facts li:nth-child(n + 3) { border-top: var(--dash); }
+  .mplans__head .h2, .mplans__lead { grid-column: 1 / -1; }
+  .mhead .h2, .mhead--r .h2 { grid-column: 1 / -1; }
+  .mhead__note { grid-column: 1 / 9; margin-top: 12px; }
+  .mapply__aside, .mapply__form { grid-column: 1 / -1; }
+  .join__step { grid-column: span 4; }
+  .perks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mapply__aside { position: static; }
+  .mapply__card { max-width: 360px; }
+}
+
+/* Phone: the comparison stacks (privilege on its own line, four values under the plan row),
+   the steps run down a vertical line */
+@media (max-width: 760px) {
+  .mhero { padding-top: calc(var(--bar-h) + 56px); }
+  .mhero__l { display: block; }
+  .mhero__title br { display: none; }
+  .mhero__card { max-width: 340px; }
+  .mhero__facts li { padding: 16px 12px 16px 0; }
+  .mhero__facts li:nth-child(even) { padding-left: 12px; }
+  .mhero__facts b small { font-size: 14px; }
+  .mhead { display: block; }
+  .mhead__note { margin-top: 12px; }
+
+  .cmp { --cols: repeat(4, minmax(0, 1fr)); }
+  .cmp__corner { display: none; }
+  .cmp__plan { padding: 10px 8px; }
+  .cmp__plan b { font-size: 14px; line-height: 18px; }
+  .cmp__tag { display: none; }
+  .cmp__key { grid-column: 1 / -1; padding: 14px 0 8px; font-size: 14px; line-height: 20px; }
+  .cmp__key small { display: inline; margin-left: 6px; }
+  .cmp__cell { padding: 4px 8px 14px; font-size: 14px; line-height: 20px; }
+  .cmp__row--foot { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cmp__row--foot .cmp__key { display: none; }
+  .cmp__row--foot .cmp__cell { padding: 6px 4px; background: none; }
+  .cmp__row--foot { padding-top: 10px; }
+
+  .perks { grid-template-columns: minmax(0, 1fr); }
+  .perk { min-height: 200px; }
+
+  .join { display: grid; grid-template-columns: 44px minmax(0, 1fr); }
+  .join__track { grid-row: 1; grid-column: 1; height: auto; margin: 0; }
+  .join__line { left: 14px; right: auto; top: 0; bottom: 0; border-top: 0; border-left: var(--dash); }
+  .join__ball { top: 0; }
+  .join__steps { grid-row: 1; grid-column: 2; grid-template-columns: minmax(0, 1fr); gap: 48px; padding-bottom: 8px; }
+  .join__step { grid-column: 1; }
+  .join__n { font-size: 80px; }
+}

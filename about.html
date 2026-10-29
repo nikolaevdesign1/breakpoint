@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Our story | Break Point by Alexander Milevski</title>
+  <meta name="description" content="The story of Break Point, told as one rally: a letter from founder Alexander Milevski, slow tennis, the craft of clay courts and the people behind the club in Coconut Grove, Miami." />
+<!-- include:partials/head.html -->
+  <script>
+    /* The 3D rally needs a wide, capable screen and motion allowed; everything else gets the plain chapters.
+       Set before first paint so the layout never jumps (the module can still drop it if WebGL fails). */
+    (function () {
+      var coarse = matchMedia('(pointer: coarse)').matches;
+      var weak = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4 || (coarse && innerWidth < 1100);
+      var ok = innerWidth >= 900 && !weak && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (ok) document.documentElement.classList.add('is-rally');
+    })();
+  </script>
+</head>
+<body data-page="about">
+<!-- include:partials/nav.html -->
+
+  <main id="main">
+    <!-- One rally (row 33): the page is a single point played through the club in 3D. Scroll follows the ball;
+         five chapters, one per shot. Motion: src/js/site/about-rally/. The same markup is the plain version
+         for phones, weak devices and reduced motion: chapters stacked, photos with a cut and parallax. -->
+    <section class="rally" id="rally" aria-labelledby="rally-title" data-rally>
+      <div class="rally__stage" data-rally-stage>
+        <canvas class="rally__canvas" data-rally-canvas aria-hidden="true"></canvas>
+
+        <header class="rally__intro" data-rally-intro>
+          <h1 class="rally__title" id="rally-title">One rally.</h1>
+          <p class="rally__lead">The story of Break Point, told in a single point. Follow the ball.</p>
+        </header>
+
+        <article class="rc rc--serve" data-chapter aria-label="The letter">
+          <h2 class="rc__big" data-d="0" data-depth="0.5">I wrote one page.</h2>
+          <div class="rc__letter" data-d="1" data-depth="-0.3">
+            <p>My players kept asking where to play after work. Every answer came with a catch.</p>
+            <p>So I wrote one page: watered clay, lights until closing, a court booked in a minute. This club is that page.</p>
+          </div>
+          <p class="rc__sign" data-d="2" data-depth="0.8">
+            <span class="rc__avatar cut cut--a"><img src="/media/coaches/alexander-milevski.thumb.webp" alt="Alexander Milevski" width="240" height="300" loading="lazy" decoding="async" /></span>
+            <span class="rc__name">Alexander Milevski</span>Founder and head coach</p>
+        </article>
+
+        <article class="rc rc--return" data-chapter aria-label="Slow tennis">
+          <p class="rc__small rc__kicker" data-d="0" data-depth="0.3">Slow tennis</p>
+          <h2 class="rc__big" data-d="0" data-depth="0.6">Tennis does not hurry.</h2>
+          <p class="rc__note rc__note--a" data-d="1" data-depth="-0.4"><b>Hours, not slots.</b> Book 60, 90 or 120 minutes.</p>
+          <p class="rc__note rc__note--b" data-d="2" data-depth="0.5"><b>A coach who remembers.</b> Last week counts.</p>
+          <p class="rc__note rc__note--c" data-d="3" data-depth="-0.2"><b>Stay after the match.</b> Nobody rushes you off the court.</p>
+          <figure class="cut cut--b rc__photo rc__photo--a" data-photo><img data-media="services.5" data-w="900" alt="Club members watching a match on clay" loading="lazy" decoding="async" /></figure>
+        </article>
+
+        <article class="rc rc--rally" data-chapter aria-label="The craft of clay">
+          <h2 class="visually-hidden">How the clay is kept</h2>
+          <ol class="rc__steps" data-d="0" data-depth="0.3">
+            <li class="rc__step" data-word="0"><b>Water.</b><span class="rc__cap">Before the next booking.</span></li>
+            <li class="rc__step" data-word="1"><b>Roll.</b><span class="rc__cap">So the surface lies flat.</span></li>
+            <li class="rc__step" data-word="2"><b>Brush.</b><span class="rc__cap">Your last five minutes are yours.</span></li>
+            <li class="rc__step" data-word="3"><b>Line.</b><span class="rc__cap">Swept clean, so every ball leaves a mark.</span></li>
+          </ol>
+          <p class="rc__craft" data-d="2" data-depth="-0.4">Red clay is a surface you look after every day. That is how you know where the ball landed.</p>
+          <figure class="cut cut--a rc__photo rc__photo--b" data-photo><img data-media="services.1" data-w="900" alt="Fresh red clay on a court" loading="lazy" decoding="async" /></figure>
+        </article>
+
+        <article class="rc rc--net" data-chapter aria-label="The people behind the scenes">
+          <h2 class="rc__big" data-d="0" data-depth="0.5">Those you do not see.</h2>
+          <p class="rc__who rc__who--a" data-d="1" data-depth="-0.3"><b>The groundskeeper</b>Waters, rolls and lines the clay before the first player arrives.</p>
+          <p class="rc__who rc__who--b" data-d="2" data-depth="0.4"><b>The front desk</b>Finds you a court, a partner at your level and a racket if you forgot yours.</p>
+          <p class="rc__who rc__who--c" data-d="3" data-depth="-0.2"><b>Alexander</b>Still coaches most mornings and picks up the club phone when the desk is busy.</p>
+          <figure class="cut cut--d rc__photo rc__photo--c" data-photo><img data-media="services.2" data-w="900" alt="A coach feeding balls during a lesson" loading="lazy" decoding="async" /></figure>
+        </article>
+
+        <article class="rc rc--point" data-chapter aria-label="The club in numbers">
+          <h2 class="rc__big" data-d="0" data-depth="0.5">Match point.</h2>
+          <dl class="rc__board" data-d="1" data-depth="-0.3">
+            <div><dt>Courts, four surfaces</dt><dd data-count="16">16</dd></div>
+            <div><dt>Coaches</dt><dd data-count="20">20</dd></div>
+            <div><dt>First ball on weekdays</dt><dd><span data-count="6">6</span><small>AM</small></dd></div>
+            <div><dt>Lights out on weekdays</dt><dd><span data-count="11">11</span><small>PM</small></dd></div>
+          </dl>
+          <div class="rc__cta" data-d="2" data-depth="0.4">
+            <p>The ball is in. Come and play the next one.</p>
+            <a class="btn" href="/booking.html"><span class="btn__bg"></span><span class="btn__label">Book a court</span></a>
+          </div>
+        </article>
+
+        <nav class="rally__rail" data-rally-rail aria-label="Chapters of the rally" hidden>
+          <button type="button">Serve</button><button type="button">Return</button><button type="button">Rally</button><button type="button">Approach</button><button type="button">Match point</button>
+        </nav>
+        <div class="rally__tags" data-rally-tags aria-hidden="true"></div>
+      </div>
+    </section>
+    <div class="rally-end" data-rally-end></div>
+
+<!-- include:partials/book-banner.html -->
+
+    <!-- Club rules: short numbered rows on the dashed rule (linked from the footer and the membership form) -->
+    <section class="section rules" id="rules" aria-labelledby="rules-title">
+      <div class="rules__head">
+        <h2 class="rules__title" id="rules-title" data-lines>Six club rules.</h2>
+        <p class="rules__note">Six rules, kept short. Questions about a booking or a guest?</p>
+        <a class="btn" href="/contacts.html"><span class="btn__bg"></span><span class="btn__label">Ask the front desk</span></a>
+      </div>
+      <ol class="rules__list">
+        <li class="rules__row" data-reveal><span class="rules__num">01</span><b>{{fact:cancel.head}}</b><span>{{fact:cancel.tail}}</span></li>
+        <li class="rules__row" data-reveal><span class="rules__num">02</span><b>Clay soles on clay</b><span>Herringbone soles on the red courts, non-marking soles indoors.</span></li>
+        <li class="rules__row" data-reveal><span class="rules__num">03</span><b>Brush the court</b><span>Sweep the lines in the last five minutes of your hour.</span></li>
+        <li class="rules__row" data-reveal><span class="rules__num">04</span><b>Guest passes</b><span>Members bring guests with their plan’s guest passes; guests pay their share of the court.</span></li>
+        <li class="rules__row" data-reveal><span class="rules__num">05</span><b>Juniors with an adult</b><span>Under twelve, an adult stays on site outside academy hours.</span></li>
+        <li class="rules__row" data-reveal><span class="rules__num">06</span><b>Lights out at closing</b><span>Weekdays 11 PM, weekends 10 PM. The last booking starts an hour earlier.</span></li>
+      </ol>
+    </section>
+  </main>
+
+<!-- include:partials/footer.html -->
+
+  <script type="module" src="/src/js/pages/about.js"></script>
+</body>
+</html>

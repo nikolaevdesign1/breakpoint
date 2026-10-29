@@ -1,0 +1,72 @@
+:root {
+  /* Neutrals carry the design; palette colours are accents only. */
+  --paper: #ffffff;
+  --paper-2: #f1f1ef;
+  --paper-3: #e7e7e4;
+  --ink: #0e0e0d;
+  --ink-2: #1e1e1e;
+  --night: #121211;
+  --mute: #6d6c68;
+  --mute-2: #a3a29d;
+  --line: rgba(14, 14, 13, 0.12);
+  --line-inv: rgba(244, 243, 239, 0.14);
+  --snow: #f4f3ef;
+
+  --clay: #9c441f;
+  --finch: #646544;
+  --wood: #36251b;
+  --sun: #fff3da;
+
+  --font-sans: 'Switzer', 'Helvetica Neue', Arial, sans-serif;
+
+  --fs-display: clamp(40px, 3.6vw, 64px);
+  --fs-h2: clamp(28px, 2.5vw, 44px);
+  --fs-h3: clamp(20px, 1.5vw, 22px);
+  --fs-body: 16px;
+  --fs-small: 14px;
+  --fs-mono: 14px;
+  /* Row 18: a wide gap between big and small. Section headings and scores sit on the big steps
+     (xl, xxl, mega), captions, dates and numbers on 12 and 14. Even px only. */
+  --fs-xs: 12px;
+  --fs-lg: clamp(28px, 3vw, 48px);
+  --fs-xl: clamp(40px, 5.2vw, 88px);
+  --fs-xxl: clamp(48px, 7.2vw, 120px);
+  --fs-mega: clamp(64px, 11vw, 176px);
+
+  /* Square corners everywhere (row 78): only things that are round by nature stay round */
+  --r-btn: 0px;
+  --r-btn-sm: 0px;
+  --r-card: 0px;
+  --r-media: 0px;
+  --r-ui: 0px; /* small chips, inputs, labels */
+
+  /* One grid for header, sections and footer (docs/grid.md, grid.css): 12 columns, 16px gutter,
+     16px edge on desktop / 12px on phones. --gutter and --frame stay as aliases of the edge. */
+  --edge: 16px;
+  --grid-cols: 12;
+  --grid-gap: 16px;
+  --gutter: var(--edge);
+  --frame: var(--edge);
+  --bar-h: 56px; /* header bar */
+  --section-y: clamp(96px, 14vw, 220px);
+
+  /* Tempo (row 17): tennis does not hurry. One scale for durations and curves; the JS twin is motion.js.
+     Soft curves: a gentle start and a long tail, no hard stops. */
+  --dur-1: 0.4s; /* colour, opacity, small hover */
+  --dur-2: 0.7s; /* hover movement, small panels */
+  --dur-3: 1s; /* reveals, menu, overlays */
+  --dur-4: 1.5s; /* big photos and sections */
+  --dur-5: 2.4s; /* slow drifts */
+  --stagger: 0.12s;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-soft: cubic-bezier(0.45, 0, 0.15, 1);
+  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
+}
+
+@media (max-width: 640px) {
+  :root { --edge: 12px; }
+}
+@media (max-width: 520px) {
+  :root { --bar-h: 52px; }
+}

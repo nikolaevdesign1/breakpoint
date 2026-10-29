@@ -1,0 +1,121 @@
+/* Row 49: the sticky scene beside the perk list (member-scene.js). A pale frame with a dashed edge; five drawings
+   built from squares, dashes and court lines, in the project palette. Slow, soft builds (row 17). */
+.mscene {
+  position: sticky;
+  top: calc(var(--bar-h, 64px) + 32px);
+  align-self: start;
+  grid-column: 9 / 13;
+  grid-row: 2;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--paper-2);
+  border: var(--dash);
+  --ms-ink: var(--ink);
+}
+.mscene__layer { position: absolute; inset: 0; padding: 20px; display: flex; flex-direction: column; justify-content: center; gap: 16px; opacity: 0; visibility: hidden; transition: opacity var(--dur-2) var(--ease-out), visibility 0s linear var(--dur-2); }
+.mscene__layer.is-on { opacity: 1; visibility: visible; transition: opacity var(--dur-3) var(--ease-out) 0.3s, visibility 0s; }
+.mscene__layer::before { /* a faint court under every drawing */
+  content: ''; position: absolute; inset: 12px; z-index: -1;
+  background: rgba(14, 14, 13, 0.08);
+  -webkit-mask: var(--court-svg) 50% 50% / 100% auto no-repeat; mask: var(--court-svg) 50% 50% / 100% auto no-repeat;
+}
+.mscene__ripple { position: absolute; inset: 0; z-index: 3; display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr); pointer-events: none; }
+.mscene__ripple i { background: var(--paper-2); opacity: 0; }
+.mscene__ripple.is-run i { animation: ms-ripple var(--dur-5) var(--ease-in-out) calc(var(--d) * 0.8s) 1; }
+@keyframes ms-ripple { 0%, 100% { opacity: 0; } 30%, 50% { opacity: 1; } }
+
+.ms-k { font-size: var(--fs-xs); line-height: 16px; color: var(--mute); }
+.ms-note { font-size: 14px; line-height: 20px; color: var(--mute); }
+.ms-big { font-size: var(--fs-xl); font-weight: 500; line-height: 0.9; }
+.ms-big small { display: block; margin-top: 8px; font-size: 14px; font-weight: 400; line-height: 20px; color: var(--mute); }
+
+/* 1. Fourteen days */
+.ms-days { display: flex; flex-direction: column; gap: 20px; }
+.ms-days__cells { display: grid; grid-template-columns: repeat(14, 1fr); gap: 2px; margin-top: 8px; }
+.ms-days__cells i { aspect-ratio: 1 / 2; background: var(--paper-3); transform-origin: 50% 100%; transform: scaleY(0.3); transition: transform var(--dur-2) var(--ease-out), background-color var(--dur-2); }
+.is-on .ms-days__cells i { transform: scaleY(0.3); transition-delay: 0s; }
+.is-on .ms-days__cells i.is-open { background: var(--clay); transform: none; transition: transform var(--dur-3) var(--ease-out) calc(0.5s + var(--i) * 0.12s), background-color var(--dur-3) calc(0.5s + var(--i) * 0.12s); }
+.ms-days__guest .ms-days__cells i:nth-child(n + 4) { background-image: repeating-linear-gradient(45deg, rgba(14, 14, 13, 0.18) 0 1px, transparent 1px 4px); }
+
+/* 2. Rates */
+.ms-rates { display: flex; flex-direction: column; gap: 20px; }
+.ms-rates__pair { display: flex; flex-direction: column; gap: 8px; }
+.ms-rates__bars { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: end; height: 136px; padding-top: 28px; }
+.ms-bar { position: relative; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; }
+.ms-bar i { display: block; height: var(--h); background: var(--wood); transform-origin: 50% 100%; transform: scaleY(0); }
+.ms-bar--member i { background: var(--clay); }
+.is-on .ms-bar i { transform: none; transition: transform var(--dur-4) var(--ease-in-out) 0.5s; }
+.is-on .ms-bar--member i { transition-delay: 1.2s; }
+.ms-bar b { position: absolute; left: 0; bottom: calc(var(--h) + 4px); font-size: 20px; font-weight: 500; line-height: 24px; font-variant-numeric: tabular-nums; }
+.ms-bar span { position: absolute; left: 6px; bottom: 4px; font-size: var(--fs-xs); line-height: 16px; color: var(--snow); }
+
+/* 3. Ladder */
+.ms-ladder ol { position: relative; height: 200px; margin-top: 12px; }
+.ms-ladder li { position: absolute; left: 0; right: 0; top: 0; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; height: 36px; padding: 0 10px 0 38px; border-bottom: var(--dash); background: var(--paper-2); transform: translateY(calc(var(--from) * 40px)); transition: transform var(--dur-4) var(--ease-in-out), background-color var(--dur-3), color var(--dur-3); }
+.ms-rank { position: absolute; left: 10px; top: calc(var(--r) * 40px); z-index: 1; height: 36px; display: flex; align-items: center; font-size: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.is-on .ms-ladder li.is-you ~ .ms-rank:nth-of-type(2) { color: var(--snow); }
+.ms-ladder span { font-size: 14px; }
+.ms-ladder em { font-size: var(--fs-xs); font-style: normal; color: var(--mute); }
+.is-on .ms-ladder li { transform: translateY(calc(var(--to) * 40px)); transition-delay: 1.4s; }
+.is-on .ms-ladder li.is-you { background: var(--clay); color: var(--snow); }
+.is-on .ms-ladder li.is-you em { color: var(--sun); }
+.ms-ladder li:not(.is-you) { transition-delay: 0s; }
+.is-on .ms-ladder li:not(.is-you) { transition-delay: 1.4s; }
+
+/* 4. Guest passes */
+.ms-pass { display: flex; flex-direction: column; gap: 16px; }
+.ms-ticket { position: relative; display: grid; gap: 4px; padding: 16px 16px 16px 20px; background: var(--sun); color: var(--wood); transform: translateX(120%); transition: transform var(--dur-3) var(--ease-in-out); }
+.ms-ticket b { font-size: var(--fs-lg); font-weight: 500; line-height: 1; }
+.ms-ticket span { font-size: 14px; line-height: 20px; }
+.ms-ticket .ms-k { color: var(--wood); opacity: 0.7; }
+.ms-ticket i { position: absolute; top: 0; bottom: 0; right: 28%; border-left: 1px dashed rgba(54, 37, 27, 0.5); }
+.is-on .ms-ticket { transform: none; transition: transform var(--dur-4) var(--ease-out) calc(0.5s + var(--n) * 0.7s); }
+.ms-ticket:nth-child(2) { margin-left: 24px; }
+
+/* 5. Lounge and lockers */
+.ms-lounge { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: center; }
+.ms-lockers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.ms-lockers i { position: relative; aspect-ratio: 1 / 1.6; background: var(--ink-2); color: var(--snow); opacity: 0; transition: opacity var(--dur-2) var(--ease-out); }
+.ms-lockers b { position: absolute; left: 4px; top: 4px; font-size: 10px; font-weight: 400; line-height: 12px; opacity: 0.7; }
+.is-on .ms-lockers i { opacity: 1; transition-delay: calc(0.3s + var(--i) * 0.08s); }
+.ms-lockers i::after { content: ''; position: absolute; inset: 0; background: var(--clay); transform-origin: 0 50%; transform: scaleX(0); transition: transform var(--dur-3) var(--ease-in-out); }
+.is-on .ms-lockers i.is-open { background: var(--wood); }
+.is-on .ms-lockers i.is-open::after { background: var(--ink-2); }
+.ms-terrace { aspect-ratio: 3 / 5; background: var(--paper-3); opacity: 0; transition: opacity var(--dur-4) var(--ease-out); }
+.is-on .ms-terrace { opacity: 1; transition-delay: 1s; }
+.ms-terrace img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.05); }
+.ms-lounge .ms-note { grid-column: 1 / -1; }
+.is-on .ms-lockers i.is-open b { opacity: 0; }
+
+@media (max-width: 900px) {
+  /* Phones: a compact scene pinned to the bottom of the screen while the list scrolls, under the active perk */
+  .mscene { grid-column: 1 / -1; grid-row: auto; top: auto; bottom: 12px; z-index: 3; aspect-ratio: auto; height: 176px; margin-top: 8px; background: var(--paper-2); }
+  .mscene__layer { padding: 12px 16px; gap: 8px; }
+  .ms-big { font-size: 40px; }
+  .ms-note { font-size: 12px; line-height: 16px; }
+  .ms-days { gap: 8px; }
+  .ms-days__cells i { aspect-ratio: 1 / 1; }
+  .ms-rates { flex-direction: row; gap: 12px; }
+  .ms-rates .ms-note { display: none; }
+  .ms-rates__pair { flex: 1; }
+  .ms-rates__bars { height: 100px; padding-top: 20px; }
+  .ms-bar b { font-size: 14px; line-height: 16px; }
+  .ms-ladder ol { height: 130px; margin-top: 4px; }
+  .ms-ladder li { height: 24px; padding-left: 30px; transform: translateY(calc(var(--from) * 26px)); }
+  .ms-rank { height: 24px; top: calc(var(--r) * 26px); font-size: 14px; }
+  .is-on .ms-ladder li { transform: translateY(calc(var(--to) * 26px)); }
+  .ms-ladder .ms-note { display: none; }
+  .ms-pass { flex-direction: row; gap: 8px; }
+  .ms-ticket { flex: 1; padding: 10px 12px; }
+  .ms-ticket:nth-child(2) { margin-left: 0; }
+  .ms-ticket b { font-size: 24px; }
+  .ms-lounge { grid-template-columns: 2fr 1fr; gap: 8px; }
+  .ms-lockers { grid-template-columns: repeat(6, 1fr); }
+  .ms-lockers i { aspect-ratio: 1 / 1.4; }
+  .ms-terrace { aspect-ratio: auto; height: 100%; }
+  .ms-lounge .ms-note { display: none; }
+  .mscene__layer::before { inset: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mscene * { transition: none !important; animation: none !important; transition-delay: 0s !important; }
+}

@@ -1,0 +1,136 @@
+/* Home, calm text blocks (rows 107, 109): the club paragraph with its scattered facts,
+   and the membership block before the plans. White page, no photos, dashed rules (row 110). */
+
+/* ---------- Club: one paragraph inks in on scroll (reveal.js, data-words="ink"), then a row of score cells ---------- */
+.club { --words-from: #c8c7c2; }
+
+.club__grid { --grid-row: clamp(56px, 7vw, 112px); }
+.club__text {
+  font-size: clamp(32px, 4.4vw, 72px);
+  font-weight: 500;
+  line-height: 1.04;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+/* Rows 45, 18: four cells on a 12-column grid, a big figure over a small label, dashed rules between them.
+   club-notes.js adds .is-staged, then .is-on cell by cell (--i): the rule draws, then the figure and label rise. */
+.club__board { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--grid-gap); }
+.club__note { position: relative; grid-column: span 3; padding: 16px 16px 0 0; }
+.club__note + .club__note { padding-left: 16px; border-left: var(--dash); }
+.club__note::before { content: ''; position: absolute; top: 0; left: 0; right: 0; border-top: var(--dash); }
+.club__v { display: block; font-size: var(--fs-xl); font-weight: 500; line-height: 0.96; font-variant-numeric: tabular-nums; }
+.club__k { display: block; max-width: 24ch; margin-top: 12px; font-size: 14px; line-height: 20px; color: var(--mute); }
+
+.club.is-staged .club__note::before { clip-path: inset(0 100% 0 0); transition: clip-path var(--dur-2) var(--ease-in-out); }
+.club.is-staged .club__k,
+.club.is-staged .club__v {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity var(--dur-1) var(--ease-out), transform var(--dur-2) var(--ease-out);
+}
+.club.is-staged .club__note.is-on::before { clip-path: inset(0 0 0 0); transition: clip-path var(--dur-3) var(--ease-in-out) calc(var(--i, 0) * 0.3s); }
+.club.is-staged .club__note.is-on .club__k,
+.club.is-staged .club__note.is-on .club__v {
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--dur-2) var(--ease-out) calc(0.4s + var(--i, 0) * 0.3s), transform var(--dur-3) var(--ease-out) calc(0.4s + var(--i, 0) * 0.3s);
+}
+.club.is-staged .club__note.is-on .club__k { transition-delay: calc(0.6s + var(--i, 0) * 0.3s); }
+
+@media (max-width: 900px) {
+  .club__note { grid-column: span 6; padding-bottom: 8px; }
+  .club__note + .club__note { padding-left: 0; border-left: 0; }
+  .club__note:nth-child(even) { padding-left: 16px; border-left: var(--dash); }
+  .club__board { row-gap: 32px; }
+}
+
+/* ---------- Membership (rows 109, 42): head, a member card you can turn, the perks as dashed rows.
+   member-card.js marks the active row (.is-on) and the card line that carries it (.is-hot). ---------- */
+.member {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 40px var(--gutter);
+  align-items: start;
+  margin-bottom: clamp(96px, 10vw, 176px);
+}
+/* Row 24: a big title on columns 1-9, a small caption and the button hang from columns 10-12 */
+.member__head {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--grid-gap);
+  row-gap: 24px;
+  align-items: end;
+}
+.member__title { grid-column: 1 / 10; font-size: var(--fs-xl); font-weight: 500; line-height: 0.96; text-wrap: balance; }
+.member__aside { grid-column: 10 / 13; }
+.member__lead { max-width: none; }
+
+.member__stage {
+  grid-column: 1 / 5;
+  grid-row: 2;
+  position: sticky;
+  top: calc(var(--bar-h, 64px) + 32px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+.member__hint { font-size: 14px; color: var(--mute); }
+
+.member__list { grid-column: 5 / 9; grid-row: 2; margin-top: 48px; padding-inline: 16px; border-bottom: var(--dash); } /* row 49: card, list, scene on columns 1-4, 5-8, 9-12 */
+.member__list li {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  padding: 28px 0 32px;
+  border-top: var(--dash);
+  cursor: default;
+}
+.member__list b {
+  font-size: clamp(22px, 2.2vw, 36px);
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--mute-2);
+  transition: color var(--dur-2) var(--ease-out), transform var(--dur-3) var(--ease-spring);
+}
+.member__list span {
+  max-width: 44ch;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--mute);
+  opacity: 0.5;
+  transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-3) var(--ease-spring);
+}
+.member__list li::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 100%;
+  border-top: 2px solid var(--ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-3) var(--ease-in-out);
+}
+.member__list li.is-on b { color: var(--ink); transform: translateX(12px); }
+.member__list li.is-on span { opacity: 1; transform: translateX(12px); }
+.member__list li.is-on::before { transform: scaleX(1); }
+.member:not(.is-live) .member__list b { color: var(--ink); }
+.member:not(.is-live) .member__list span { opacity: 1; }
+
+@media (max-width: 900px) {
+  .member { gap: 32px var(--gutter); }
+  .member__head, .member__stage, .member__list { grid-column: 1 / -1; grid-row: auto; }
+  .member__head { grid-template-columns: minmax(0, 1fr); }
+  .member__title, .member__aside { grid-column: 1 / -1; }
+  .member__aside { padding-left: calc((100% + var(--grid-gap)) / 12 * 1); }
+  .member__list { margin-top: 0; }
+  .member__stage { top: calc(var(--bar-h, 64px) + 8px); z-index: 2; align-items: center; padding: 8px 0 16px; background: var(--paper); }
+  .member__hint { display: none; }
+  .member__list li { padding: 20px 0 24px; }
+  .member__list li.is-on b, .member__list li.is-on span { transform: none; }
+}

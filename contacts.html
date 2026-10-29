@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Contacts | Break Point by Alexander Milevski</title>
+  <meta name="description" content="Address, opening hours, directions and the front desk of Break Point tennis club in Coconut Grove, Miami." />
+<!-- include:partials/head.html -->
+</head>
+<body data-page="contacts">
+<!-- include:partials/nav.html -->
+
+  <main id="main">
+    <!-- Contacts (rows 10, 12, 14, 24): the 12-column grid with a loose, stepped layout. Phone and e-mail
+         very large, small tags beside them; the form right after (a black block with a dashed frame);
+         the page ends on the big square map with the route switch. Live status and Miami clock:
+         src/js/site/club-hours.js. Map and routes: square-map.js, map-routes.js. -->
+    <section class="cx" aria-labelledby="contacts-title">
+      <div class="cx__top grid">
+        <h1 class="cx__title col-8" id="contacts-title" data-lines>Gate B, Coconut <em>Grove.</em></h1>
+        <div class="cx__live col-3 start-10" data-club-status>
+          <p class="cx__status"><span data-status-text>Weekdays {{fact:hours.weekday}}</span></p>
+          <p class="cx__clock" aria-label="Time in Miami"><span class="cx__city">Miami</span> <time data-clock>--:--:--</time> <span class="cx__tz" data-tz></span></p>
+        </div>
+      </div>
+
+      <div class="cx__reach grid grid--rows">
+        <p class="cx__tag col-2">Call</p>
+        <div class="cx__body col-10 start-3" data-reveal>
+          <a class="cx__big" href="{{fact:phoneHref}}" data-scramble data-cursor="Call">{{fact:phone}}</a>
+          <p class="cx__note">Call or WhatsApp the same number.</p>
+        </div>
+        <p class="cx__tag col-2 start-4 p-start-1">Write</p>
+        <div class="cx__body col-7 start-6 p-start-1" data-reveal>
+          <a class="cx__big cx__mail" href="{{fact:mailHref}}" data-copy="{{fact:email}}" data-scramble data-cursor="Copy"><span data-scramble-text>{{fact:email}}</span><span class="cx__copied" data-copied aria-hidden="true">copied</span></a>
+          <p class="cx__note">A click copies the address. <span class="visually-hidden" role="status" data-copied-status></span></p>
+        </div>
+        <p class="cx__tag col-2 start-2 p-start-1">Hours</p>
+        <div class="cx__small col-4 start-4 p-start-1" data-reveal>
+          <ul class="cx__hours" data-hours>
+            <li data-days="1,2,3,4,5"><span>Monday to Friday</span><b>{{fact:hours.weekday}}</b></li>
+            <li data-days="0,6"><span>Saturday and Sunday</span><b>{{fact:hours.weekend}}</b></li>
+          </ul>
+          <p class="cx__note">Last booking an hour before close. The lounge opens with the first court.</p>
+        </div>
+        <p class="cx__tag col-1 start-9 p-start-1">Follow</p>
+        <ul class="cx__social col-3 start-10 p-start-1" data-reveal>
+          <li><a class="link" href="#">Instagram</a></li>
+          <li><a class="link" href="{{fact:whatsapp}}" target="_blank" rel="noopener">WhatsApp</a></li>
+          <li><a class="link" href="#">YouTube</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Form (row 10): a big heading, topic tiles, big fields, the reply promise and a confirmation. -->
+    <section class="cxf" aria-labelledby="form-title">
+      <div class="cxf__head grid grid--rows">
+        <h2 class="cxf__title col-10" id="form-title" data-lines>Ask us <em>anything.</em></h2>
+        <p class="cxf__lead col-4 start-8 p-start-1" data-reveal>Coaching, memberships, tournaments, events. A person at the front desk reads every message. Need a court now? <a class="link" href="/booking.html">Book it online.</a></p>
+      </div>
+
+      <div class="cxf__panel dash-inv" id="form" data-form-wrap data-reveal>
+        <form class="lf cxf__form" novalidate data-form>
+          <fieldset class="cxf__topics" data-field="topic">
+            <legend class="cxf__legend">What is it about?</legend>
+            <div class="cxf__tiles">
+              <label class="cxf__tile"><input type="radio" name="topic" value="booking" /><span>Book a court</span></label>
+              <label class="cxf__tile"><input type="radio" name="topic" value="coaching" /><span>Lessons</span></label>
+              <label class="cxf__tile"><input type="radio" name="topic" value="membership" /><span>Membership</span></label>
+              <label class="cxf__tile"><input type="radio" name="topic" value="other" checked /><span>Other</span></label>
+            </div>
+            <p class="cxf__reply"><b>Same day</b><span>We reply the same day, while the club is open.</span></p>
+            <p class="cxf__hint" data-topic-hint="membership" hidden>Plans, prices and the application form are on the <a class="link" href="/memberships.html">Memberships page</a>.</p>
+            <p class="cxf__hint" data-topic-hint="booking" hidden>Faster online: pick a court and a time in <a class="link" href="/booking.html">the booking scene</a>.</p>
+          </fieldset>
+          <div class="lf__field lf__field--half" data-field="name"><label class="lf__label" for="f-name">Name</label><input class="lf__input" id="f-name" name="name" autocomplete="name" required /><span class="lf__line" aria-hidden="true"></span><p class="lf__error" aria-live="polite"></p></div>
+          <div class="lf__field lf__field--half" data-field="email"><label class="lf__label" for="f-email">E-mail</label><input class="lf__input" id="f-email" name="email" type="email" autocomplete="email" required /><span class="lf__line" aria-hidden="true"></span><p class="lf__error" aria-live="polite"></p></div>
+          <div class="lf__field" data-field="phone"><label class="lf__label" for="f-phone">Phone <small>(optional)</small></label><input class="lf__input" id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" /><span class="lf__line" aria-hidden="true"></span><p class="lf__error" aria-live="polite"></p></div>
+          <div class="lf__field" data-field="message"><label class="lf__label" for="f-message">Message</label><textarea class="lf__input" id="f-message" name="message" rows="3" required></textarea><span class="lf__line" aria-hidden="true"></span><p class="lf__error" aria-live="polite"></p></div>
+          <div class="lf__foot">
+            <p class="lf__note">Your details are used only to reply.</p>
+            <button class="btn" type="submit" data-bounce="press"><span class="btn__bg"></span><span class="btn__label">Send message</span></button>
+          </div>
+        </form>
+        <div class="lf-done cxf__done" role="status" aria-live="polite">
+          <h3 tabindex="-1">Thanks, <span data-done-name>you</span>.</h3>
+          <p>Your message is with the front desk. We reply the same day.</p>
+          <div class="cxf__done-actions"><a class="btn" href="/booking.html"><span class="btn__bg"></span><span class="btn__label">Book a court</span></a></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How to get here (row 12): the map is the main thing; the switch picks a route and the map draws it.
+         On a phone the map comes first. The page ends on the map. -->
+    <section class="cxd" id="directions" aria-labelledby="directions-title">
+      <div class="cxd__grid grid grid--rows">
+        <div class="cxd__lead col-6">
+          <h2 class="cxd__title" id="directions-title" data-lines>2150 Bayshore <em>Drive</em></h2>
+          <p class="cxd__addr">Miami, FL 33133</p>
+          <p class="cxd__note">Coconut Grove, gate B. Ten minutes from Brickell.</p>
+        </div>
+        <div class="cxd__block col-6 start-7 p-start-1">
+          <div class="cxd__side" data-reveal>
+            <div class="cxd__tabs" role="tablist" aria-label="How to get here" data-route-tabs>
+              <button class="cxd__tab" type="button" role="tab" id="rt-car" aria-controls="rt-panel" data-route="car"><b>Car</b><span>10 min</span></button>
+              <button class="cxd__tab" type="button" role="tab" id="rt-rail" aria-controls="rt-panel" data-route="rail"><b>Rail</b><span>12 min walk</span></button>
+              <button class="cxd__tab" type="button" role="tab" id="rt-ride" aria-controls="rt-panel" data-route="ride"><b>Ride</b><span>10 min</span></button>
+              <button class="cxd__tab" type="button" role="tab" id="rt-bike" aria-controls="rt-panel" data-route="bike"><b>Bike</b><span>5 min</span></button>
+            </div>
+            <div class="cxd__panel" id="rt-panel" role="tabpanel" aria-live="polite" data-route-panel></div>
+          </div>
+          <a class="smap cxd__map" href="https://www.google.com/maps/search/?api=1&amp;query=2150+S+Bayshore+Dr+Miami+FL+33133" target="_blank" rel="noopener" data-cursor="Open in Maps" aria-label="Map of Coconut Grove with the club on S Bayshore Drive. Opens Google Maps.">
+            <span class="smap__grid" data-square-map></span>
+            <span class="smap__label smap__label--bay">Biscayne Bay</span>
+            <span class="smap__label smap__label--us1">US-1</span>
+            <span class="smap__label smap__label--club">Break Point</span>
+            <span class="smap__pins" data-map-pins></span>
+            <span class="smap__open">Open in Maps</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<!-- include:partials/footer.html -->
+
+  <script type="module" src="/src/js/pages/contacts.js"></script>
+</body>
+</html>
