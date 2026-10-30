@@ -2,18 +2,15 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { initSite, releaseScroll } from '../site/site.js';
 import { MEDIA, videoSrc } from '../site/media.js';
 import { playIntro } from '../site/intro.js';
-import { renderServicesDrum, initServicesDrum } from '../site/services-drum.js';
-import { initNextSlotCard, initBookBanner } from '../site/next-slot.js';
+import { renderCourtLane, initCourtLane } from '../site/court-lane.js';
 import { initCommunity } from '../site/community.js';
 import { initCoachCloud } from '../site/coaches-cloud.js';
 import { initHeroEdge } from '../site/court-grid.js';
 import { initClubNotes } from '../site/club-notes.js';
-import { initMemberCard } from '../site/member-card.js';
-import { initMemberScene } from '../site/member-scene.js';
 import { initGalleryStrip } from '../site/gallery-strip.js';
 import { watchCut } from '../site/cut.js';
 
-renderServicesDrum();
+renderCourtLane();
 const { lenis, reducedMotion, ready } = initSite({ holdScroll: true });
 const heroEdge = initHeroEdge(document.querySelector('[data-hero-card]'), { reducedMotion });
 
@@ -39,16 +36,12 @@ function heroVideoReady() {
 
 const assets = [document.fonts.ready, heroVideoReady()];
 
-const heroAlert = initNextSlotCard({ reducedMotion });
-initBookBanner();
 initCommunity({ reducedMotion });
 initCoachCloud();
 
 ready.then(() => {
-  initServicesDrum({ reducedMotion });
+  initCourtLane({ reducedMotion });
   initClubNotes({ reducedMotion });
-  initMemberCard({ reducedMotion });
-  initMemberScene({ reducedMotion });
   initGalleryStrip({ reducedMotion });
   ScrollTrigger.refresh();
 });
@@ -67,5 +60,4 @@ playIntro({ assets, reducedMotion }).then(() => {
   releaseScroll(lenis);
   heroEdge?.show();
   cutHero();
-  heroAlert?.show();
 });

@@ -5,6 +5,7 @@ import 'locomotive-scroll/dist/locomotive-scroll.css';
 import { hydrateImages } from './media.js';
 import { initNav } from './nav.js';
 import { initReveals } from './reveal.js';
+import { initCta } from './cta.js';
 import { initRates } from './pricing.js';
 import { initBigmark } from './bigmark.js';
 import { initSound } from './sound.js';
@@ -55,6 +56,7 @@ export function initSite({ holdScroll = false } = {}) {
   initNoise();
   initFormControls();
   initButtons({ reducedMotion });
+  initCta({ reducedMotion });
   initPageTransitions({ reducedMotion });
   initToTop({ lenis, reducedMotion });
   // The home page shows the cookie card after its intro (see releaseScroll).

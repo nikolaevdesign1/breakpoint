@@ -45,16 +45,6 @@
               <li><b>7–22</b><span>open Sat–Sun</span></li>
             </ul>
           </div>
-          <!-- Next free court (rows 40, 44): a small holographic note, opens after the intro; closes; live data in next-slot.js -->
-          <div class="hero-alert" data-next-slot hidden>
-            <a class="hero-alert__box" href="/booking.html" data-cursor="Book this court">
-              <span class="hero-alert__l k">Next free court</span>
-              <span class="hero-alert__l b" data-slot-court>Checking the courts</span>
-              <span class="hero-alert__l s" data-slot-when></span>
-              <span class="hero-alert__l s go"><span data-slot-price></span> · Book</span>
-            </a>
-            <button class="hero-alert__close" type="button" data-slot-close aria-label="Close this note"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
-          </div>
         </div>
       </div>
     </section>
@@ -73,41 +63,6 @@
       </div>
     </section>
 
-    <!-- 03 Services drum -->
-    <section class="section services" id="services" aria-label="Services &amp; formats">
-      <div class="services__pin" data-services>
-        <div class="services__head">
-          <p class="eyebrow services__count"><b data-services-index>01</b> / <span data-services-total>06</span></p>
-        </div>
-
-        <div class="ruler ruler--left" aria-hidden="true"><span class="ruler__mark" data-ruler-mark></span></div>
-        <div class="ruler ruler--right" aria-hidden="true"><span class="ruler__mark" data-ruler-mark></span></div>
-
-        <div class="services__aside services__aside--left">
-          <div class="media services__thumb cut cut--c" data-services-thumbs></div>
-        </div>
-
-        <ul class="drum" data-drum aria-label="Services"></ul>
-
-        <div class="services__aside services__aside--right">
-          <p class="eyebrow services__meta swap" data-services-meta></p>
-          <p class="services__desc swap" data-services-desc></p>
-          <p class="services__price swap"><b data-services-price></b><sup data-services-unit></sup></p>
-          <p class="services__note swap" data-services-note></p>
-          <a class="btn btn--sm" href="#book" data-services-cta><span class="btn__bg"></span><span class="btn__label">Book</span></a>
-        </div>
-      </div>
-    </section>
-
-    <!-- 04 Memberships & pricing -->
-    <section class="section" id="pricing" aria-labelledby="pricing-title">
-<!-- include:partials/member.html -->
-<!-- include:partials/pricing.html -->
-    </section>
-
-    <!-- 05 Book a court: a low banner into the 3D map (rows 87, 113) -->
-<!-- include:partials/book-banner.html -->
-
     <!-- 06 Coaches: depth cloud (coaches-cloud.js) -->
     <section class="coach-cloud" id="coaches" aria-labelledby="coaches-title" data-coach-cloud>
       <div class="coach-cloud__stage">
@@ -117,6 +72,35 @@
           <p class="coach-cloud__lead">Tennis and padel, first lessons to tournament prep. Pick by level, language or the hour you are free.</p>
           <a class="btn" href="/coaches.html"><span class="btn__bg"></span><span class="btn__label">Meet the coaches</span></a>
         </div>
+      </div>
+    </section>
+
+    <!-- 04 Membership: heading and a line, then the services as a pinned sideways lane (court-lane.js) -->
+    <section class="mship" id="membership" aria-labelledby="mship-title">
+      <div class="grid grid--rows mship__head">
+        <h2 class="h2 h-xl col-8" id="mship-title" data-lines>Membership, <em>made for play.</em></h2>
+        <p class="note col-4 start-9">Members get the good hours first, people to play with and a place to stay after the match.</p>
+      </div>
+      <div class="mlane" data-mlane>
+        <div class="mlane__frame" data-mlane-frame>
+          <ul class="mlane__track" data-mlane-track aria-label="Courts, lessons and academy"></ul>
+        </div>
+        <div class="mlane__bar">
+          <a class="btn" href="/memberships.html"><span class="btn__bg"></span><span class="btn__label">Be a member</span></a>
+          <p class="mlane__count k" aria-hidden="true"><b data-mlane-index>01</b> / <span data-mlane-total>06</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 Price and FAQ -->
+    <section class="section" id="pricing" aria-label="Prices and questions">
+<!-- include:partials/pricing.html -->
+    </section>
+
+    <!-- 06 Reviews: texts from members, arriving mid-screen (reviews.js) -->
+    <section class="section section--flush reviews-section" id="reviews" aria-labelledby="reviews-title">
+      <div class="reviews" data-reviews="home">
+<!-- include:partials/reviews.html -->
       </div>
     </section>
 
@@ -183,10 +167,9 @@
         </div>
       </div>
 
-      <div class="reviews" data-reviews="home">
-<!-- include:partials/reviews.html -->
-      </div>
     </section>
+    <!-- 09 Book a court: full-screen call to action before the footer -->
+<!-- include:partials/cta.html -->
   </main>
 
 <!-- include:partials/footer.html -->
