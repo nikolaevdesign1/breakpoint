@@ -7,7 +7,7 @@ import { renderCourtLane, initCourtLane } from '../site/court-lane.js';
 import { initCommunity } from '../site/community.js';
 import { initCoachCloud } from '../site/coaches-cloud.js';
 import { initClubNotes } from '../site/club-notes.js';
-import { initGalleryStrip } from '../site/gallery-strip.js';
+import { initMapGallery } from '../site/map-gallery.js';
 import { watchCut } from '../site/cut.js';
 
 renderCourtLane();
@@ -41,7 +41,7 @@ initCoachCloud();
 ready.then(() => {
   initCourtLane({ reducedMotion });
   initClubNotes({ reducedMotion });
-  initGalleryStrip({ reducedMotion });
+  initMapGallery({ reducedMotion });
   ScrollTrigger.refresh();
 });
 

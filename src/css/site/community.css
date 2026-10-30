@@ -199,3 +199,21 @@
 }
 @media (hover: hover) { .cgal-view__btn:hover { background: var(--ink); color: var(--snow); box-shadow: inset 0 0 0 1px var(--snow); } }
 .cgal-view__btn:active { transform: scale(0.94); }
+
+/* ---------- Club life map (map-gallery.js) ----------
+   A field of small pictures in one frame; the stage clips it, one transform on the field zooms. */
+.mapg { background: var(--paper-2); }
+.mapg__stage { position: relative; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; }
+.mapg__field { position: absolute; left: 0; top: 0; will-change: transform; }
+.mapg__tile { position: absolute; display: block; overflow: hidden; background: var(--paper-3); transition: translate var(--dur-2) var(--ease-spring), box-shadow var(--dur-2) var(--ease-out), opacity var(--dur-2); }
+.mapg__tile img, .mapg__tile video { width: 100%; height: 100%; object-fit: cover; transition: scale var(--dur-3) var(--ease-out); }
+@media (hover: hover) {
+  .mapg__tile:hover { z-index: 2; translate: 0 -3px; box-shadow: 0 16px 28px -14px rgba(14, 14, 13, 0.6); }
+  .mapg__tile:hover img, .mapg__tile:hover video { scale: 1.08; }
+}
+.mapg__tile:focus-visible { z-index: 3; outline: 2px solid var(--ink); outline-offset: 2px; }
+.mapg__tile { filter: opacity(1); }
+.mapg.is-zoomed .mapg__tile { filter: opacity(0.3); }
+.mapg.is-zoomed .mapg__tile[data-cursor='Back'] { filter: opacity(1); }
+.mapg__back { position: absolute; left: var(--edge); bottom: var(--edge); z-index: 5; }
+.mapg__back[hidden] { display: none; }
