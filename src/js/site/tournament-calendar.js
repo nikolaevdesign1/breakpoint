@@ -1,7 +1,6 @@
 import gsap from 'gsap';
 import { landIn } from './bounce.js';
 import { createPeek, preloadPhotos } from './tournament-peek.js';
-import { createWave } from './tournament-wave.js';
 import { DUR, EASE, STAGGER } from './motion.js';
 import {
   EVENTS, LEVELS, AGES, dayKey, eventDays, formatDates, formatStart, levelText, ageText, feeText, spotsLeft, isPast,
@@ -9,7 +8,8 @@ import {
 
 // Tournament calendar (rows 75, 126): a month grid with events drawn as bands across their days.
 // Bands fill up with the spots taken and flag the last few; filters dim what doesn't fit and bounce what does;
-// months change with a wave of squares (arrows, horizontal swipe or wheel, ← → keys); hovering a day
+// the grid lies back in perspective and follows the pointer a little; months turn over like a page
+// (arrows, horizontal swipe or wheel, ← → keys); hovering a day
 // assembles the event photo inside it; clicking opens the event card next to the date.
 
 const MONTHS_AHEAD = 4;
@@ -120,7 +120,21 @@ export function initCalendar({ reducedMotion }) {
   let monthEvents = [];
 
   const peek = createPeek({ reducedMotion });
-  const wave = reducedMotion ? null : createWave(grid);
+  // 3D: the grid lies back in perspective and leans toward the pointer (fine pointers only).
+  const TILT = -8; // negative: the far (bottom) rows recede, so the grid never grows wider than the page
+  gsap.set(grid, { transformPerspective: 1600, transformOrigin: '50% 0%', rotationX: reducedMotion ? 0 : TILT });
+  if (!reducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const rx = gsap.quickTo(grid, 'rotationX', { duration: 0.8, ease: 'power3.out' });
+    const ry = gsap.quickTo(grid, 'rotationY', { duration: 0.8, ease: 'power3.out' });
+    body.addEventListener('pointermove', (e) => {
+      const r = body.getBoundingClientRect();
+      const nx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+      const ny = ((e.clientY - r.top) / r.height - 0.5) * 2;
+      ry(nx * 4);
+      rx(TILT - ny * 3);
+    });
+    body.addEventListener('pointerleave', () => { ry(0); rx(TILT); });
+  }
 
   $('[data-filter="level"]').insertAdjacentHTML('beforeend', chipsHTML([{ id: 'all', label: 'Any' }, ...LEVELS]));
   $('[data-filter="age"]').insertAdjacentHTML('beforeend', chipsHTML([{ id: 'all', label: 'Any' }, ...AGES]));
@@ -223,8 +237,12 @@ export function initCalendar({ reducedMotion }) {
       render();
       if (focusInGrid) grid.querySelector('.cal__day.has-match, .cal__day')?.focus({ preventScroll: true });
     };
-    if (!wave) { swap(); return true; }
-    wave(dir, swap);
+    if (reducedMotion) { swap(); return true; }
+    // The page turns over: the old month tips away from you, the new one falls into place.
+    gsap.timeline()
+      .to(grid, { rotationX: TILT + 70 * dir, autoAlpha: 0, duration: DUR.fast, ease: 'power2.in', overwrite: 'auto' })
+      .add(swap)
+      .fromTo(grid, { rotationX: TILT - 70 * dir, autoAlpha: 0 }, { rotationX: TILT, autoAlpha: 1, duration: DUR.base, ease: EASE.out });
     gsap.fromTo(monthEl, { autoAlpha: 0, x: 24 * dir }, { autoAlpha: 1, x: 0, duration: DUR.base, delay: DUR.fast, ease: EASE.out });
     return true;
   }
