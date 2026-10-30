@@ -95,6 +95,8 @@
   font: inherit; font-size: 12px; color: var(--ink);
 }
 .cal__nav { display: flex; gap: 4px; margin-left: 12px; align-self: center; }
+/* the month bar stays under the header while the grid scrolls, so the month can be switched from any row */
+.cal__bar { position: sticky; top: calc(var(--bar-h) + 8px); z-index: 8; padding: 8px 0; background: var(--paper-2); }
 .cal__arrow {
   display: grid; place-items: center;
   width: 44px; height: 44px;
@@ -137,6 +139,16 @@
   text-align: left;
   transition: background-color var(--dur-1), box-shadow var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
 }
+.cal__wx { position: absolute; top: 12px; right: 10px; z-index: 1; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; line-height: 16px; color: var(--mute); pointer-events: none; }
+.cal__wx[hidden] { display: none; }
+.cal__wx svg { width: 16px; height: 16px; }
+.cal__wx b { font-weight: 400; color: var(--ink); font-variant-numeric: tabular-nums; }
+.cal__wx i { font-style: normal; color: var(--clay); }
+.cal__day.is-out .cal__wx { opacity: 0.5; }
+.cal__day.is-peek .cal__wx b { color: var(--snow); }
+/* days that are gone: the date struck through and a hairline across the cell */
+.cal__day.is-past .cal__num { text-decoration: line-through; text-decoration-thickness: 1px; }
+
 .cal__num { position: relative; z-index: 1; display: inline-grid; place-items: center; min-width: 26px; height: 26px; font-size: 14px; font-variant-numeric: tabular-nums; transition: color var(--dur-1); }
 .cal__day.is-out .cal__num, .cal__day.is-past .cal__num { color: var(--mute-2); }
 .cal__day.is-out .cal__band { opacity: 0.45; }

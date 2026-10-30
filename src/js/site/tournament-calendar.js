@@ -2,6 +2,7 @@ import gsap from 'gsap';
 import { landIn } from './bounce.js';
 import { createPeek, preloadPhotos } from './tournament-peek.js';
 import { DUR, EASE, STAGGER } from './motion.js';
+import { dayWeather, weatherHTML } from './day-weather.js';
 import {
   EVENTS, LEVELS, AGES, dayKey, eventDays, formatDates, formatStart, levelText, ageText, feeText, spotsLeft, isPast,
 } from './tournaments-data.js';
@@ -206,7 +207,7 @@ export function initCalendar({ reducedMotion }) {
       const isToday = +d === +today;
       const cls = ['cal__day', d.getMonth() !== m && 'is-out', d < today && 'is-past', isToday && 'is-today', list.length && 'has-events'].filter(Boolean).join(' ');
       const ball = isToday ? '<span class="cal__ball" aria-hidden="true"></span>' : '';
-      const inner = `<span class="cal__num">${d.getDate()}</span>${ball}${list.map((e) => bandHTML(e, d, lane.get(e), events.indexOf(e))).join('')}`;
+      const inner = `<span class="cal__num">${d.getDate()}</span><span class="cal__wx" data-wx="${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}" title="" hidden></span>${ball}${list.map((e) => bandHTML(e, d, lane.get(e), events.indexOf(e))).join('')}`;
       html += list.length
         ? `<button class="${cls}" type="button" data-day="${key}" data-date="${longDate(d)}">${inner}</button>`
         : `<div class="${cls}">${inner}</div>`;
@@ -214,6 +215,7 @@ export function initCalendar({ reducedMotion }) {
     grid.style.setProperty('--lanes', Math.max(1, laneEnds.length));
     grid.innerHTML = html;
 
+    paintWeather();
     plates.innerHTML = monthEvents.map((e) => plateHTML(e)).join('');
     monthEl.textContent = month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     prev.disabled = state.offset === 0;
@@ -221,6 +223,20 @@ export function initCalendar({ reducedMotion }) {
     counter.n = 0;
     applyFilter();
   }
+
+  // The forecast for the days that have one (today and about two weeks ahead); filled in once it has loaded.
+  let forecast = null;
+  function paintWeather() {
+    if (!forecast) return;
+    grid.querySelectorAll('.cal__wx').forEach((el) => {
+      const w = forecast.get(el.dataset.wx);
+      if (!w) return;
+      el.innerHTML = weatherHTML(w);
+      el.title = `Miami: high ${w.hi}°F, low ${w.lo}°F`;
+      el.hidden = false;
+    });
+  }
+  dayWeather().then((map) => { forecast = map; paintWeather(); }).catch(() => {});
 
   // Dim what doesn't match, update the cells, the counter and the phone agenda.
   function applyFilter({ animate = false } = {}) {
