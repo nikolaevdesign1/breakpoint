@@ -150,6 +150,9 @@ html.is-rally .rc__cta { visibility: hidden; }
 html.is-rally .rally__stage { color: #fff; --mute: rgba(255, 255, 255, 0.82); }
 html.is-rally .rc, html.is-rally .rally__intro { text-shadow: 0 2px 24px rgba(10, 8, 6, 0.5); }
 html.is-rally .rc__board, html.is-rally .rc__board * { text-shadow: none; }
+/* Big headings: a text-shadow on letters that sit on their own compositing layers is clipped into a visible box; the halo goes on the whole heading instead. */
+html.is-rally .rc__big, html.is-rally .rc__big * { text-shadow: none; }
+html.is-rally .rc__big { filter: drop-shadow(0 2px 20px rgba(10, 8, 6, 0.45)); }
 html.is-rally .rc__sign, html.is-rally .rc__kicker, html.is-rally .rally__lead, html.is-rally .rc__sign .rc__name, html.is-rally .rc__note b, html.is-rally .rc__who b { color: #fff; }
 html.is-rally .rc__letter { max-width: 40ch; }
 html.is-rally .rc__steps { display: grid; align-content: center; }

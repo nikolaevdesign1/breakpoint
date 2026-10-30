@@ -11,6 +11,8 @@ import { DUR, EASE, STAGGER } from './motion.js';
 const SOLID_AFTER = 24; // px of scroll before the plates get their shadow
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+const stopScroll = (e) => e.preventDefault();
+
 export function initNav(lenis) {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const nav = document.querySelector('[data-nav]');
@@ -49,6 +51,8 @@ export function initNav(lenis) {
     if (open) {
       menu.hidden = false;
       lenis?.stop();
+      menu.addEventListener('wheel', stopScroll, { passive: false }); // the page behind does not scroll while the menu is open
+      menu.addEventListener('touchmove', stopScroll, { passive: false });
       tl = gsap.timeline()
         .fromTo(dim, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7 * d, ease: EASE.out }, 0)
         // They come forward out of the depth (z, rotationX) as well as down.
@@ -61,6 +65,8 @@ export function initNav(lenis) {
         }, 0.1 * d);
       if (viaKeyboard) links[0].focus({ preventScroll: true });
     } else {
+      menu.removeEventListener('wheel', stopScroll);
+      menu.removeEventListener('touchmove', stopScroll);
       lenis?.start();
       tl = gsap.timeline({ onComplete: () => { menu.hidden = true; } })
         .to(tiles, { autoAlpha: 0, y: 14, scale: 0.94, duration: 0.5 * d, ease: 'power2.inOut', stagger: { amount: 0.3 * d, from: 'end' } }, 0)

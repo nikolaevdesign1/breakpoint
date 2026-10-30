@@ -15,7 +15,7 @@ function tileLean(tiles) {
     z: gsap.quickTo(el, 'z', { duration: 0.7, ease: 'power3.out' }),
     rx: gsap.quickTo(el, 'rotationX', { duration: 0.7, ease: 'power3.out' }),
     ry: gsap.quickTo(el, 'rotationY', { duration: 0.7, ease: 'power3.out' }),
-    plane: (i % 3) * 16,
+    plane: (i % 3) * 5,
   }));
   return {
     toPointer(x, y) {
@@ -24,9 +24,9 @@ function tileLean(tiles) {
         const r = p.el.getBoundingClientRect();
         const dx = (x - (r.left + r.width / 2)) / (r.width / 2 + 120);
         const dy = (y - (r.top + r.height / 2)) / (r.height / 2 + 120);
-        p.ry(Math.max(-1, Math.min(1, dx)) * 14);
-        p.rx(-Math.max(-1, Math.min(1, dy)) * 10);
-        p.z(p.plane + (1 - Math.min(1, Math.hypot(dx, dy))) * 26);
+        p.ry(Math.max(-1, Math.min(1, dx)) * 6);
+        p.rx(-Math.max(-1, Math.min(1, dy)) * 4);
+        p.z(p.plane + (1 - Math.min(1, Math.hypot(dx, dy))) * 8);
       });
     },
     rest() { pool.forEach((p) => { p.ry(0); p.rx(0); p.z(0); }); },
@@ -41,6 +41,11 @@ export function initDepth({ reducedMotion }) {
   const tx = gsap.quickTo(nav, '--tx', { duration: 0.9, ease: 'power3.out' });
   const ty = gsap.quickTo(nav, '--ty', { duration: 0.9, ease: 'power3.out' });
   const headerLean = { to: (nx, ny) => { ty(nx * 0.9); tx(-ny * 0.6); }, rest: () => { ty(0); tx(0); } };
+  // Headings drift a hair against the pointer (--fx / --fy on the root, read by headings.css). Not on the booking page.
+  const drift = document.body.dataset.page === 'booking' ? null : {
+    x: gsap.quickTo(document.documentElement, '--fx', { duration: 1.2, ease: 'power3.out' }),
+    y: gsap.quickTo(document.documentElement, '--fy', { duration: 1.2, ease: 'power3.out' }),
+  };
   const menuLean = tileLean(tiles);
   let wasOpen = false;
 
@@ -51,6 +56,7 @@ export function initDepth({ reducedMotion }) {
     if (open) { menuLean.toPointer(e.clientX, e.clientY); headerLean.to(nx * 0.6, ny * 0.6); wasOpen = true; return; }
     if (wasOpen) { menuLean.rest(); wasOpen = false; }
     headerLean.to(nx, ny);
+    if (drift) { drift.x(-nx * 3); drift.y(-ny * 2); }
   }, { passive: true });
-  document.addEventListener('pointerleave', () => { headerLean.rest(); menuLean.rest(); });
+  document.addEventListener('pointerleave', () => { headerLean.rest(); menuLean.rest(); if (drift) { drift.x(0); drift.y(0); } });
 }

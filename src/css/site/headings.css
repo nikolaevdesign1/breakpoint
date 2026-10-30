@@ -34,3 +34,13 @@ h3 { line-height: 1; }
   font-weight: 400;
   text-transform: uppercase;
 }
+
+/* Pointer drift: the headings float a couple of pixels against the pointer (depth.js sets --fx / --fy on the root).
+   Offsets, not transforms, so the reveal and the scroll parallax keep the headings' own transforms. */
+/* zero specificity: a heading that is already positioned elsewhere keeps its own rule */
+:where(body:not([data-page='booking'])) :where(h1, h2, .h2, .h-xl, .h-xxl):not(.rc__big, .preloader *, .menu *) {
+  position: relative;
+  left: var(--fx, 0px);
+  top: var(--fy, 0px);
+}
+@media (prefers-reduced-motion: reduce), (hover: none) { :root { --fx: 0px !important; --fy: 0px !important; } }
