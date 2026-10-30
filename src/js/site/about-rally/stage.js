@@ -5,7 +5,7 @@ import { loadLightmaps, applyLightmaps } from '../../booking/lightmaps.js';
 
 // The club for the About rally: the same model as the booking map, still and light.
 // One canvas, no shadow map and no post stack (the ground light is baked into the lightmaps),
-// pixel ratio capped at 1.5. The words get their contrast from a grade drawn in the render (GRADE), not from cards.
+// pixel ratio capped at 2 and textures sharpened at grazing angles (anisotropy), a faint grain in the grade. The words get their contrast from a grade drawn in the render (GRADE), not from cards.
 
 const MODEL_URL = '/models/clay_courts.glb';
 const SKY = new THREE.Color('#a8c4dc');
@@ -24,13 +24,18 @@ const GRADE = new THREE.ShaderMaterial({
       float vig = smoothstep(0.35, 0.85, length(d * vec2(1.1, 1.0)));
       float top = pow(smoothstep(0.55, 1.0, vUv.y), 1.4);
       float bot = pow(smoothstep(0.5, 0.0, vUv.y), 1.3);
-      gl_FragColor = vec4(0.07, 0.05, 0.04, clamp(vig * 0.45 + top * 0.5 + bot * 0.55, 0.0, 0.8));
+      // fine grain: a little light and dark noise, so flat colour reads as a photographed surface
+      float n = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+      vec3 base = vec3(0.07, 0.05, 0.04);
+      vec3 tone = base + (n - 0.5) * 0.06;
+      float a = clamp(vig * 0.45 + top * 0.5 + bot * 0.55, 0.0, 0.8) + 0.012;
+      gl_FragColor = vec4(tone, a);
     }`,
 });
 
 export async function createStage(canvas, onProgress) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'default' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.AgXToneMapping;
   renderer.toneMappingExposure = 1.2;
@@ -62,9 +67,14 @@ export async function createStage(canvas, onProgress) {
   const hide = [];
   root.traverse((o) => { if (o.name && SKIP.test(o.name)) hide.push(o); });
   hide.forEach((o) => o.removeFromParent());
+  const aniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
   root.traverse((o) => {
     if (!o.isMesh) return;
     o.matrixAutoUpdate = false;
+    for (const m of [o.material].flat()) {
+      if (!m) continue;
+      for (const v of Object.values(m)) if (v?.isTexture) v.anisotropy = aniso; // sharper clay and lines at a low camera angle
+    }
   });
   scene.add(root);
   await renderer.compileAsync(scene, camera); // link the shaders in parallel instead of stalling the first draw
