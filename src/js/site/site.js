@@ -7,6 +7,7 @@ import { initNav } from './nav.js';
 import { initReveals } from './reveal.js';
 import { initCta } from './cta.js';
 import { initDepth } from './depth.js';
+import { initHeroScroll } from './hero-scroll.js';
 import { initEntry, entryDone } from './entry.js';
 import { initAmbientBed } from './ambient-bed.js';
 import { initRates } from './pricing.js';
@@ -74,6 +75,7 @@ export function initSite({ holdScroll = false } = {}) {
     initBigmark({ reducedMotion });
     initCuts();
     initParallax({ reducedMotion });
+    initHeroScroll({ reducedMotion });
     initPhotoCells({ reducedMotion });
     initSectionEdges({ reducedMotion });
   });

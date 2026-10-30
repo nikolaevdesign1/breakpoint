@@ -17,6 +17,7 @@ const TIERS = [0.1, 0.14, 0.12]; // travel as a share of the frame height; neigh
 const TRAVEL_MAX = 0.2;
 const SCENE_BOOST = 1.4; // a pinned scene is long, so its drift is stretched to stay visible
 const SCENE_MAX = 0.16;
+const ZOOM = 0.07; // how much more the picture scales by the time it has passed
 const MARGIN = 0.04; // extra scale on top of the travel, so no edge ever shows
 const SCRUB = 1.2; // seconds of smoothing, unhurried (row 17)
 const MIN_W = 120; // smaller pictures (avatars, icons) stay still
@@ -75,8 +76,10 @@ function trigger(box, targets, vars, scene) {
 function mediaParallax(box, medias, travel, scene) {
   const y = () => `${(box.offsetHeight * travel) / 2}px`;
   const ny = () => `-${y()}`;
-  medias.forEach((m) => { m.dataset.px = ''; m.style.setProperty('--par-s', 1 + travel + MARGIN); });
-  trigger(box, medias, { from: { '--par-y': ny }, to: { '--par-y': y } }, scene);
+  const s0 = 1 + travel + MARGIN;
+  medias.forEach((m) => { m.dataset.px = ''; m.style.setProperty('--par-s', s0); });
+  // The picture lags behind the page and grows a little (ZOOM) while the frame passes through the screen.
+  trigger(box, medias, { from: { '--par-y': ny, '--par-s': s0 }, to: { '--par-y': y, '--par-s': s0 + ZOOM } }, scene);
 }
 
 function textParallax(el, k, power) {
