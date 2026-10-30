@@ -1,15 +1,15 @@
 import gsap from 'gsap';
 
-// Pointer depth for the header and the open menu: the plates lean a few degrees toward the pointer on
-// different planes, like the booking panel's tiles. Fine pointers only; nothing moves under reduced motion.
-// GSAP owns the rotation, so it composes with the press squash (bounce.js) and the hero offsets (CSS `translate`).
+// Pointer depth for the header and the open menu: the header and the menu tiles lean a few degrees toward
+// the pointer, like the booking panel's tiles. Fine pointers only; nothing moves under reduced motion.
+// The menu tiles are rotated by GSAP; they carry no CSS translate of their own. The header uses CSS variables.
 
 const FINE = '(hover: hover) and (pointer: fine)';
 
 function lean(items, { maxX, maxY, perspective, zStep = 0 }) {
   const pool = items.map((el, i) => {
     gsap.set(el, { transformPerspective: perspective });
-    const depth = el.classList.contains('nav__logo') ? 0.55 : 1;
+    const depth = 1;
     return {
       el,
       depth,
@@ -32,9 +32,12 @@ function lean(items, { maxX, maxY, perspective, zStep = 0 }) {
 
 export function initDepth({ reducedMotion }) {
   if (reducedMotion || !window.matchMedia(FINE).matches) return;
-  const plates = [...document.querySelectorAll('.nav .nav-plate')];
+  const nav = document.querySelector('[data-nav]');
   const tiles = [...document.querySelectorAll('.menu__tile')];
-  const headerLean = lean(plates, { maxX: 5, maxY: 7, perspective: 700 });
+  // The header leans as one piece through CSS variables (nav.css), so it never touches the plates' own transforms.
+  const tx = gsap.quickTo(nav, '--tx', { duration: 0.9, ease: 'power3.out' });
+  const ty = gsap.quickTo(nav, '--ty', { duration: 0.9, ease: 'power3.out' });
+  const headerLean = { to: (nx, ny) => { ty(nx * 2.2); tx(-ny * 1.6); }, rest: () => { ty(0); tx(0); } };
   const menuLean = lean(tiles, { maxX: 6, maxY: 9, perspective: 900, zStep: 14 });
   let wasOpen = false;
 

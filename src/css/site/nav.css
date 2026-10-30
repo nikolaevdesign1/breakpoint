@@ -16,9 +16,12 @@
   padding: 0 var(--gutter);
   pointer-events: none; /* the gaps between plates belong to the page */
   transition: transform var(--dur-3) var(--ease-out), translate var(--dur-3) var(--ease-out);
+  /* leans a little toward the pointer: depth.js sets --tx and --ty (degrees) */
+  transform: perspective(900px) rotateX(calc(var(--tx, 0) * 1deg)) rotateY(calc(var(--ty, 0) * 1deg));
+  transform-origin: 50% 0;
 }
-.nav.is-hidden { transform: translateY(-100%); }
-body.menu-open .nav.is-hidden { transform: none; }
+.nav.is-hidden { translate: 0 -100%; }
+body.menu-open .nav.is-hidden { translate: none; }
 
 /* Row 122: on the home page the transparent bar sits inside the hero video card, lowered from its top
    edge and pulled in at the sides to the hero content's padding (logo stays centred). Once the page
