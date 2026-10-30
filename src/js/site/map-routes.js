@@ -1,4 +1,4 @@
-import { N, CELL, STATION } from './square-map.js';
+import { W, H, STATION } from './square-map.js';
 
 // Route switch for the square map (row 12). Each way to the club is a line of small squares laid over
 // the map; the picked one is drawn square by square from the start to the club, the others stay faint.
@@ -38,7 +38,6 @@ const ROUTES = {
   },
 };
 
-const U = N * CELL; // viewBox size
 
 // Squares along a polyline: solid = a tight chain, dashed = every few cells
 function squares(pts, dashed) {
@@ -46,8 +45,8 @@ function squares(pts, dashed) {
   const size = 6;
   const out = [];
   for (let i = 1; i < pts.length; i++) {
-    const [ax, ay] = pts[i - 1].map((v) => v * U);
-    const [bx, by] = pts[i].map((v) => v * U);
+    const [ax, ay] = [pts[i - 1][0] * W, pts[i - 1][1] * H];
+    const [bx, by] = [pts[i][0] * W, pts[i][1] * H];
     const len = Math.hypot(bx - ax, by - ay);
     for (let d = 0; d <= len; d += step) out.push([ax + ((bx - ax) * d) / len, ay + ((by - ay) * d) / len, size]);
   }

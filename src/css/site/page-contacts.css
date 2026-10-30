@@ -199,7 +199,7 @@
 .cxd__panel { min-height: 60px; padding-top: 16px; border-top: var(--dash); font-size: 14px; line-height: 20px; color: var(--mute); }
 
 /* Square map (square-map.js, map-routes.js) */
-.smap { position: relative; display: block; aspect-ratio: 1; background: var(--paper); }
+.smap { position: relative; display: block; aspect-ratio: 2; background: var(--paper); }
 .smap__grid, .smap__grid svg { display: block; width: 100%; height: 100%; }
 .smap rect:not(.smap__pulse, .smap__rt) {
   opacity: 0;
@@ -251,7 +251,7 @@
 
 .smap__label { position: absolute; font-size: 14px; line-height: 20px; white-space: nowrap; pointer-events: none; }
 .smap__label--bay { left: 64%; top: 82%; color: var(--mute); }
-.smap__label--us1 { left: 10%; top: 30%; padding: 0 4px; background: var(--paper); transform: rotate(-45deg); }
+.smap__label--us1 { left: 10%; top: 30%; padding: 0 4px; background: var(--paper); transform: rotate(-29deg); }
 .smap__label--club { left: 63%; top: 53%; padding: 2px 8px; background: var(--ink); color: var(--snow); }
 .smap__open {
   position: absolute;
