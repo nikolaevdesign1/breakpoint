@@ -44,6 +44,7 @@ export function initCursor() {
     if (next === 'label' && text !== currentText) {
       currentText = text;
       labelText.textContent = text;
+      label.classList.toggle('cursor-label--sign', text === '+' || text === '−');
       delete labelText.dataset.typeSplit; // fresh text: split it again
       revealText(labelText, { fade: false, duration: 0.45, stagger: 0.024 });
     }

@@ -94,7 +94,7 @@ export function initMapGallery({ reducedMotion }) {
     root.classList.add('is-zoomed');
     back.hidden = false;
     window.__lenis?.stop(); // the page waits while the map is zoomed
-    tiles.forEach((t) => { t.el.dataset.cursor = group.length === 1 && group[0] === t ? 'Back' : '+'; });
+    tiles.forEach((t) => { t.el.dataset.cursor = group.length === 1 && group[0] === t ? '−' : '+'; });
   }
   function reset() {
     focus = null;

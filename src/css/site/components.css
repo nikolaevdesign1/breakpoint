@@ -153,6 +153,9 @@ html.has-cursor input, html.has-cursor textarea, html.has-cursor [contenteditabl
   will-change: transform;
 }
 
+.cursor-label--sign { padding: 0; width: 44px; height: 44px; display: grid; place-items: center; font-size: 32px; font-weight: 300; line-height: 1; }
+.cursor-label--sign .cursor-label__text { display: block; transform: translateY(-2px); }
+
 /* Court-grid squares (court-grid.js) */
 .cells { position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; }
 [data-cells] { border-radius: 0 !important; }
