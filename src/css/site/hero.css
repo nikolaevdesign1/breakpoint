@@ -60,8 +60,8 @@
 .hero__tag { position: absolute; z-index: 1; margin: 0; color: rgba(244, 243, 239, 0.92); text-shadow: 0 1px 14px rgba(0, 0, 0, 0.6); }
 .hero__tag b { margin-left: 10px; font-weight: 500; }
 .hero__tag--c { top: 78px; left: 50%; translate: -50% 0; text-align: center; }
-.hero__tag--l { left: var(--gutter); top: 50%; translate: 0 -50%; }
-.hero__tag--r { right: var(--gutter); top: 50%; translate: 0 -50%; text-align: right; }
+.hero__tag--l { left: var(--gutter); top: 78px; }
+.hero__tag--r { right: var(--gutter); top: 78px; text-align: right; }
 /* A drawn mouse: the wheel runs down and fades, over and over, so the page says "scroll" without a word */
 .hero__mouse { position: absolute; z-index: 1; right: var(--gutter); bottom: calc(var(--gutter) + 4px); display: block; width: 24px; height: 38px; margin: 0; border: 1.5px solid rgba(244, 243, 239, 0.92); border-radius: 12px; filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.5)); }
 .hero__mouse i { position: absolute; left: 50%; top: 7px; width: 3px; height: 8px; margin-left: -1.5px; background: rgba(244, 243, 239, 0.95); border-radius: 2px; animation: hero-wheel 1.8s var(--ease-in-out) infinite; }
