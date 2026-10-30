@@ -76,7 +76,7 @@ export function initMapGallery({ reducedMotion }) {
   const view = (scale, cx, cy) => ({ scale, x: sw / 2 - cx * scale, y: sh / 2 - cy * scale });
   const overview = () => view(Math.min(sw / FW, sh / FH), FW / 2, FH / 2);
   const go = (v, instant) => {
-    gsap.to(field, { x: v.x, y: v.y, scale: v.scale, duration: instant || reducedMotion ? 0 : 1.15, ease: 'power3.inOut', overwrite: true });
+    gsap.to(field, { x: v.x, y: v.y, scale: v.scale, duration: instant || reducedMotion ? 0 : 1.15, ease: 'power3.inOut', overwrite: true, onComplete: refreshCursor });
   };
 
   const measure = () => {
@@ -86,6 +86,9 @@ export function initMapGallery({ reducedMotion }) {
   };
 
   function zoom(group, instant) {
+    const lenis = window.__lenis;
+    const off = stage.getBoundingClientRect().top;
+    const align = !focus && Math.abs(off) > 2; // bring the whole map into the window, so no other block shows under it
     focus = group;
     const x0 = Math.min(...group.map((t) => t.x)); const x1 = Math.max(...group.map((t) => t.x + t.w));
     const y0 = Math.min(...group.map((t) => t.y)); const y1 = Math.max(...group.map((t) => t.y + t.h));
@@ -93,8 +96,12 @@ export function initMapGallery({ reducedMotion }) {
     go(view(Math.min(scale, 7), (x0 + x1) / 2, (y0 + y1) / 2), instant);
     root.classList.add('is-zoomed');
     back.hidden = false;
-    window.__lenis?.stop(); // the page waits while the map is zoomed
-    tiles.forEach((t) => { t.el.dataset.cursor = group.length === 1 && group[0] === t ? '−' : '+'; });
+    // The page waits while the map is zoomed (after it has slid the map into place).
+    if (align && lenis) lenis.scrollTo(lenis.scroll + off, { duration: 0.8, force: true, onComplete: () => { if (focus) lenis.stop(); } });
+    else if (align) scrollTo({ top: scrollY + off, behavior: 'smooth' });
+    else lenis?.stop();
+    setCursor(group.length === 1 ? '−' : '+');
+    setTimeout(refreshCursor, 0);
   }
   function reset() {
     focus = null;
@@ -102,7 +109,8 @@ export function initMapGallery({ reducedMotion }) {
     root.classList.remove('is-zoomed');
     back.hidden = true;
     window.__lenis?.start();
-    tiles.forEach((t) => { t.el.dataset.cursor = '+'; });
+    setCursor('+');
+    setTimeout(refreshCursor, 0);
   }
   // The pictures around a point: the closest first, then more while the group stays compact.
   const nearest = (fx, fy) => {
@@ -124,9 +132,14 @@ export function initMapGallery({ reducedMotion }) {
     return [(e.clientX - r.left - gsap.getProperty(field, 'x')) / s, (e.clientY - r.top - gsap.getProperty(field, 'y')) / s];
   };
 
+  // The cursor label follows what is under the pointer; it must be told when the picture under it changes without a move.
+  let mx = -1; let my = -1;
+  window.addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; }, { passive: true });
+  const refreshCursor = () => document.elementFromPoint(mx, my)?.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+  const setCursor = (text) => { stage.dataset.cursor = text; tiles.forEach((t) => { t.el.dataset.cursor = text; }); };
+
   let dragged = false;
   tiles.forEach((t) => {
-    t.el.dataset.cursor = '+';
     t.el.addEventListener('click', (e) => {
       if (dragged) { e.preventDefault(); return; }
       if (focus?.length === 1 && focus[0] === t) { reset(); return; } // a single picture in frame: a click leaves
@@ -139,6 +152,7 @@ export function initMapGallery({ reducedMotion }) {
   // The empty space between the pictures zooms too: onto the pictures nearest to the click.
   stage.addEventListener('click', (e) => {
     if (dragged || e.target.closest('.mapg__tile, .mapg__back')) return;
+    if (focus?.length === 1) { reset(); return; } // one picture in frame: any click leaves
     const [fx, fy] = toField(e);
     zoom(nearest(fx, fy));
   });
@@ -186,6 +200,7 @@ export function initMapGallery({ reducedMotion }) {
   }, { threshold: 0.15 }).observe(stage);
 
   gsap.set(field, { transformOrigin: '0 0' });
+  setCursor('+');
   measure();
   new ResizeObserver(measure).observe(stage);
   if (!reducedMotion) {
