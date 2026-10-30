@@ -45,7 +45,7 @@ function scrub(root, chat, items) {
     if (i < 0) return 0;
     cache = cache || bottoms();
     const need = Math.max(...cache.slice(0, i + 1)) + ROOM;
-    return Math.min(0, win.clientHeight - need);
+    return Math.min(0, win.clientHeight * MID - need); // the newest bubble lands mid-window, older ones stack above
   };
 
   const tl = gsap.timeline({ paused: true, defaults: { immediateRender: false } });
@@ -77,6 +77,8 @@ function scrub(root, chat, items) {
     onRefreshInit: () => { cache = null; },
   });
 }
+
+const MID = 0.58; // share of the window height where the newest bubble's bottom edge rests
 
 export function initReviews({ reducedMotion }) {
   initReviewForm({ reducedMotion });

@@ -2,54 +2,48 @@
    rows with "+" left, question in the right column and a square arrow far right. Black and Rich Red only.
    Markup: see src/js/site/faq.js. */
 .faq {
-  --faq-cols: minmax(0, 1fr) minmax(0, 1fr);
-  --faq-arrow: 44px;
-}
-
-.faq__head {
+  --faq-arrow: 36px;
   display: grid;
-  grid-template-columns: var(--faq-cols);
-  gap: 0 var(--gutter);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 32px var(--gutter);
   align-items: start;
-  margin-bottom: clamp(32px, 4vw, 64px);
 }
-.faq__word {
-  margin-left: -0.055em;
-  font-size: clamp(96px, 10vw, 140px);
-  font-weight: 500;
-  line-height: 0.8;
-}
-.faq__caption { justify-self: end; padding-top: 0.4em; font-size: 14px; line-height: 20px; color: var(--mute); }
 
-.faq__list { border-bottom: var(--dash); }
+/* Two columns: a small title that stays put on the left, the accordion on the right (columns 6-12). */
+.faq__head { grid-column: 1 / 5; position: sticky; top: calc(var(--bar-h) + 40px); }
+.faq__word { font-size: var(--fs-h2); line-height: 0.94; }
+.faq__caption { margin-top: 16px; font-size: 14px; line-height: 20px; color: var(--mute); }
+.faq__head .btn { margin-top: 24px; }
+
+.faq__list { grid-column: 6 / 13; border-bottom: var(--dash); }
 .faq__item { border-top: var(--dash); }
 .faq__q { font: inherit; }
 
 .faq__btn {
-  display: grid;
-  grid-template-columns: var(--faq-cols);
-  gap: 0 var(--gutter);
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 24px;
   width: 100%;
-  padding: clamp(18px, 1.8vw, 26px) 0;
+  padding: clamp(14px, 1.4vw, 20px) 0;
   text-align: left;
 }
-.faq__row { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.faq__row { display: flex; flex: 1; align-items: center; gap: 24px; }
 .faq__text {
-  max-width: 34ch;
-  font-size: clamp(18px, 1.5vw, 24px);
-  font-weight: 500;
+  max-width: 44ch;
+  font-size: clamp(16px, 1.25vw, 18px);
+  font-weight: 450;
   line-height: 1.2;
   transition: color var(--dur-1);
 }
 
 /* "+" turns into a Rich Red "−" when open */
-.faq__plus { position: relative; width: 14px; height: 14px; transition: transform var(--dur-3) var(--ease-spring); }
+.faq__plus { position: relative; order: 2; flex: none; width: var(--faq-arrow); height: var(--faq-arrow); background: var(--paper-3); transition: transform var(--dur-3) var(--ease-spring), background-color var(--dur-1); }
 .faq__plus::before,
 .faq__plus::after {
   content: '';
-  position: absolute; left: 0; top: 50%;
-  width: 100%; height: 2px;
+  position: absolute; left: calc(50% - 7px); top: 50%;
+  width: 14px; height: 2px;
   margin-top: -1px;
   background: currentColor;
   transition: transform var(--dur-2) var(--ease-out), background-color var(--dur-1);
@@ -57,7 +51,7 @@
 .faq__plus::after { transform: rotate(90deg); }
 
 .faq__arrow {
-  display: grid;
+  display: none;
   place-items: center;
   flex: none;
   width: var(--faq-arrow);
@@ -82,17 +76,17 @@
 /* Answer: height eases open via grid rows; hidden from the accessibility tree while closed */
 .faq__a {
   display: grid;
-  grid-template-columns: var(--faq-cols);
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: 0fr;
   gap: 0 var(--gutter);
   visibility: hidden;
   transition: grid-template-rows var(--dur-3) var(--ease-out), visibility 0s 0.98s;
 }
 .faq__item.is-open .faq__a { grid-template-rows: 1fr; visibility: visible; transition-delay: 0s; }
-.faq__clip { grid-column: 2; min-height: 0; overflow: hidden; }
+.faq__clip { min-height: 0; overflow: hidden; }
 .faq__body {
   max-width: 54ch;
-  padding: 0 calc(var(--faq-arrow) + 24px) clamp(22px, 2.2vw, 32px) 0;
+  padding: 0 calc(var(--faq-arrow) + 24px) clamp(18px, 1.8vw, 26px) 0;
   color: var(--mute);
   font-size: 16px;
   line-height: 1.5;
@@ -110,9 +104,11 @@ dl.faq__list dd { margin: 0; padding-bottom: 22px; color: var(--mute); }
 /* After the pricing cards */
 .pricing-faq { margin-top: clamp(96px, 12vw, 200px); }
 
+@media (max-width: 900px) {
+  .faq__head { grid-column: 1 / -1; position: static; }
+  .faq__list { grid-column: 1 / -1; }
+}
 @media (max-width: 720px) {
-  .faq { --faq-cols: 22px minmax(0, 1fr); --faq-arrow: 38px; }
-  .faq__head { grid-template-columns: auto minmax(0, 1fr); }
-  .faq__caption { max-width: 12ch; text-align: right; }
+  .faq { --faq-arrow: 32px; }
   .faq__body { padding-right: 0; font-size: 16px; }
 }

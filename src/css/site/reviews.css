@@ -3,8 +3,9 @@
 .reviews {
   --bubble-cut: 12px;
   position: relative;
-  max-width: 1120px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
+  padding: 0 var(--edge);
 }
 
 /* The block ends right after the last message (row 54): an ordinary gap, not the big section padding */
@@ -16,12 +17,16 @@
 .reviews.is-scrubbed .reviews__stage {
   position: sticky;
   top: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 0 var(--gutter);
   height: 100vh;
   height: 100svh;
   padding-top: calc(var(--bar-h) + clamp(24px, 5vh, 64px));
 }
+/* The title stays put on the left; the messages arrive mid-screen on the right. */
+.reviews.is-scrubbed .reviews__window { grid-column: 2; margin-top: 0; }
+.reviews.is-scrubbed .reviews__head { grid-column: 1; }
 .reviews.is-scrubbed .reviews__window {
   flex: 1;
   min-height: 0;
@@ -37,9 +42,8 @@
 /* Rows 18, 24: a big heading on the left edge, the thread of small texts centred under it */
 .reviews__head { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
 .reviews__title {
-  max-width: 14ch;
-  font-size: var(--fs-xl);
-  font-weight: 500;
+  max-width: 16ch;
+  font-size: var(--fs-h2);
   line-height: 0.96;
   text-wrap: balance;
 }
@@ -59,7 +63,7 @@
   flex-direction: column;
   gap: 28px;
   width: 100%;
-  max-width: 880px;
+  max-width: 720px;
   margin: clamp(56px, 7vw, 112px) auto 0;
 }
 
