@@ -1,10 +1,11 @@
 import { COACHES, coachPhoto } from './coaches-data.js';
+import { MEDIA, mediaUrl } from './media.js';
 
 // Club life gallery (map-gallery.js): everything that can appear on the map. To add photos later, append
 // to EXTRA below ({ src, ar } with ar = width / height; add `video: '/media/...'` for a clip); the map lays
 // out whatever is here, repeating pictures with a different crop until it has TILES squares to fill.
 
-export const TILES = 42;
+export const TILES = 84;
 
 const CLIPS = [
   { name: 'clay-aerial', video: true }, { name: 'clay-rally', video: true }, { name: 'clay-serve' }, { name: 'junior-lesson', video: true },
@@ -14,8 +15,13 @@ const CLIPS = [
 
 const EXTRA = []; // { src: '/media/club/court-1.jpg', ar: 1.5 }
 
+// The stock photos of the other blocks (hotlinked, see media.js), landscape and portrait mixed.
+const STOCK = ['services', 'community', 'advantages']
+  .flatMap((group) => MEDIA[group].map((_, i) => ({ src: mediaUrl(`${group}.${i}`, 900), ar: i % 3 === 0 ? 0.8 : 1.45, alt: '' })));
+
 export const GALLERY = [
   ...COACHES.map((c) => ({ src: coachPhoto(c), ar: 4 / 5, alt: c.name })),
   ...CLIPS.map((c) => ({ src: `/media/clips/${c.name}.jpg`, video: c.video ? `/media/clips/${c.name}.mp4` : null, ar: 1.9, alt: '' })),
+  ...STOCK,
   ...EXTRA,
 ];

@@ -38,16 +38,10 @@
         <p class="tag hero__tag hero__tag--c" data-hero-fade>Tennis club of Alexander Milevski</p>
         <p class="tag hero__tag hero__tag--l" data-hero-fade><b>01</b> Miami, Coconut Grove</p>
         <p class="tag hero__tag hero__tag--r" data-hero-fade>2150 S Bayshore Dr <b>16 courts</b></p>
-        <p class="tag hero__tag hero__tag--s" data-hero-fade>Scroll <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M6 1v10M2 7l4 4 4-4"/></svg></p>
+        <p class="hero__mouse" data-hero-fade role="img" aria-label="Scroll down"><i></i></p>
         <div class="hero__content">
           <div class="hero__main">
-            <h1 class="hero__title" data-hero-title>Clay, grass, hard.<br /><em>No rush.</em></h1>
-            <ul class="hero__facts" data-hero-fade aria-label="The club in numbers">
-              <li><b>16</b><span>courts</span></li>
-              <li><b>4</b><span>surfaces</span></li>
-              <li><b>6–23</b><span>open Mon–Fri</span></li>
-              <li><b>7–22</b><span>open Sat–Sun</span></li>
-            </ul>
+            <h1 class="hero__title" data-hero-title>Clay grass and hard courts for people who play after work <em>and never rush</em></h1>
           </div>
         </div>
       </div>
@@ -57,7 +51,7 @@
     <section class="section club" id="club" aria-labelledby="club-title">
       <h2 class="visually-hidden" id="club-title">The club</h2>
       <div class="grid grid--rows club__grid">
-        <p class="mark col-12" data-lines><svg class="mark__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10.6 1h2.8l-.5 7.4 5.3-5.2 2 2-5.2 5.3L23 10.6v2.8l-7.4-.5 5.2 5.3-2 2-5.3-5.2.5 7.4h-2.8l.5-7.4-5.3 5.2-2-2 5.2-5.3L1 13.4v-2.8l7.4.5-5.2-5.3 2-2 5.3 5.2z"/></svg><span>Ready for your next court?</span></p>
+        <p class="mark col-12" data-lines><svg class="mark__icon" viewBox="0 -720 600 720" aria-hidden="true"><use href="#bp-ball"/></svg><span>Ready for your next court?</span></p>
         <p class="club__text col-10 start-3 p-shift-1" data-words="ink">Break Point is a club for people who play after work. Book a court in under a minute, find a partner at your level, train with a coach who remembers last week, then cool off on the terrace. Sixteen courts, lit until <em>closing time.</em></p>
         <ul class="club__board col-12" aria-label="The club in numbers" data-club-board>
           <li class="club__note" data-club-note><span class="club__v">16</span><span class="club__k">courts</span></li>
@@ -73,7 +67,7 @@
       <div class="coach-cloud__stage">
         <div class="coach-cloud__field" data-cloud-field aria-hidden="true"></div>
         <div class="coach-cloud__copy">
-          <h2 class="h2 coach-cloud__title" id="coaches-title" data-lines><span>Twenty coaches.</span> <span>One of them is <em>yours.</em></span></h2>
+          <h2 class="h2 coach-cloud__title" id="coaches-title" data-lines><span>Twenty coaches</span> <span>One of them is <em>yours</em></span></h2>
           <p class="coach-cloud__lead">Tennis and padel, first lessons to tournament prep. Pick by level, language or the hour you are free.</p>
           <a class="btn" href="/coaches.html"><span class="btn__bg"></span><span class="btn__label">Meet the coaches</span></a>
         </div>
@@ -83,7 +77,7 @@
     <!-- 04 Membership: heading and a line, then the services as a pinned sideways lane (court-lane.js) -->
     <section class="mship" id="membership" aria-labelledby="mship-title">
       <div class="grid grid--rows mship__head">
-        <h2 class="h2 h-xl col-8" id="mship-title" data-lines>Membership, <em>made for play.</em></h2>
+        <h2 class="h2 h-xl col-8" id="mship-title" data-lines>Membership <em>made for play</em></h2>
         <p class="note col-4 start-9">Members get the good hours first, people to play with and a place to stay after the match.</p>
       </div>
       <div class="mlane" data-mlane>
@@ -112,7 +106,7 @@
     <!-- 07 Community & reviews -->
     <section class="section community" id="community" aria-labelledby="community-title">
       <div class="grid grid--rows community__head">
-        <h2 class="h2 h-xl col-10 start-3" id="community-title" data-lines>Draws, finals and the <em>occasional</em> upset.</h2>
+        <h2 class="h2 h-xl col-10 start-3" id="community-title" data-lines>Draws finals and the <em>occasional</em> upset</h2>
         <div class="note col-5 start-3">
           <p class="note__lead" data-lines>Friday Night Doubles, the Club Open and the Club Championship. Members apply first; guests take every open spot.</p>
           <a class="btn" href="/tournaments.html"><span class="btn__bg"></span><span class="btn__label">Tournament calendar</span></a>
@@ -120,7 +114,10 @@
       </div>
     </section>
     <!-- Club life: one map of small pictures; a click zooms in on a few of them (map-gallery.js) -->
-    <section class="mapg" data-mapg aria-label="Club life">
+    <section class="mapg" data-mapg aria-labelledby="mapg-title">
+      <div class="mapg__head">
+        <h2 class="h2 h-xl" id="mapg-title" data-lines>Club gallery</h2>
+      </div>
       <div class="mapg__stage" data-mapg-stage data-cursor="+">
         <div class="mapg__field" data-mapg-field></div>
         <button class="btn mapg__back" type="button" data-mapg-back hidden><span class="btn__bg"></span><span class="btn__label">Back to all</span></button>
@@ -128,10 +125,12 @@
     </section>
 
     <!-- 09 Book a court: full-screen call to action before the footer -->
-<!-- include:partials/cta.html -->
   </main>
 
+<div class="finale">
+<!-- include:partials/cta.html -->
 <!-- include:partials/footer.html -->
+</div>
 
   <script type="module" src="/src/js/pages/home.js"></script>
 </body>

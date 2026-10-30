@@ -3,12 +3,11 @@ import { CHAPTERS, COURT, cameraAt, ballAt, timeAt } from './path.js';
 
 // Chapter 3, "Water. Roll. Brush. Line.": four small acts on the clay, one per word, each laid where the
 // camera looks while that word is on screen. Everything is a function of the chapter's progress q (0..1),
-// so scrubbing back undoes it. Acts: spray and a wet patch, a roller crossing, a broom sweeping, chalk drawn.
+// so scrubbing back undoes it. Acts: a wet patch, a roller crossing, a broom sweeping, chalk drawn.
 
 const [P0, P1] = CHAPTERS[2].p;
 const smooth = (x) => x * x * (3 - 2 * x);
 const clamp = (v) => Math.min(1, Math.max(0, v));
-const DROPS = 90;
 const BAND = 3; // half width of an act, metres
 
 export function createCraft(scene) {
@@ -47,17 +46,9 @@ export function createCraft(scene) {
     return root;
   });
 
-  // 0 water: dark wet patch + droplets
+  // 0 water: a dark wet patch that spreads
   const wet = flatPlane(2 * BAND, 2 * BAND, mat(0x3b2216, 0.4));
   acts[0].add(wet);
-  const dropGeo = new THREE.BufferGeometry();
-  const dropPos = new Float32Array(DROPS * 3);
-  dropGeo.setAttribute('position', new THREE.BufferAttribute(dropPos, 3));
-  const seeds = Array.from({ length: DROPS }, (_, i) => ({ x: Math.sin(i * 12.9) * BAND, z: Math.cos(i * 7.3) * BAND * 0.8, d: (i % 30) / 30, h: 1.2 + ((i * 37) % 10) / 10 }));
-  const drops = new THREE.Points(dropGeo, new THREE.PointsMaterial({ color: 0xdff1ff, size: 0.09, transparent: true, opacity: 0.95, depthWrite: false }));
-  drops.frustumCulled = false;
-  acts[0].add(drops);
-  keep.push(dropGeo, drops.material);
 
   // 1 roll: a drum crossing the court, a darker pressed strip behind it
   const drumGeo = new THREE.CylinderGeometry(0.34, 0.34, 2.4, 20);
@@ -100,15 +91,6 @@ export function createCraft(scene) {
       const w = u(0);
       wet.scale.setScalar(0.3 + 0.7 * smooth(w));
       wet.material.opacity = 0.4 * smooth(clamp(w * 2));
-      drops.visible = w > 0 && w < 1;
-      seeds.forEach((s, i) => {
-        const t = clamp(w * 1.5 - s.d * 0.5) % 1;
-        const live = w * 1.5 - s.d * 0.5 > 0 && w * 1.5 - s.d * 0.5 < 1;
-        dropPos[i * 3] = s.x * (0.3 + t);
-        dropPos[i * 3 + 1] = live ? 4 * s.h * t * (1 - t) : -5;
-        dropPos[i * 3 + 2] = s.z * (0.3 + t);
-      });
-      dropGeo.attributes.position.needsUpdate = true;
       // roll
       const r = smooth(u(1));
       const dx = -BAND + 2 * BAND * r;

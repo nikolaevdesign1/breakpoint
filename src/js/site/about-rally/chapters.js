@@ -13,6 +13,8 @@ const FADE = 0.16; // share of a chapter spent fading in (and out)
 const DRIFT = 120; // px of parallax travel at depth 1
 const CHAR_SPREAD = 0.55; // share of a heading's arrival that the first and last letter are apart
 const BLUR = 6;
+const SETTLE = 0.72; // share of a letter's arrival spent swapping through other letters before it locks
+const SWAP_MS = 90;
 
 // Words stay in the page for screen readers; only a faded-out link leaves the tab order.
 function put(el, w, y, link) {
@@ -29,8 +31,14 @@ export function createChapters(stage, onJump) {
     el,
     items: [...el.querySelectorAll('[data-d]')].map((n) => {
       const big = n.classList.contains('rc__big');
-      if (big) prepareText(n, { mode: 'chars' });
-      return { el: n, d: +n.dataset.d, depth: +n.dataset.depth || 0, link: !!n.querySelector('a'), chars: big ? [...n.querySelectorAll('.tr-char')] : null };
+      if (big) {
+        prepareText(n, { mode: 'chars' });
+        // lock each letter to its own width, so the stand-in letters never push the line around
+        const letters = [...n.querySelectorAll('.tr-char')];
+        const widths = letters.map((c) => c.getBoundingClientRect().width);
+        if (widths.some(Boolean)) letters.forEach((c, i) => { c.style.width = `${widths[i]}px`; });
+      }
+      return { el: n, d: +n.dataset.d, depth: +n.dataset.depth || 0, link: !!n.querySelector('a'), chars: big ? [...n.querySelectorAll('.tr-char')] : null, pool: big ? [...n.textContent.replace(/\s+/g, '')] : null };
     }),
     counts: [...el.querySelectorAll('[data-count]')].map((n) => ({ el: n, to: +n.dataset.count })),
     words: [...el.querySelectorAll('[data-word]')],
@@ -59,6 +67,17 @@ export function createChapters(stage, onJump) {
             const n = it.chars.length;
             it.chars.forEach((ch, k) => {
               const pc = smooth(clamp((wi - (k / n) * CHAR_SPREAD) / (1 - CHAR_SPREAD)));
+              const swapping = pc > 0 && pc < SETTLE;
+              const now = performance.now();
+              // while it arrives a letter flips through other letters of its heading, then settles on its own
+              if (swapping && now - (ch._t || 0) >= SWAP_MS) {
+                ch._t = now;
+                const pool = it.pool;
+                ch.textContent = pool[(Math.random() * pool.length) | 0];
+                ch._k = null;
+              } else if (!swapping && ch.textContent !== ch.dataset.char) {
+                ch.textContent = ch.dataset.char;
+              }
               const key = pc.toFixed(2);
               if (ch._k === key) return;
               ch._k = key;

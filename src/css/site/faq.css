@@ -12,7 +12,7 @@
 /* Two columns: a small title that stays put on the left, the accordion on the right (columns 6-12). */
 .faq__head { grid-column: 1 / 5; position: sticky; top: calc(var(--bar-h) + 40px); }
 .faq__word { font-size: var(--fs-h2); line-height: 0.94; }
-.faq__caption { margin-top: 16px; font-size: 14px; line-height: 20px; color: var(--mute); }
+.faq__caption { margin-top: 16px; font-size: 12px; line-height: 18px; color: var(--mute); }
 .faq__head .btn { margin-top: 24px; }
 
 .faq__list { grid-column: 6 / 13; border-bottom: var(--dash); }

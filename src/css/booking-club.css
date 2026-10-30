@@ -66,7 +66,7 @@
 @media (max-width: 640px) { .dock__club { order: -1; color: var(--snow); } .dock__club + *, .dock__club { box-shadow: none; } .dock__filters { box-shadow: inset 1px 0 0 rgba(244, 243, 239, 0.12); } }
 
 /* ---------- Pins on the map ---------- */
-.cl-layer { position: fixed; inset: 0; z-index: 33; pointer-events: none; font-family: var(--font-sans); letter-spacing: 0; transition: opacity 0.5s var(--ease-out); }
+.cl-layer { position: fixed; inset: 0; z-index: 33; pointer-events: none; font-family: var(--font-sans); transition: opacity 0.5s var(--ease-out); }
 .cl-layer.is-hidden, body.hud-open .cl-layer, body.postcard-on .cl-layer { opacity: 0; visibility: hidden; }
 .cl-pin {
   position: absolute; left: 0; top: 0;

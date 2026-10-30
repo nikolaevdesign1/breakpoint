@@ -4,19 +4,20 @@ import { GALLERY, TILES } from './gallery-data.js';
 
 // Club life: one big field of small pictures, laid out like a map. Over the field the cursor is a "+":
 // a click zooms the whole field in on that spot until three to five pictures fill the frame; a click on
-// those (or the Back button, or Esc) returns to the overview. Hovering a picture lifts and enlarges it.
+// those opens one picture full size in a lightbox (Esc or Close to leave it); the Back button or Esc in the
+// zoomed view returns to the overview. Hovering a picture lifts and enlarges it.
 //
 // The field is FW x FH design units; one transform (x, y, scale) on it does all the zooming.
 
 const FW = 1600;
 const FH = 900;
-const GAP = 6;
+const GAP = 4;
 const GROUP_MIN = 3; // pictures that fill the frame after a zoom: three to five
 const GROUP_MAX = 5;
-const GROUP_W = 520; // widest and tallest area a group may cover, in field units
-const GROUP_H = 340;
+const GROUP_W = 380; // widest and tallest area a group may cover, in field units
+const GROUP_H = 250;
 const PAD = 0.1; // share of the frame left empty around the group
-const WIDTHS = [64, 78, 92, 108, 128, 152];
+const WIDTHS = [46, 56, 66, 78, 92, 110];
 
 // Small deterministic generator, so the map looks the same on every visit.
 function rng(seed) {
@@ -67,6 +68,7 @@ export function initMapGallery({ reducedMotion }) {
     return { ...t, el, cx: t.x + t.w / 2, cy: t.y + t.h / 2 };
   });
   const videos = [...field.querySelectorAll('video')];
+  const box = lightbox();
 
   let sw = 0;
   let sh = 0;
@@ -91,7 +93,7 @@ export function initMapGallery({ reducedMotion }) {
     go(view(Math.min(scale, 7), (x0 + x1) / 2, (y0 + y1) / 2), instant);
     root.classList.add('is-zoomed');
     back.hidden = false;
-    tiles.forEach((t) => { t.el.dataset.cursor = group.includes(t) ? 'Back' : '+'; });
+    tiles.forEach((t) => { t.el.dataset.cursor = group.includes(t) ? 'Open' : '+'; });
   }
   function reset() {
     focus = null;
@@ -123,13 +125,13 @@ export function initMapGallery({ reducedMotion }) {
   tiles.forEach((t) => {
     t.el.dataset.cursor = '+';
     t.el.addEventListener('click', (e) => {
-      if (focus?.includes(t)) { reset(); return; }
+      if (focus?.includes(t)) { box.open(t); return; }
       const [fx, fy] = e.detail ? toField(e) : [t.cx, t.cy]; // keyboard: around the tile itself
       zoom(nearest(fx, fy).includes(t) ? nearest(fx, fy) : nearest(t.cx, t.cy));
     });
   });
   back.addEventListener('click', reset);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && focus) reset(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && focus && !box.isOpen()) reset(); });
 
   // Clips play only while the map is on screen.
   new IntersectionObserver(([en]) => {
@@ -151,4 +153,37 @@ export function initMapGallery({ reducedMotion }) {
       onEnter: () => gsap.to(els, { autoAlpha: 1, scale: 1, duration: 0.6, ease: 'back.out(1.6)', stagger: { amount: 1.2, from: 'random' } }),
     });
   }
+}
+
+// One picture full size over the page. A clip plays, a photo shows its large file.
+function lightbox() {
+  const el = document.createElement('div');
+  el.className = 'mapg-box';
+  el.hidden = true;
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('aria-modal', 'true');
+  el.setAttribute('aria-label', 'Club gallery picture');
+  el.innerHTML = '<div class="mapg-box__media" data-box-media></div><button class="btn btn--light mapg-box__close" type="button" data-cursor="Close"><span class="btn__bg"></span><span class="btn__label">Close</span></button>';
+  document.body.append(el);
+  const holder = el.querySelector('[data-box-media]');
+  const close = () => {
+    el.hidden = true;
+    holder.innerHTML = '';
+    document.documentElement.classList.remove('mapg-box-open');
+    window.__lenis?.start();
+  };
+  el.addEventListener('click', close);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !el.hidden) close(); });
+  return {
+    isOpen: () => !el.hidden,
+    open(t) {
+      holder.innerHTML = t.src.video
+        ? `<video src="${t.src.video}" poster="${t.src.src}" autoplay muted loop playsinline></video>`
+        : `<img src="${t.src.src}" alt="${t.src.alt || ''}" />`;
+      el.hidden = false;
+      document.documentElement.classList.add('mapg-box-open');
+      window.__lenis?.stop();
+      el.querySelector('button').focus({ preventScroll: true });
+    },
+  };
 }

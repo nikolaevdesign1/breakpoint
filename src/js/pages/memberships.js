@@ -1,5 +1,4 @@
 import gsap from 'gsap';
-import { entryDone } from '../site/entry.js';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { initSite } from '../site/site.js';
 import { initReviews } from '../site/reviews.js';
@@ -23,7 +22,7 @@ const { reducedMotion } = initSite();
 initReviews({ reducedMotion });
 initFaq();
 initMembershipApply({ reducedMotion });
-entryDone.then(playIntro);
+playIntro();
 initMemberCard({ reducedMotion });
 initCountUps('.mhero__facts', { reducedMotion });
 initCountUps('.perks', { reducedMotion });

@@ -48,7 +48,7 @@
   text-wrap: balance;
 }
 /* the small step under the big one (row 18), then the button, before the feed */
-.reviews__lead { max-width: 34ch; margin-top: 24px; font-size: 16px; line-height: 1.5; color: var(--mute); }
+.reviews__lead { max-width: 34ch; margin-top: 24px; font-size: 14px; line-height: 1.5; color: var(--mute); }
 .reviews__head .btn { margin-top: 24px; }
 .plate-grass .reviews__lead { color: rgba(255, 243, 218, 0.8); }
 

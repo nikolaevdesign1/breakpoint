@@ -126,7 +126,7 @@
 .ruler--right .ruler__mark { left: auto; right: 0; }
 
 /* ---------- Tag: a small caption in 12px capitals, set on the edges of big blocks ---------- */
-.tag { font-size: 12px; line-height: 16px; font-weight: 450; letter-spacing: 0.04em; text-transform: uppercase; }
+.tag { font-size: 10px; line-height: 14px; font-weight: 450; }
 
 /* ---------- Ball cursor (cursor.js) ---------- */
 html.has-cursor, html.has-cursor * { cursor: none !important; }
@@ -144,7 +144,6 @@ html.has-cursor input, html.has-cursor textarea, html.has-cursor [contenteditabl
 .cursor-label {
   position: fixed; left: 0; top: 0; z-index: 1001;
   padding: 8px 14px; /* row 114: compact, 14px regular */
-  border-radius: 999px; /* round plate behind the cursor text */
   background: var(--ink-2);
   color: var(--snow);
   font-size: 14px;

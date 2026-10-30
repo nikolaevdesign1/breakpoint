@@ -28,7 +28,6 @@ body.hud-open .bp-postcard { opacity: 0; pointer-events: none; }
   position: fixed; inset: 0; z-index: 900; /* over every panel, under the ball cursor */
   background: var(--night);
   font-family: var(--font-sans);
-  letter-spacing: 0;
 }
 .postcard__shot {
   position: absolute; inset: 0;
@@ -80,7 +79,6 @@ body.hud-open .bp-postcard { opacity: 0; pointer-events: none; }
   color: var(--snow);
   box-shadow: inset 0 0 0 1px rgba(244, 243, 239, 0.12), 0 24px 48px -24px rgba(0, 0, 0, 0.7);
   font-family: var(--font-sans);
-  letter-spacing: 0;
   pointer-events: none; /* information only: the court under it stays hovered and clickable */
   transform-origin: 100% 0;
   opacity: 0;

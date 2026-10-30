@@ -1,4 +1,4 @@
-/* ---------- Headings: one dense display face, capitals ----------
+/* ---------- Headings: one dense display face, display face ----------
    After the sport-brand moodboard: tall, tight, almost shouted. Anton (@fontsource) has a single 400 weight, so
    the 500s that Switzer needed are reset here. Accent words (<em>) keep the grey of base.css. Loaded last so it
    wins over the per-page title rules; page files keep only the size and spacing. */
@@ -8,16 +8,27 @@ h1, h2, h3,
 .coach-cloud__title, .cgal__title, .hud-head__title {
   font-family: var(--font-display);
   font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.005em;
   line-height: 0.94;
 }
 h3 { line-height: 1; }
+
+/* The accented words in a heading are outlined: no fill, a line in the heading's own colour */
+:is(h1, h2, h3, .h2, .h-xl, .h-xxl) em {
+  color: inherit;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: max(1.5px, 0.018em) currentColor;
+  paint-order: stroke fill;
+}
 /* h3 tags that are really small labels or wrappers stay in the text face */
 .cv__label, .faq__q, .apply__done-title, .cal__month {
   font-family: var(--font-sans);
   font-weight: 400;
   text-transform: none;
-  letter-spacing: 0;
 }
-.cal__month { font-family: var(--font-display); text-transform: uppercase; font-weight: 400; }
+.cal__month { font-family: var(--font-display); font-weight: 400; }
+
+/* Titles of the small items in the 3D chapters and the rule rows use the same face as the headings */
+.rc__step b, .rc__note b, .rc__who b, .rc__sign .rc__name, .rules__row b {
+  font-family: var(--font-display);
+  font-weight: 400;
+}

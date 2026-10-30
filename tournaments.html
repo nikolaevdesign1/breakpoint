@@ -11,40 +11,10 @@
 <!-- include:partials/nav.html -->
 
   <main id="main">
-    <!-- Hero: the next draw with a live countdown -->
-    <section class="thero cut cut--c" style="--cut-x: 6%" aria-labelledby="tournaments-title">
-      <div class="thero__media">
-        <img src="/media/clips/tournaments-night.jpg" width="1280" height="720" fetchpriority="high" alt="Clay courts under the floodlights at dusk" />
-        <video muted loop playsinline preload="none" aria-hidden="true" data-hero-video data-src="/media/clips/tournaments-night.mp4"></video>
-      </div>
-      <div class="thero__top">
-        <h1 class="thero__title" id="tournaments-title" data-lines data-parallax="0.5">Draws by years <em>played.</em></h1>
-        <p class="thero__lead">Every event is split by how long you’ve played and your age group, so you meet people at your level.</p>
-      </div>
-      <div class="thero__next" data-next>
-        <div class="thero__event">
-          <p class="thero__eyebrow">Next draw · <span data-next-dates></span></p>
-          <h2 class="thero__name" data-next-name></h2>
-          <p class="thero__meta" data-next-meta></p>
-          <div class="thero__actions">
-            <button class="btn btn--light" type="button" data-apply data-next-apply><span class="btn__bg"></span><span class="btn__label">Apply</span></button>
-            <a class="thero__link" href="#calendar">All dates</a>
-            <span class="thero__spots" data-next-spots></span>
-          </div>
-        </div>
-        <div class="countdown" data-countdown role="timer" aria-label="Time until the next draw starts">
-          <span class="countdown__unit"><b data-cd="d">00</b><small data-cd-label="d">days</small></span>
-          <span class="countdown__unit"><b data-cd="h">00</b><small data-cd-label="h">hrs</small></span>
-          <span class="countdown__unit"><b data-cd="m">00</b><small>min</small></span>
-          <span class="countdown__unit"><b data-cd="s">00</b><small>sec</small></span>
-        </div>
-      </div>
-    </section>
-
     <!-- Calendar -->
     <section class="section cal-section" id="calendar" aria-labelledby="calendar-title">
       <div class="grid grid--rows cal-section__head">
-        <h2 class="h2 h-xl col-8" id="calendar-title" data-lines data-parallax="0.5">Fourteen events, four <em>months.</em></h2>
+        <h2 class="h2 h-xl col-8" id="calendar-title" data-lines data-parallax="0.5">Fourteen events four <em>months</em></h2>
         <p class="note cal-section__lead col-3 start-10 p-shift-1">Fourteen amateur events over the next four months. Filter by how long you’ve played and your age, then pick a date.</p>
       </div>
 
@@ -106,7 +76,6 @@
         <dt>What should I bring?</dt><dd>Your racket, clay shoes for the red courts and water. New balls are at the referee’s desk.</dd>
       </dl>
     </section>
-<!-- include:partials/cta.html -->
   </main>
 
   <!-- Application form (multi-step modal), driven by src/js/site/tournament-apply.js -->
@@ -207,7 +176,7 @@
       <div class="apply__done" data-apply-done hidden tabindex="-1">
         <span class="apply__ball" aria-hidden="true"></span>
         <p class="kicker-score" data-apply-kicker>Ace</p>
-        <h3 class="apply__done-title">Application received.</h3>
+        <h3 class="apply__done-title">Application received</h3>
         <p class="apply__done-text" data-apply-summary></p>
         <div class="apply__done-actions">
           <button class="btn" type="button" data-apply-close><span class="btn__bg"></span><span class="btn__label">Back to the calendar</span></button>
@@ -217,7 +186,10 @@
     </div>
   </div>
 
+<div class="finale">
+<!-- include:partials/cta.html -->
 <!-- include:partials/footer.html -->
+</div>
 
   <script type="module" src="/src/js/pages/tournaments.js"></script>
 </body>

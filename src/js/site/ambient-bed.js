@@ -1,7 +1,7 @@
 // Neutral sound for every page except the booking map (which has its own bed): a very soft pad of
 // slow chords and a little moving air, synthesised with Web Audio, no files. It fades in over three
-// seconds, follows the shared mute (sound.js) and, if the browser still holds the audio back after a
-// page change, starts on the first gesture.
+// seconds, follows the shared mute (sound.js) and starts on the visitor's first gesture, because browsers
+// hold audio back until then. The bars in the header turn it off.
 
 import { isMuted } from './sound.js';
 
@@ -99,5 +99,4 @@ export function initAmbientBed() {
     if (!ctx) return;
     if (document.hidden) ctx.suspend().catch(() => {}); else apply();
   });
-  if (!isMuted() && sessionStorage.getItem('bp-entered') === 'sound') begin(); // a page change after "Enter with sound"
 }

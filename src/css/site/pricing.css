@@ -7,7 +7,6 @@
   gap: 16px 24px;
   margin-bottom: 24px;
   padding-top: 16px;
-  border-top: var(--dash);
 }
 .plans-bar__note { font-size: 14px; line-height: 20px; color: var(--mute); }
 

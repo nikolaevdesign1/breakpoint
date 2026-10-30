@@ -7,12 +7,7 @@ import { initRules } from '../site/rules.js';
 const rally = document.documentElement.classList.contains('is-rally');
 const section = document.querySelector('[data-rally]');
 
-if (rally) {
-  // photos sit between the chapters in the plain version; in 3D they close the page
-  document.querySelector('[data-rally-end]').append(...section.querySelectorAll('[data-photo]'));
-} else {
-  section.querySelectorAll('[data-d]').forEach((n) => n.setAttribute('data-reveal', ''));
-}
+if (!rally) section.querySelectorAll('[data-d]').forEach((n) => n.setAttribute('data-reveal', ''));
 
 const { ready } = initSite();
 initRules();

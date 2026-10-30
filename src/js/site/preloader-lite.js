@@ -1,5 +1,6 @@
 import gsap from 'gsap';
 import { DUR } from './motion.js';
+import { markPageReady } from './page-ready.js';
 
 // Inner pages: no greeting, only the percent counter on paper, then the sheet lifts and the page's own
 // hero photo opens (page-intro.js). Counts to 90 at once, finishes when fonts and images are in.
@@ -23,6 +24,6 @@ export function playLitePreloader(imageLoads) {
     gsap.timeline({ onComplete: () => pre.remove() })
       .to(num, { v: 100, duration: 0.6, ease: 'power1.out', onUpdate: show })
       .to(pre.firstChild, { autoAlpha: 0, y: -10, duration: 0.6, ease: 'power2.inOut' }, '>0.1')
-      .to(pre, { clipPath: 'inset(0 0 100% 0)', duration: DUR.slow, ease: 'power3.inOut' }, '<0.2');
+      .to(pre, { clipPath: 'inset(0 0 100% 0)', duration: DUR.slow, ease: 'power3.inOut', onStart: () => setTimeout(markPageReady, 250) }, '<0.2');
   });
 }

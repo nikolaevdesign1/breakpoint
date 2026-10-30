@@ -14,8 +14,8 @@
 }
 
 /* A small mark before a big paragraph: a star and a two-line caption in 12px capitals */
-.mark { display: flex; align-items: flex-start; gap: 14px; max-width: 28ch; font-size: 12px; line-height: 16px; text-transform: uppercase; letter-spacing: 0.01em; }
-.mark__icon { flex: none; width: 36px; height: 36px; }
+.mark { display: flex; align-items: flex-start; gap: 14px; max-width: 28ch; font-size: 10px; line-height: 14px; }
+.mark__icon { flex: none; width: 36px; height: 30px; }
 .club--about .club__text { display: grid; gap: 1.1em; font-size: clamp(24px, 2.9vw, 46px); line-height: 1.1; }
 .club--about .club__text p { margin: 0; }
 
@@ -26,7 +26,7 @@
 .club__note + .club__note { padding-left: 16px; border-left: var(--dash); }
 .club__note::before { content: ''; position: absolute; top: 0; left: 0; right: 0; border-top: var(--dash); }
 .club__v { display: block; font-size: var(--fs-xl); font-weight: 500; line-height: 0.96; font-variant-numeric: tabular-nums; }
-.club__k { display: block; max-width: 24ch; margin-top: 12px; font-size: 14px; line-height: 20px; color: var(--mute); }
+.club__k { display: block; max-width: 24ch; margin-top: 12px; font-size: 12px; line-height: 18px; color: var(--mute); }
 
 .club.is-staged .club__note::before { clip-path: inset(0 100% 0 0); transition: clip-path var(--dur-2) var(--ease-in-out); }
 .club.is-staged .club__k,

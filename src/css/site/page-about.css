@@ -10,7 +10,7 @@
 .rally__rail, .rally__tags { display: none; }
 
 .rally__intro { display: grid; gap: 24px; padding: calc(var(--bar-h) + 64px) var(--edge) 64px; }
-.rally__title { font-size: var(--fs-mega); font-weight: 500; line-height: 0.9; letter-spacing: 0; }
+.rally__title { font-size: var(--fs-mega); font-weight: 500; line-height: 0.9; }
 .rally__lead { max-width: 32ch; font-size: 16px; line-height: 24px; color: var(--mute); }
 
 .rc {
@@ -25,7 +25,8 @@
 .rc__small, .rc__sign { font-size: 14px; line-height: 20px; color: var(--mute); }
 .rc__letter, .rc__note, .rc__who, .rc__craft { max-width: 44ch; font-size: 16px; line-height: 24px; text-wrap: pretty; }
 .rc__letter p + p { margin-top: 12px; }
-.rc__note, .rc__who { padding-top: 12px; border-top: 1px dashed currentColor; }
+.rc__note { padding-top: 12px; }
+.rc__who { padding-top: 12px; }
 .rc__avatar { display: block; width: 72px; height: 90px; margin-bottom: 12px; background: var(--sun); }
 .rc__avatar img { width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; }
 .rc__note b, .rc__who b, .rc__sign .rc__name { display: block; margin-bottom: 4px; font-size: 18px; font-weight: 500; line-height: 24px; color: var(--ink); }
@@ -63,14 +64,14 @@
   .rc--return .rc__note { grid-row: 2; }
   .rc--return .rc__note { align-self: end; }
   .rc--return .rc__note--a { grid-column: 1 / span 3; }
-  .rc--return .rc__note--b { grid-column: 5 / span 3; }
-  .rc--return .rc__note--c { grid-column: 9 / span 3; }
+  .rc--return .rc__note--b { grid-column: 4 / span 3; }
+  .rc--return .rc__note--c { grid-column: 7 / span 3; }
 
   .rc--rally .rc__steps { grid-column: 1 / -1; grid-row: 1 / span 2; }
   .rc--rally .rc__step:nth-child(2) { margin-left: 18%; }
   .rc--rally .rc__step:nth-child(3) { margin-left: 6%; }
   .rc--rally .rc__step:nth-child(4) { margin-left: 24%; }
-  .rc--rally .rc__craft { grid-column: 9 / span 4; grid-row: 2; align-self: end; border-top: 1px dashed currentColor; padding-top: 12px; }
+  .rc--rally .rc__craft { grid-column: 9 / span 4; grid-row: 2; align-self: end; padding-top: 12px; }
 
   .rc--net .rc__big { grid-column: 3 / span 9; grid-row: 1; }
   .rc--net .rc__who { grid-row: 2; align-self: end; }
@@ -181,20 +182,7 @@ html.is-rally .rally__rail[hidden] { display: none; }
   color: var(--mute);
   transition: color var(--dur-1) var(--ease-out), transform var(--dur-2) var(--ease-spring);
 }
-.rally__rail button::before {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--ink);
-  transform: scaleY(0);
-  transform-origin: 50% 0;
-  transition: transform var(--dur-3) var(--ease-out);
-}
 .rally__rail button.is-on { color: var(--ink); background: rgba(255, 255, 255, 0.86); }
-.rally__rail button.is-on::before { transform: scaleY(1); }
 @media (hover: hover) {
   .rally__rail button:hover { color: var(--clay); transform: translateY(-2px); }
 }
@@ -234,7 +222,7 @@ html.is-rally .rally__tags { display: block; position: absolute; inset: 0; point
 }
 .rules__head { grid-column: 1 / 5; position: sticky; top: calc(var(--bar-h) + 40px); }
 .rules__title { font-size: var(--fs-h2); font-weight: 500; line-height: 1.05; }
-.rules__note { max-width: 30ch; margin-top: 20px; font-size: 16px; line-height: 1.5; color: var(--mute); }
+.rules__note { max-width: 30ch; margin-top: 20px; font-size: 14px; line-height: 1.5; color: var(--mute); }
 .rules__note .link { color: var(--ink); background-size: 100% 1px; }
 @media (hover: hover) {
   .rules__note .link:hover { background-position: 100% 100%; background-size: 0 1px; }
@@ -291,4 +279,3 @@ html.is-rally .rally__tags { display: block; position: absolute; inset: 0; point
 .rules__head .btn { margin-top: 20px; }
 html.is-rally .rally__rail button { color: #fff; }
 html.is-rally .rally__rail button.is-on { color: var(--ink); }
-html.is-rally .rally__rail button::before { background: var(--clay); }

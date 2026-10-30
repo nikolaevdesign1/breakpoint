@@ -62,8 +62,11 @@
 .hero__tag--c { top: 78px; left: 50%; translate: -50% 0; text-align: center; }
 .hero__tag--l { left: var(--gutter); top: 50%; translate: 0 -50%; }
 .hero__tag--r { right: var(--gutter); top: 50%; translate: 0 -50%; text-align: right; }
-.hero__tag--s { right: var(--gutter); bottom: calc(var(--gutter) + 4px); display: flex; align-items: center; gap: 8px; }
-.hero__tag--s svg { width: 12px; height: 12px; }
+/* A drawn mouse: the wheel runs down and fades, over and over, so the page says "scroll" without a word */
+.hero__mouse { position: absolute; z-index: 1; right: var(--gutter); bottom: calc(var(--gutter) + 4px); display: block; width: 24px; height: 38px; margin: 0; border: 1.5px solid rgba(244, 243, 239, 0.92); border-radius: 12px; filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.5)); }
+.hero__mouse i { position: absolute; left: 50%; top: 7px; width: 3px; height: 8px; margin-left: -1.5px; background: rgba(244, 243, 239, 0.95); border-radius: 2px; animation: hero-wheel 1.8s var(--ease-in-out) infinite; }
+@keyframes hero-wheel { 0% { opacity: 0; transform: translateY(-3px); } 25% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(12px); } }
+@media (prefers-reduced-motion: reduce) { .hero__mouse i { animation: none; } }
 @media (max-width: 760px) { .hero__tag--l, .hero__tag--r { display: none; } .hero__tag--c { top: 70px; width: 80%; } }
 .hero__facts { display: flex; gap: clamp(20px, 2.5vw, 40px); margin-top: clamp(24px, 3vw, 40px); }
 .hero__facts li { padding-left: 12px; border-left: 1px dashed rgba(255, 243, 218, 0.5); }

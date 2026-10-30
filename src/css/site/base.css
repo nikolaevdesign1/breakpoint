@@ -69,7 +69,7 @@ em { font-weight: inherit; color: var(--em-ink, var(--mute)); }
 /* One big number with small corner captions, split from its label by hairlines */
 
 .eyebrow {
-  font-size: var(--fs-mono);
+  font-size:  12px;
   line-height: 1.4;
   color: var(--mute);
 }
@@ -82,7 +82,7 @@ em { font-weight: inherit; color: var(--em-ink, var(--mute)); }
   text-wrap: balance;
 }
 
-.lead { max-width: 40ch; color: var(--mute); font-size: 18px; line-height: 1.45; }
+.lead { max-width: 40ch; color: var(--mute); font-size: 16px; line-height: 1.45; }
 
 /* Headings stay hidden until type-reveal has split them, so they never flash */
 .js [data-lines] { visibility: hidden; }

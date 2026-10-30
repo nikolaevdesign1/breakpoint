@@ -32,7 +32,7 @@ export const avatarUrl = (i, size = 96) =>
 // tone: ink (default) · sun (Malibu Sun cream) · clay (Rich Red)
 export const REVIEW_SETS = {
   home: {
-    title: 'What members text us after a <em>match.</em>',
+    title: 'What members text us after a <em>match</em>',
     items: [
       { text: 'Booked a clay court for 9 PM on a Tuesday. Lights on, clay watered, nobody waiting.', name: 'Marcus T.', meta: 'Tue, 10:42 PM', avatar: 0 },
       { text: 'One hour with Sofia and my second serve finally goes in. Three years of double faults, gone.', name: 'Priya N.', meta: 'Sat, 11:05 AM', avatar: 8, tone: 'sun' },
@@ -47,7 +47,7 @@ export const REVIEW_SETS = {
     ],
   },
   coaching: {
-    title: 'What players text their <em>coach.</em>',
+    title: 'What players text their <em>coach</em>',
     items: [
       { text: 'Kevin filmed my forehand and showed me the exact frame where it breaks. Fixed in two sessions.', name: 'Omar S.', meta: 'Private coaching', avatar: 5 },
       { text: 'Lena remembers what we worked on last month. Better than I do.', name: 'Hannah G.', meta: 'Adult intermediate group', avatar: 17, tone: 'sun' },
@@ -60,7 +60,7 @@ export const REVIEW_SETS = {
     ],
   },
   tournaments: {
-    title: 'Texts from the <em>draw.</em>',
+    title: 'Texts from the <em>draw</em>',
     items: [
       { text: 'Lost in the semis 10–8 in the match tiebreak. Already signed up for next month.', name: 'Nadia B.', meta: 'Club Open', avatar: 20 },
       { text: 'First tournament ever and they put me with people at my level. Won two rounds!', name: 'Chris L.', meta: 'Under 1 year draw', avatar: 7, tone: 'sun' },
@@ -73,7 +73,7 @@ export const REVIEW_SETS = {
     ],
   },
   members: {
-    title: 'What members text us after <em>joining.</em>',
+    title: 'What members text us after <em>joining</em>',
     items: [
       { text: 'Week one: booked Tuesday 7 PM two weeks out. Never got that slot as a guest.', name: 'Jordan P.', meta: 'Club member', avatar: 7 },
       { text: 'The desk matched me with three intermediate players. I have a standing Sunday game now.', name: 'Maya C.', meta: 'Weekday member', avatar: 10, tone: 'sun' },

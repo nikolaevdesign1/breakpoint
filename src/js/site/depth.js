@@ -6,24 +6,27 @@ import gsap from 'gsap';
 
 const FINE = '(hover: hover) and (pointer: fine)';
 
-function lean(items, { maxX, maxY, perspective, zStep = 0 }) {
-  const pool = items.map((el, i) => {
-    gsap.set(el, { transformPerspective: perspective });
-    const depth = 1;
-    return {
-      el,
-      depth,
-      z: gsap.quickTo(el, 'z', { duration: 0.9, ease: 'power3.out' }),
-      rx: gsap.quickTo(el, 'rotationX', { duration: 0.9, ease: 'power3.out' }),
-      ry: gsap.quickTo(el, 'rotationY', { duration: 0.9, ease: 'power3.out' }),
-      zBase: (i % 3) * zStep,
-    };
-  });
+// Menu tiles: each one leans toward the pointer by its own distance from it, up to 14 degrees, so a tile
+// under the pointer turns most and the far side of the panel still moves. They also float on three planes.
+function tileLean(tiles) {
+  gsap.set(tiles, { transformPerspective: 800 });
+  const pool = tiles.map((el, i) => ({
+    el,
+    z: gsap.quickTo(el, 'z', { duration: 0.7, ease: 'power3.out' }),
+    rx: gsap.quickTo(el, 'rotationX', { duration: 0.7, ease: 'power3.out' }),
+    ry: gsap.quickTo(el, 'rotationY', { duration: 0.7, ease: 'power3.out' }),
+    plane: (i % 3) * 16,
+  }));
   return {
-    to(nx, ny) {
+    toPointer(x, y) {
       pool.forEach((p) => {
-        if (gsap.getProperty(p.el, 'transformPerspective') !== perspective) gsap.set(p.el, { transformPerspective: perspective }); // the menu clears it after it opens
-        p.ry(nx * maxY * p.depth); p.rx(-ny * maxX * p.depth); p.z(p.zBase);
+        if (gsap.getProperty(p.el, 'transformPerspective') !== 800) gsap.set(p.el, { transformPerspective: 800 }); // cleared when the menu opened
+        const r = p.el.getBoundingClientRect();
+        const dx = (x - (r.left + r.width / 2)) / (r.width / 2 + 120);
+        const dy = (y - (r.top + r.height / 2)) / (r.height / 2 + 120);
+        p.ry(Math.max(-1, Math.min(1, dx)) * 14);
+        p.rx(-Math.max(-1, Math.min(1, dy)) * 10);
+        p.z(p.plane + (1 - Math.min(1, Math.hypot(dx, dy))) * 26);
       });
     },
     rest() { pool.forEach((p) => { p.ry(0); p.rx(0); p.z(0); }); },
@@ -37,15 +40,15 @@ export function initDepth({ reducedMotion }) {
   // The header leans as one piece through CSS variables (nav.css), so it never touches the plates' own transforms.
   const tx = gsap.quickTo(nav, '--tx', { duration: 0.9, ease: 'power3.out' });
   const ty = gsap.quickTo(nav, '--ty', { duration: 0.9, ease: 'power3.out' });
-  const headerLean = { to: (nx, ny) => { ty(nx * 2.2); tx(-ny * 1.6); }, rest: () => { ty(0); tx(0); } };
-  const menuLean = lean(tiles, { maxX: 6, maxY: 9, perspective: 900, zStep: 14 });
+  const headerLean = { to: (nx, ny) => { ty(nx * 0.9); tx(-ny * 0.6); }, rest: () => { ty(0); tx(0); } };
+  const menuLean = tileLean(tiles);
   let wasOpen = false;
 
   window.addEventListener('pointermove', (e) => {
     const nx = (e.clientX / window.innerWidth - 0.5) * 2;
     const ny = (e.clientY / window.innerHeight - 0.5) * 2;
     const open = document.body.classList.contains('menu-open');
-    if (open) { menuLean.to(nx, ny); headerLean.to(nx * 0.6, ny * 0.6); wasOpen = true; return; }
+    if (open) { menuLean.toPointer(e.clientX, e.clientY); headerLean.to(nx * 0.6, ny * 0.6); wasOpen = true; return; }
     if (wasOpen) { menuLean.rest(); wasOpen = false; }
     headerLean.to(nx, ny);
   }, { passive: true });

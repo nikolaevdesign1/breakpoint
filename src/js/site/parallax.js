@@ -13,12 +13,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 // Scrubbed on ScrollTrigger (Lenis/Locomotive feed it in site.js): no layout work, no CLS.
 
 const TEXT_AMP = 24; // px at coefficient 1
-const TIERS = [0.1, 0.14, 0.12]; // travel as a share of the frame height; neighbours get different ones
+const TIERS = [0.05, 0.07, 0.06]; // travel as a share of the frame height; neighbours get different ones
 const TRAVEL_MAX = 0.2;
 const SCENE_BOOST = 1.4; // a pinned scene is long, so its drift is stretched to stay visible
 const SCENE_MAX = 0.16;
-const ZOOM = 0.07; // how much more the picture scales by the time it has passed
-const MARGIN = 0.04; // extra scale on top of the travel, so no edge ever shows
+const ZOOM = 0.06; // how much more the picture scales by the time it has passed
+const MARGIN = 0.01; // extra scale on top of the travel, so no edge ever shows
 const SCRUB = 1.2; // seconds of smoothing, unhurried (row 17)
 const MIN_W = 120; // smaller pictures (avatars, icons) stay still
 

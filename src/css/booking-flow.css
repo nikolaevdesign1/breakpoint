@@ -155,7 +155,7 @@ body.hud-open .dock-range, body.postcard-on .dock-range { opacity: 0; pointer-ev
 .dock__filter--played[hidden] { display: none; }
 
 /* ---------- Marks over the map (row 20): flat DOM pinned to ground points (flags and "Your court" are club/ annotations now) ---------- */
-.bf-layer { position: fixed; inset: 0; z-index: 34; pointer-events: none; font-family: var(--font-sans); letter-spacing: 0; transition: opacity 0.4s var(--ease-out); }
+.bf-layer { position: fixed; inset: 0; z-index: 34; pointer-events: none; font-family: var(--font-sans); transition: opacity 0.4s var(--ease-out); }
 .bf-layer.is-hidden, body.hud-open .bf-layer, body.postcard-on .bf-layer { opacity: 0; }
 .bf-mark { position: absolute; left: 0; top: 0; width: 0; height: 0; will-change: transform; }
 .bf-mark.is-off { visibility: hidden; }

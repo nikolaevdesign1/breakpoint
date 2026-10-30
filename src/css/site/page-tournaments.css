@@ -63,7 +63,7 @@
 .countdown small { font-size: 14px; color: rgba(244, 243, 239, 0.7); }
 
 /* ---------- Calendar (rows 75, 126) ---------- */
-.cal-section { padding-top: clamp(32px, 3.3333vw, 48px); }
+.cal-section { padding-top: calc(var(--bar-h) + clamp(48px, 6vw, 96px)); }
 .cal-section__head { align-items: end; margin-bottom: clamp(32px, 4vw, 64px); }
 .cal-section .score-rule { margin-top: clamp(64px, 8vw, 128px); }
 
@@ -121,8 +121,6 @@
   grid-template-columns: repeat(7, minmax(0, 1fr));
   border-top: 1px solid var(--line);
   border-left: 1px solid var(--line);
-  transform-style: preserve-3d; /* tilted in perspective by tournament-calendar.js */
-  box-shadow: 0 40px 60px -40px rgba(14, 14, 13, 0.35);
 }
 
 .cal__day {
@@ -137,7 +135,6 @@
   border-bottom: 1px solid var(--line);
   background: var(--paper);
   text-align: left;
-  transform-style: preserve-3d;
   transition: background-color var(--dur-1), box-shadow var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-spring);
 }
 .cal__num { position: relative; z-index: 1; display: inline-grid; place-items: center; min-width: 26px; height: 26px; font-size: 14px; font-variant-numeric: tabular-nums; transition: color var(--dur-1); }
@@ -151,7 +148,7 @@ button.cal__day[aria-disabled] { cursor: default; }
 /* Hover: the day lifts off the grid and its event photo assembles inside (tournament-peek.js) */
 @media (hover: hover) and (pointer: fine) {
   button.cal__day.has-match:hover,
-  button.cal__day.has-match.is-peek { z-index: 2; transform: translateZ(34px); box-shadow: 0 22px 30px -14px rgba(14, 14, 13, 0.55); }
+  button.cal__day.has-match.is-peek { z-index: 2; transform: translateY(-6px); box-shadow: 0 18px 28px -16px rgba(14, 14, 13, 0.55); }
 }
 .cal__day.is-peek .cal__num { color: var(--snow); }
 .cal__peek { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
@@ -206,8 +203,8 @@ button.cal__day[aria-disabled] { cursor: default; }
   overflow: hidden;
   background: var(--tone-soft);
   color: var(--tone-ink);
-  transform: translateZ(14px); /* a block standing on the day */
-  box-shadow: 0 8px 10px -6px rgba(14, 14, 13, 0.4);
+  transform: perspective(520px) rotateX(var(--bx, 0deg)) rotateY(var(--by, 0deg)); /* a plate standing on the day */
+  box-shadow: 0 6px 8px -5px rgba(14, 14, 13, 0.4);
   font-size: 12px;
   line-height: var(--band);
   white-space: nowrap;
@@ -216,7 +213,7 @@ button.cal__day[aria-disabled] { cursor: default; }
 .cal__band.is-start { left: 8px; }
 .cal__band.is-end { right: 8px; }
 .cal__band.is-past { opacity: 0.4; }
-.cal__band.is-dim { opacity: 0.18; transform: translateZ(14px) scale(0.94, 0.34); }
+.cal__band.is-dim { opacity: 0.18; transform: scale(0.94, 0.34); }
 .cal__band.is-hopping { transition: none; }
 .cal__band-name { display: block; padding: 0 8px; overflow: hidden; text-overflow: ellipsis; }
 .cal__band.has-tag .cal__band-name { padding-right: 58px; }
@@ -461,3 +458,21 @@ html.apply-open { overflow: hidden; }
   .apply__count { display: none; }
   .apply__foot .btn { margin-left: auto; }
 }
+
+/* Event plates above the grid: each one tilts toward the pointer and catches a little light */
+.cal__plates { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.cal__plates:empty { display: none; }
+.cal__plate { display: block; text-align: left; perspective: 700px; }
+.cal__plate-in {
+  position: relative; display: grid; gap: 4px; padding: 14px 16px 16px; overflow: hidden;
+  background: var(--tone-soft, var(--paper-2)); color: var(--tone-ink, var(--ink));
+  transform: rotateX(var(--bx, 0deg)) rotateY(var(--by, 0deg));
+  transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+  box-shadow: 0 10px 18px -14px rgba(14, 14, 13, 0.6);
+}
+.cal__plate-in::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(60% 90% at var(--gx, 50%) 0%, rgba(255, 255, 255, 0.42), transparent 70%); transition: opacity var(--dur-2); }
+@media (hover: hover) { .cal__plate:hover .cal__plate-in { box-shadow: 0 22px 28px -16px rgba(14, 14, 13, 0.7); } .cal__plate:hover .cal__plate-in::after { opacity: 1; } }
+.cal__plate-dates, .cal__plate-meta, .cal__plate-spots { font-size: 12px; line-height: 16px; opacity: 0.75; }
+.cal__plate-name { font-family: var(--font-display); font-size: 24px; line-height: 1; }
+.cal__plate-meter { display: block; height: 3px; margin-top: 8px; background: rgba(14, 14, 13, 0.14); }
+.cal__plate-meter i { display: block; width: var(--fill); height: 100%; background: currentColor; }

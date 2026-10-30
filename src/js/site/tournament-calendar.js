@@ -8,8 +8,8 @@ import {
 
 // Tournament calendar (rows 75, 126): a month grid with events drawn as bands across their days.
 // Bands fill up with the spots taken and flag the last few; filters dim what doesn't fit and bounce what does;
-// the grid lies back in perspective and follows the pointer a little; months turn over like a page
-// (arrows, horizontal swipe or wheel, ← → keys); hovering a day
+// the grid stays flat; the events stand on it as plates that tilt toward the pointer, and the same events
+// are listed as plates above it (arrows, horizontal swipe or wheel, ← → keys); hovering a day
 // assembles the event photo inside it; clicking opens the event card next to the date.
 
 const MONTHS_AHEAD = 4;
@@ -71,6 +71,20 @@ function cardHTML(list, index) {
 // One day's slice of a band. The fill runs across the whole event: on a three-day event two thirds
 // full, the first two slices are solid and the third is empty. The name sits twice, once on the empty
 // track and once on the clipped fill, so it stays readable on both.
+function plateHTML(e) {
+  const left = spotsLeft(e);
+  const fill = Math.round((e.taken / e.spots) * 100);
+  return `<button class="cal__plate tone--${e.kind}" type="button" data-plate="${e.id}">
+    <span class="cal__plate-in">
+      <span class="cal__plate-dates">${formatDates(e)}</span>
+      <span class="cal__plate-name">${e.plain}</span>
+      <span class="cal__plate-meta">${levelText(e)}</span>
+      <span class="cal__plate-meter" style="--fill:${fill}%"><i></i></span>
+      <span class="cal__plate-spots">${left > 0 ? `${left} of ${e.spots} spots left` : 'Full, waitlist open'}</span>
+    </span>
+  </button>`;
+}
+
 function bandHTML(e, d, lane, order) {
   const seg = Math.round((d - e.start) / DAY);
   const start = seg === 0;
@@ -106,6 +120,9 @@ export function initCalendar({ reducedMotion }) {
   const prev = $('[data-cal-prev]');
   const next = $('[data-cal-next]');
   const empty = $('[data-cal-empty]');
+  const plates = document.createElement('div'); // this month's events as tilting plates
+  plates.className = 'cal__plates';
+  body.before(plates);
   const agenda = $('[data-cal-agenda]');
   const narrow = window.matchMedia('(max-width: 720px)');
   const hover = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -120,24 +137,38 @@ export function initCalendar({ reducedMotion }) {
   let monthEvents = [];
 
   const peek = createPeek({ reducedMotion });
-  // 3D: the grid lies back in perspective and leans toward the pointer (fine pointers only).
-  const TILT = -8; // negative: the far (bottom) rows recede, so the grid never grows wider than the page
-  gsap.set(grid, { transformPerspective: 1600, transformOrigin: '50% 0%', rotationX: reducedMotion ? 0 : TILT });
-  if (!reducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    const rx = gsap.quickTo(grid, 'rotationX', { duration: 0.8, ease: 'power3.out' });
-    const ry = gsap.quickTo(grid, 'rotationY', { duration: 0.8, ease: 'power3.out' });
-    body.addEventListener('pointermove', (e) => {
-      const r = body.getBoundingClientRect();
-      const nx = ((e.clientX - r.left) / r.width - 0.5) * 2;
-      const ny = ((e.clientY - r.top) / r.height - 0.5) * 2;
-      ry(nx * 4);
-      rx(TILT - ny * 3);
-    });
-    body.addEventListener('pointerleave', () => { ry(0); rx(TILT); });
-  }
-
   $('[data-filter="level"]').insertAdjacentHTML('beforeend', chipsHTML([{ id: 'all', label: 'Any' }, ...LEVELS]));
   $('[data-filter="age"]').insertAdjacentHTML('beforeend', chipsHTML([{ id: 'all', label: 'Any' }, ...AGES]));
+
+  // Tilt: a plate (above the grid or standing on a day) leans toward the pointer, up to 9 degrees.
+  if (!reducedMotion && hover.matches) {
+    const lean = (e) => {
+      const el = e.target.closest('.cal__plate, .cal__band');
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const nx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+      const ny = ((e.clientY - r.top) / r.height - 0.5) * 2;
+      el.style.setProperty('--bx', `${(-ny * 9).toFixed(1)}deg`);
+      el.style.setProperty('--by', `${(nx * 9).toFixed(1)}deg`);
+      el.style.setProperty('--gx', `${((nx + 1) * 50).toFixed(0)}%`);
+    };
+    const rest = (e) => {
+      const el = e.target.closest('.cal__plate, .cal__band');
+      if (el) { el.style.removeProperty('--bx'); el.style.removeProperty('--by'); }
+    };
+    [plates, grid].forEach((host) => {
+      host.addEventListener('pointermove', lean);
+      host.addEventListener('pointerout', rest);
+    });
+  }
+  // A plate opens the event card on its first day.
+  plates.addEventListener('click', (e) => {
+    const plate = e.target.closest('[data-plate]');
+    if (!plate) return;
+    const ev = EVENTS.find((x) => x.id === plate.dataset.plate);
+    const first = eventDays(ev).find((k) => grid.querySelector(`[data-day="${k}"]:not(.is-out)`)) || eventDays(ev)[0];
+    grid.querySelector(`[data-day="${first}"]`)?.click();
+  });
 
   const matches = (e) => (state.level === 'all' || e.levels.includes(state.level)) && (state.age === 'all' || e.ages.includes(state.age));
   const matchingOn = (key) => (dayEvents.get(key) || []).filter(matches);
@@ -183,6 +214,7 @@ export function initCalendar({ reducedMotion }) {
     grid.style.setProperty('--lanes', Math.max(1, laneEnds.length));
     grid.innerHTML = html;
 
+    plates.innerHTML = monthEvents.map((e) => plateHTML(e)).join('');
     monthEl.textContent = month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     prev.disabled = state.offset === 0;
     next.disabled = state.offset === MONTHS_AHEAD;
@@ -238,11 +270,10 @@ export function initCalendar({ reducedMotion }) {
       if (focusInGrid) grid.querySelector('.cal__day.has-match, .cal__day')?.focus({ preventScroll: true });
     };
     if (reducedMotion) { swap(); return true; }
-    // The page turns over: the old month tips away from you, the new one falls into place.
     gsap.timeline()
-      .to(grid, { rotationX: TILT + 70 * dir, autoAlpha: 0, duration: DUR.fast, ease: 'power2.in', overwrite: 'auto' })
+      .to([grid, plates], { autoAlpha: 0, y: 12 * dir, duration: DUR.fast, ease: 'power2.in', overwrite: 'auto' })
       .add(swap)
-      .fromTo(grid, { rotationX: TILT - 70 * dir, autoAlpha: 0 }, { rotationX: TILT, autoAlpha: 1, duration: DUR.base, ease: EASE.out });
+      .fromTo([grid, plates], { autoAlpha: 0, y: -12 * dir }, { autoAlpha: 1, y: 0, duration: DUR.base, ease: EASE.out });
     gsap.fromTo(monthEl, { autoAlpha: 0, x: 24 * dir }, { autoAlpha: 1, x: 0, duration: DUR.base, delay: DUR.fast, ease: EASE.out });
     return true;
   }

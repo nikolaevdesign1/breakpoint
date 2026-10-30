@@ -81,6 +81,7 @@ export function initCourtLane({ reducedMotion }) {
       scrub: 0.6,
       anticipatePin: 1,
       invalidateOnRefresh: true,
+      refreshPriority: 1, // measured first, so everything below the lane (FAQ, reviews, headings) counts its pin spacing
     },
   });
 
@@ -105,6 +106,12 @@ export function initCourtLane({ reducedMotion }) {
       onEnter: () => setIndex(i),
       onEnterBack: () => setIndex(i),
     });
+    // The picture is blurred while the slide is at the edges of the screen and sharp in the middle; the
+    // scrub lags a little (0.7 s), so the blur eases in and out instead of stepping with the wheel.
+    gsap.timeline({ scrollTrigger: { trigger: slide, containerAnimation: lane, start: 'left right', end: 'right left', scrub: 0.7 } })
+      .fromTo(media, { filter: 'blur(20px)' }, { filter: 'blur(0px)', ease: 'sine.out', duration: 0.38 })
+      .to(media, { filter: 'blur(0px)', ease: 'none', duration: 0.24 })
+      .to(media, { filter: 'blur(20px)', ease: 'sine.in', duration: 0.38 });
     // The picture drifts against the slide so the lane has depth.
     gsap.fromTo(media, { xPercent: -5, scale: 1.12 }, {
       xPercent: 5, scale: 1.12, ease: 'none',

@@ -13,7 +13,6 @@
   right: var(--edge);
   font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.3em;
   font-variant-numeric: tabular-nums;
 }
 
@@ -28,15 +27,13 @@
   padding: 0 var(--edge);
 }
 html.intro .preloader__greet { visibility: hidden; }
-/* The greeting is small, in wide capitals, like the entry screen (entry.css) */
+/* The greeting is small, in the text face */
 .preloader .preloader__title {
   margin: 0;
   font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 500;
   line-height: 24px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
   text-align: center;
 }
 .preloader__line { display: block; }
@@ -46,8 +43,6 @@ html.intro .preloader__greet { visibility: hidden; }
   font-size: 12px;
   font-weight: 500;
   line-height: 16px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   text-align: center;
 }
 .fl-word { display: inline-block; white-space: nowrap; }

@@ -2,13 +2,14 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { revealText, prepareText, initTextHover } from './type-reveal.js';
 import { DUR, EASE, STAGGER } from './motion.js';
+import { pageReady } from './page-ready.js';
 
 // Every heading comes out of a blur letter by letter, the way the FAQ title does. Headings that already
 // opt in keep their markup; the rest are marked here. Not touched: headings that are not on the page
 // flow (the menu, dialogs, the profile overlay, the 3D chapters, the sideways lane, the entry screen)
 // or that own their reveal.
 const HEADINGS = 'h1, h2, h3, .h2, .h-xl';
-const NOT_HEADINGS = '.menu, .apply, .cv, .rally, .entry, .preloader, .mlane, .faq__q, .visually-hidden, [data-no-reveal]';
+const NOT_HEADINGS = '.menu, .apply, .cv, .rally, .preloader, .mlane, .faq__q, .visually-hidden, [data-no-reveal]';
 function markHeadings() {
   document.querySelectorAll(HEADINGS).forEach((el) => {
     if (el.hasAttribute('data-lines') || el.closest(NOT_HEADINGS) || el.matches('[data-hero-title]')) return;
@@ -31,7 +32,7 @@ export function initReveals({ reducedMotion }) {
   ];
   targets.forEach(([el, mode]) => {
     prepareText(el, { mode });
-    ScrollTrigger.create({ trigger: el, start: 'top 88%', once: true, onEnter: () => revealText(el, { mode }) });
+    ScrollTrigger.create({ trigger: el, start: 'top 88%', once: true, onEnter: () => pageReady.then(() => revealText(el, { mode })) });
   });
   initTextHover();
 

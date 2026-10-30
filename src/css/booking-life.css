@@ -9,7 +9,6 @@
   z-index: 50;
   width: 340px;
   font-family: var(--font-sans);
-  letter-spacing: 0;
   box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.6);
   transform-origin: 0 100%;
   translate: 0 24px;

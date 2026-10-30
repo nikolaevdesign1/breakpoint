@@ -4,10 +4,10 @@
 .mship__head { padding: 0 var(--edge); margin-bottom: clamp(40px, 5vw, 80px); align-items: end; }
 .mship__head .note { max-width: 36ch; }
 
-.mlane { display: flex; flex-direction: column; height: 100vh; height: 100svh; min-height: 560px; background: var(--paper); }
+.mlane { display: flex; flex-direction: column; height: 100vh; height: 100svh; min-height: 560px; padding-top: calc(var(--bar-h) + 8px); background: var(--paper); }
 .mlane__frame { position: relative; flex: 1; min-height: 0; overflow: hidden; }
 .mlane__track { display: flex; gap: 16px; height: 100%; padding: 0 var(--edge); width: max-content; will-change: transform; }
-.mlane__slide { position: relative; flex: none; width: min(82vw, 1500px); height: 100%; overflow: hidden; background: var(--night); }
+.mlane__slide { position: relative; flex: none; width: min(78vw, calc((100svh - var(--bar-h) - 96px) * 1.7)); height: 100%; overflow: hidden; background: var(--night); }
 .mlane__media { position: absolute; inset: 0; overflow: hidden; }
 .mlane__media > * { width: 100%; height: 100%; object-fit: cover; will-change: transform; }
 .mlane__slide::after { content: ''; position: absolute; inset: 0; background: linear-gradient(rgba(14, 14, 13, 0.1), rgba(14, 14, 13, 0.5)); pointer-events: none; }
@@ -20,7 +20,7 @@
   white-space: nowrap;
 }
 .mlane__bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 var(--edge); height: 72px; flex: none; }
-.mlane__count { font-variant-numeric: tabular-nums; color: var(--mute); font-size: 12px; }
+.mlane__count { font-variant-numeric: tabular-nums; color: var(--mute); font-size: 10px; }
 .mlane__count b { color: var(--ink); font-weight: 400; }
 
 /* Plain row: phones and reduced motion */

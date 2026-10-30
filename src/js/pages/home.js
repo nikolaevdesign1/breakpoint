@@ -2,13 +2,13 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { initSite, releaseScroll } from '../site/site.js';
 import { MEDIA, videoSrc } from '../site/media.js';
 import { playIntro } from '../site/intro.js';
-import { entryDone } from '../site/entry.js';
 import { renderCourtLane, initCourtLane } from '../site/court-lane.js';
 import { initCommunity } from '../site/community.js';
 import { initCoachCloud } from '../site/coaches-cloud.js';
 import { initClubNotes } from '../site/club-notes.js';
 import { initMapGallery } from '../site/map-gallery.js';
 import { watchCut } from '../site/cut.js';
+import { markPageReady } from '../site/page-ready.js';
 
 renderCourtLane();
 const { lenis, reducedMotion, ready } = initSite({ holdScroll: true });
@@ -55,7 +55,8 @@ function cutHero() {
   watchCut(card);
 }
 
-entryDone.then(() => playIntro({ assets, reducedMotion })).then(() => {
+playIntro({ assets, reducedMotion }).then(() => {
+  markPageReady();
   releaseScroll(lenis);
   cutHero();
 });

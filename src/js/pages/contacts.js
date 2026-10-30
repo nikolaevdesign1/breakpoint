@@ -1,5 +1,4 @@
 import gsap from 'gsap';
-import { entryDone } from '../site/entry.js';
 import { initSite } from '../site/site.js';
 import { initContactForm } from '../site/contact-form.js';
 import { initClubStatus } from '../site/club-hours.js';
@@ -12,25 +11,8 @@ const { reducedMotion } = initSite();
 initContactForm();
 initClubStatus();
 initRoutes(initSquareMap());
-initScramble();
 initCopy();
-entryDone.then(playIntro);
-
-// Big contacts scramble their letters when pointed at (type-reveal, no fade), then fold back to text.
-function initScramble() {
-  if (reducedMotion || !window.matchMedia('(hover: hover)').matches) return;
-  document.querySelectorAll('[data-scramble]').forEach((link) => {
-    const el = link.querySelector('[data-scramble-text]') || link;
-    const text = el.textContent;
-    let busy = false;
-    link.addEventListener('mouseenter', () => {
-      if (busy) return;
-      busy = true;
-      const total = revealText(el, { fade: false, duration: 0.3, stagger: 0.02 });
-      setTimeout(() => { el.textContent = text; busy = false; }, total * 1000 + 80);
-    });
-  });
-}
+playIntro();
 
 // A click on the e-mail copies it, with a small "copied" tag; without clipboard access it opens mail.
 function initCopy() {
