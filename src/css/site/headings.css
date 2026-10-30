@@ -1,0 +1,15 @@
+/* ---------- Headings: one dense display face, capitals ----------
+   After the sport-brand moodboard: tall, tight, almost shouted. Anton (@fontsource) has a single 400 weight, so
+   the 500s that Switzer needed are reset here. Accent words (<em>) keep the grey of base.css. Loaded last so it
+   wins over the per-page title rules; page files keep only the size and spacing. */
+h1, h2, h3,
+.h2, .h-xl, .h-xxl,
+.hero__title, .page-hero__title, .mhero__title, .member__title, .faq__word,
+.coach-cloud__title, .cgal__title, .hud-head__title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+  line-height: 0.94;
+}
+h3 { line-height: 1; }

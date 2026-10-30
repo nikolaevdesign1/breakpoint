@@ -1,3 +1,4 @@
+@import '@fontsource/anton/latin-400.css';
 @import './site/tokens.css';
 @import './site/grid.css';
 @import './site/cut.css';
@@ -28,3 +29,4 @@
 @import './site/page-legal.css';
 @import './site/tennis.css';
 @import './site/member-scene.css';
+@import './site/headings.css';

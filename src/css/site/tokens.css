@@ -18,9 +18,10 @@
   --sun: #fff3da;
 
   --font-sans: 'Switzer', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Anton', 'Impact', 'Arial Narrow', sans-serif; /* headings: dense, tall, capitals (headings.css) */
 
   --fs-display: clamp(40px, 3.6vw, 64px);
-  --fs-h2: clamp(28px, 2.5vw, 44px);
+  --fs-h2: clamp(34px, 3.4vw, 60px);
   --fs-h3: clamp(20px, 1.5vw, 22px);
   --fs-body: 16px;
   --fs-small: 14px;
@@ -29,8 +30,8 @@
      (xl, xxl, mega), captions, dates and numbers on 12 and 14. Even px only. */
   --fs-xs: 12px;
   --fs-lg: clamp(28px, 3vw, 48px);
-  --fs-xl: clamp(40px, 5.2vw, 88px);
-  --fs-xxl: clamp(48px, 7.2vw, 120px);
+  --fs-xl: clamp(48px, 7vw, 120px);
+  --fs-xxl: clamp(56px, 9.6vw, 164px);
   --fs-mega: clamp(64px, 11vw, 176px);
 
   /* Square corners everywhere (row 78): only things that are round by nature stay round */
