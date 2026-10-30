@@ -13,6 +13,12 @@
   text-wrap: pretty;
 }
 
+/* A small mark before a big paragraph: a star and a two-line caption in 12px capitals */
+.mark { display: flex; align-items: flex-start; gap: 14px; max-width: 28ch; font-size: 12px; line-height: 16px; text-transform: uppercase; letter-spacing: 0.01em; }
+.mark__icon { flex: none; width: 36px; height: 36px; }
+.club--about .club__text { display: grid; gap: 1.1em; font-size: clamp(24px, 2.9vw, 46px); line-height: 1.1; }
+.club--about .club__text p { margin: 0; }
+
 /* Rows 45, 18: four cells on a 12-column grid, a big figure over a small label, dashed rules between them.
    club-notes.js adds .is-staged, then .is-on cell by cell (--i): the rule draws, then the figure and label rise. */
 .club__board { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--grid-gap); }

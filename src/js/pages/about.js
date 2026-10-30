@@ -1,6 +1,6 @@
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { initSite } from '../site/site.js';
-import { initBookBanner } from '../site/next-slot.js';
+import { initRules } from '../site/rules.js';
 
 // About (row 33): "One rally". about.html decides the 3D version (class is-rally); this loads it lazily,
 // after the page is ready and the browser is idle, so it never touches LCP or other pages.
@@ -15,7 +15,7 @@ if (rally) {
 }
 
 const { ready } = initSite();
-initBookBanner();
+initRules();
 
 ready.then(() => {
   ScrollTrigger.refresh();

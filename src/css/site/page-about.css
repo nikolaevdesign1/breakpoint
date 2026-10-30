@@ -156,21 +156,26 @@ html.is-rally .rc__step { grid-area: 1 / 1; flex-direction: column; align-items:
 html.is-rally .rc__step b { font-size: clamp(96px, 17vw, 280px); line-height: 0.85; }
 html.is-rally .rc__cap { max-width: 28ch; font-size: 16px; line-height: 24px; color: #fff; }
 
-/* Rail: the five shots, one dashed line */
+/* The three facts carry a black icon on a white square */
+.rc__icon { display: grid; place-items: center; width: 36px; height: 36px; margin-bottom: 12px; background: #fff; color: #0e0e0d; text-shadow: none; }
+.rc__icon svg { width: 20px; height: 20px; }
+
+/* Rail: the five shots as tabs down the right edge */
 html.is-rally .rally__rail {
   position: absolute;
-  left: var(--edge);
-  right: 76px; /* clear of the fixed back-to-top button */
-  bottom: 20px;
+  right: var(--edge);
+  top: 50%;
+  translate: 0 -50%;
   display: flex;
-  gap: 32px;
-  padding-top: 12px;
-  border-top: var(--dash);
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
 }
 html.is-rally .rally__rail[hidden] { display: none; }
 .rally__rail button {
   position: relative;
-  padding: 0;
+  padding: 6px 12px;
+  background: rgba(14, 14, 13, 0.42);
   font-size: 14px;
   line-height: 20px;
   color: var(--mute);
@@ -179,17 +184,17 @@ html.is-rally .rally__rail[hidden] { display: none; }
 .rally__rail button::before {
   content: '';
   position: absolute;
-  left: 0;
   right: 0;
-  top: -14px;
-  height: 2px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
   background: var(--ink);
-  transform: scaleX(0);
-  transform-origin: 0 50%;
+  transform: scaleY(0);
+  transform-origin: 50% 0;
   transition: transform var(--dur-3) var(--ease-out);
 }
-.rally__rail button.is-on { color: var(--ink); }
-.rally__rail button.is-on::before { transform: scaleX(1); }
+.rally__rail button.is-on { color: var(--ink); background: rgba(255, 255, 255, 0.86); }
+.rally__rail button.is-on::before { transform: scaleY(1); }
 @media (hover: hover) {
   .rally__rail button:hover { color: var(--clay); transform: translateY(-2px); }
 }
@@ -257,6 +262,19 @@ html.is-rally .rally__tags { display: block; position: absolute; inset: 0; point
   .rules__row:hover b { transform: translateX(6px); }
 }
 
+/* Live rows (rules.js): hover lights one row and quiets the rest, a click opens it. */
+.rules__list.is-live .rules__row { cursor: pointer; transition: opacity var(--dur-2) var(--ease-out), border-color var(--dur-2); }
+.rules__list.is-live .rules__row > span:last-child { max-height: 0; overflow: hidden; opacity: 0; transition: max-height var(--dur-3) var(--ease-in-out), opacity var(--dur-2) var(--ease-out); }
+.rules__list.is-live .rules__row.is-open > span:last-child { max-height: 8em; opacity: 1; }
+.rules__row b { transition: transform var(--dur-3) var(--ease-spring), font-size var(--dur-3) var(--ease-spring); }
+.rules__row.is-open b { font-size: clamp(24px, 2.6vw, 40px); }
+.rules__row.is-open .rules__num { color: var(--clay); }
+.rules__row.is-open { border-top: 1px solid var(--ink); }
+@media (hover: hover) {
+  .rules__list.is-live:hover .rules__row:not(:hover):not(.is-open) { opacity: 0.38; }
+  .rules__list.is-live .rules__row:hover { border-top-color: var(--ink); }
+}
+
 @media (max-width: 900px) {
   .rules__head, .rules__list { grid-column: 1 / -1; }
   .rules__head { position: static; }
@@ -271,6 +289,6 @@ html.is-rally .rally__tags { display: block; position: absolute; inset: 0; point
 }
 
 .rules__head .btn { margin-top: 20px; }
-html.is-rally .rally__rail { border-top: 1px dashed rgba(255, 255, 255, 0.6); }
-html.is-rally .rally__rail button.is-on { color: #fff; }
-html.is-rally .rally__rail button::before { background: #fff; }
+html.is-rally .rally__rail button { color: #fff; }
+html.is-rally .rally__rail button.is-on { color: var(--ink); }
+html.is-rally .rally__rail button::before { background: var(--clay); }

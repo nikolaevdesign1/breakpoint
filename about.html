@@ -47,9 +47,9 @@
         <article class="rc rc--return" data-chapter aria-label="Slow tennis">
           <p class="rc__small rc__kicker" data-d="0" data-depth="0.3">Slow tennis</p>
           <h2 class="rc__big" data-d="0" data-depth="0.6">Tennis does not hurry.</h2>
-          <p class="rc__note rc__note--a" data-d="1" data-depth="-0.4"><b>Hours, not slots.</b> Book 60, 90 or 120 minutes.</p>
-          <p class="rc__note rc__note--b" data-d="2" data-depth="0.5"><b>A coach who remembers.</b> Last week counts.</p>
-          <p class="rc__note rc__note--c" data-d="3" data-depth="-0.2"><b>Stay after the match.</b> Nobody rushes you off the court.</p>
+          <p class="rc__note rc__note--a" data-d="1" data-depth="-0.4"><span class="rc__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5.2l3.4 2"/></svg></span><b>Hours, not slots.</b> Book 60, 90 or 120 minutes.</p>
+          <p class="rc__note rc__note--b" data-d="2" data-depth="0.5"><span class="rc__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="9.5" cy="9.5" rx="5.5" ry="6.5" transform="rotate(-35 9.5 9.5)"/><path d="M13.6 14.4l6 6M7 5.5l5 7"/></svg></span><b>A coach who remembers.</b> Last week counts.</p>
+          <p class="rc__note rc__note--c" data-d="3" data-depth="-0.2"><span class="rc__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 11h16M6 11V7h12v4M6 11v7M18 11v7M4 15h16"/></svg></span><b>Stay after the match.</b> Nobody rushes you off the court.</p>
           <figure class="cut cut--b rc__photo rc__photo--a" data-photo><img data-media="services.5" data-w="900" alt="Club members watching a match on clay" loading="lazy" decoding="async" /></figure>
         </article>
 
@@ -95,7 +95,18 @@
     </section>
     <div class="rally-end" data-rally-end></div>
 
-<!-- include:partials/book-banner.html -->
+    <!-- The club in words: longer than the home page, same ink-in reading -->
+    <section class="section club club--about" id="club" aria-labelledby="club-title">
+      <h2 class="visually-hidden" id="club-title">The club</h2>
+      <div class="grid grid--rows club__grid">
+        <p class="mark col-3" data-lines><svg class="mark__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10.6 1h2.8l-.5 7.4 5.3-5.2 2 2-5.2 5.3L23 10.6v2.8l-7.4-.5 5.2 5.3-2 2-5.3-5.2.5 7.4h-2.8l.5-7.4-5.3 5.2-2-2 5.2-5.3L1 13.4v-2.8l7.4.5-5.2-5.3 2-2 5.3 5.2z"/></svg><span>Who plays here</span></p>
+        <div class="club__text col-9 start-4 p-shift-0" data-words="ink">
+          <p>Break Point is a club for people who play after work. Sixteen courts in Coconut Grove: indoor hard, brushed red clay and covered glass padel, all lit until closing time.</p>
+          <p>Book a court in under a minute, find a partner at your level, train with a coach who remembers last week. Twenty coaches teach tennis and padel, from first lessons to tournament prep, for adults and juniors.</p>
+          <p>Nobody rushes you off the court. Stay after the match, cool off on the terrace and come back tomorrow: we open at six on weekdays and at seven on weekends.</p>
+        </div>
+      </div>
+    </section>
 
     <!-- Club rules: short numbered rows on the dashed rule (linked from the footer and the membership form) -->
     <section class="section rules" id="rules" aria-labelledby="rules-title">
@@ -113,6 +124,7 @@
         <li class="rules__row" data-reveal><span class="rules__num">06</span><b>Lights out at closing</b><span>Weekdays 11 PM, weekends 10 PM. The last booking starts an hour earlier.</span></li>
       </ol>
     </section>
+<!-- include:partials/cta.html -->
   </main>
 
 <!-- include:partials/footer.html -->
