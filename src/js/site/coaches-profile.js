@@ -18,6 +18,18 @@ function titleHtml(c) {
   return `<h2 class="cv__name" id="cv-name" data-cv-in>${c.name}</h2>`;
 }
 
+const QUOTE = '<svg class="cv__quote" viewBox="0 0 28 20" fill="currentColor" aria-hidden="true"><path d="M0 20V11C0 4.6 3.4.8 9.4 0l.9 3.2C7.3 4 5.9 5.8 5.8 8.4H11V20zm16.6 0V11C16.6 4.6 20 .8 26 0l.9 3.2c-3 .8-4.4 2.6-4.5 5.2h5.2V20z"/></svg>';
+const SPORT_ICON = {
+  tennis: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M4 7c5 1 8 5 8 10M20 7c-5 1-8 5-8 10"/></svg>',
+  padel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="2" width="14" height="14" rx="7"/><path d="M12 16v6"/></svg>',
+};
+// A quote with a square avatar (the author's initial) and a small icon for the game it is about.
+const initialOf = (by) => (by.match(/[A-Za-zÀ-ÿ]/) || ['?'])[0].toUpperCase();
+function reviewOf(r, c) {
+  const sport = /padel/i.test(r.by) ? 'padel' : c.sports.includes('tennis') ? 'tennis' : 'padel';
+  return `<blockquote class="cv__review" data-cv-in><span class="cv__avatar" aria-hidden="true">${initialOf(r.by)}</span><div>${QUOTE}<p>${r.text}</p><footer><span class="cv__sport" aria-hidden="true">${SPORT_ICON[sport]}</span>${r.by}</footer></div></blockquote>`;
+}
+
 function profileHtml(c) {
   const tags = [...c.sports.map((s) => SPORT_LABEL[s]), ...c.ages.map((a) => AGE_LABEL[a])];
   const stats = [c.years ? [c.years, 'years coaching'] : null, [`$${c.price}`, 'per hour, private lesson']].filter(Boolean);
@@ -38,7 +50,7 @@ function profileHtml(c) {
     </section>
     <section class="cv__block" aria-labelledby="cv-reviews">
       <h3 class="cv__label" id="cv-reviews" data-cv-in>What players say</h3>
-      ${c.reviews.map((r) => `<blockquote class="cv__review" data-cv-in><p>${r.text}</p><footer>${r.by}</footer></blockquote>`).join('')}
+      ${c.reviews.map((r) => reviewOf(r, c)).join('')}
     </section>
     <div class="cv__cta" data-cv-in>
       <a class="cv__book" href="${coachBookingUrl(c)}">Book a session with ${firstName(c)}</a>

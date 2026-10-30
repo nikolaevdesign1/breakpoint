@@ -13,3 +13,11 @@ h1, h2, h3,
   line-height: 0.94;
 }
 h3 { line-height: 1; }
+/* h3 tags that are really small labels or wrappers stay in the text face */
+.cv__label, .faq__q, .apply__done-title, .cal__month {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.cal__month { font-family: var(--font-display); text-transform: uppercase; font-weight: 400; }
