@@ -73,7 +73,7 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   padding: 0 10px;
   height: 28px;
   display: flex; align-items: center;
-  border-radius: 0;
+  border-radius: 999px;
   background: var(--night);
   box-shadow: inset 0 0 0 1px rgba(244, 243, 239, 0.12);
   font-size: 14px;
@@ -357,12 +357,12 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
 .hud-total s, .hud-ticket__row s { margin-left: 4px; font-size: 14px; font-weight: 400; color: var(--mute); text-decoration-thickness: 1px; }
 .hud-book, .hud-ics {
   display: grid; place-items: center;
-  padding: 0 34px;
+  padding: 0 20px;
   background: var(--clay);
   color: var(--snow);
-  font-size: 16px; font-weight: 500;
+  font-size: 14px; font-weight: 500;
 }
-.hud-ics { flex: 1; height: 56px; background: var(--night); }
+.hud-ics { flex: 1; height: 40px; background: var(--night); }
 .hud-book[disabled] { background: var(--paper-2); color: var(--mute-2); cursor: not-allowed; }
 @media (hover: hover) {
   .hud-book:not([disabled]):hover, .hud-ics:hover { transform: translateY(-2px); }

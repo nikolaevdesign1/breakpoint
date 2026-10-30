@@ -6,9 +6,11 @@ import gsap from 'gsap';
 // read on white and on dark blocks. Over links, buttons and fields the trail is weaker. The ball's position is read
 // from its element (cursor.js), not tracked twice. Off on touch and under reduced motion (cursor.js does not call it).
 
-const MAX = 150;
+const MAX = 240;
 const RIPPLES = 3;
 const GRAIN = '255, 243, 218'; // --sun
+const TONES = [GRAIN, GRAIN, '226, 184, 140', '196, 120, 78', '156, 68, 31']; // sand, light clay, clay: a speckled trail
+const SIZES = [2, 2, 2, 4, 4, 6]; // mixed grain sizes read as rough sand
 const RIM = '54, 37, 27'; // --wood
 const SOFT = { hover: 0.4, text: 0.3, label: 0.3 }; // emission factor by cursor mode
 
@@ -28,7 +30,7 @@ export function initCursorTrail(dot) {
   window.addEventListener('resize', fit, { passive: true });
 
   // Pool of grains: x, y, vx, vy, age, life (ms), size
-  const g = Array.from({ length: MAX }, () => ({ on: false, x: 0, y: 0, vx: 0, vy: 0, age: 0, life: 1, s: 2 }));
+  const g = Array.from({ length: MAX }, () => ({ on: false, x: 0, y: 0, vx: 0, vy: 0, age: 0, life: 1, s: 2, c: GRAIN }));
   const rings = Array.from({ length: RIPPLES }, () => ({ on: false, x: 0, y: 0, age: 0 }));
   const RING_MS = 900;
 
@@ -45,7 +47,8 @@ export function initCursorTrail(dot) {
     if (!p) return;
     p.on = true; p.x = x; p.y = y; p.vx = vx; p.vy = vy; p.age = 0;
     p.life = 600 + Math.random() * 300;
-    p.s = Math.random() < 0.85 ? 2 : 4;
+    p.s = SIZES[Math.floor(Math.random() * SIZES.length)];
+    p.c = TONES[Math.floor(Math.random() * TONES.length)];
   };
   const ring = (x, y) => {
     const r = rings.find((q) => !q.on);
@@ -75,10 +78,10 @@ export function initCursorTrail(dot) {
     if (speed < 1) moved = false;
 
     const soft = SOFT[dot.dataset.mode] ?? 1;
-    carry += Math.min(v / 4, 8) * soft * k * (dot.dataset.hidden ? 0 : 1);
+    carry += Math.min(v / 3, 10) * soft * k * (dot.dataset.hidden ? 0 : 1);
     while (carry >= 1) {
       carry -= 1;
-      const jitter = (Math.random() - 0.5) * 1.6; // sideways spread
+      const jitter = (Math.random() - 0.5) * 2.4; // sideways spread
       const back = 1 + Math.random() * 2.4; // how hard the grain is thrown backwards
       const a = Math.atan2(dirY, dirX) + Math.PI + jitter * 0.8;
       const rx = (Math.random() - 0.5) * 10; const ry = (Math.random() - 0.5) * 10; // starts under the ball
@@ -100,7 +103,7 @@ export function initCursorTrail(dot) {
       const rx = Math.round(p.x / 2) * 2; const ry = Math.round(p.y / 2) * 2; // even pixels, like the rest of the site
       ctx.fillStyle = `rgba(${RIM}, ${a * 0.5})`;
       ctx.fillRect(rx - 1, ry - 1, p.s + 2, p.s + 2);
-      ctx.fillStyle = `rgba(${GRAIN}, ${a})`;
+      ctx.fillStyle = `rgba(${p.c}, ${a})`;
       ctx.fillRect(rx, ry, p.s, p.s);
     }
     for (const r of rings) {
