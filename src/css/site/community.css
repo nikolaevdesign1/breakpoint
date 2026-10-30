@@ -216,4 +216,6 @@
 .mapg__back[hidden] { display: none; }
 
 /* Heading of the map */
-.mapg__head { padding: clamp(56px, 7vw, 112px) var(--edge) clamp(24px, 3vw, 40px); }
+.mapg__head { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; padding: clamp(56px, 7vw, 112px) var(--edge) clamp(24px, 3vw, 40px); }
+.mapg__sub { max-width: 340px; margin: 0 0 0.6em; font-size: 16px; line-height: 1.45; color: var(--mute); }
+@media (max-width: 760px) { .mapg__head { flex-direction: column; align-items: flex-start; gap: 16px; } }

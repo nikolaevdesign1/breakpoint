@@ -37,7 +37,7 @@
 }
 .lf__input::placeholder { color: var(--mute-2); opacity: 1; }
 .lf__input:-webkit-autofill { -webkit-text-fill-color: var(--ink); transition: background-color 600000s 0s; }
-textarea.lf__input { height: auto; min-height: 112px; resize: vertical; }
+textarea.lf__input { height: auto; min-height: 112px; resize: none; }
 /* The ink line drawn over the dash */
 .lf__line {
   position: absolute;

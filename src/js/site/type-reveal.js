@@ -72,6 +72,14 @@ function paint(node, p) {
  */
 export function revealText(el, { mode = 'chars', delay = 0, stagger, duration = DURATION, fade = true } = {}) {
   if (!el) return 0;
+  // Letter widths are pinned from the live font: wait for it, or the fallback face's widths leave gaps in the line.
+  if (document.fonts && document.fonts.status === 'loading') {
+    const wait = Math.random();
+    el.dataset.typeWait = wait;
+    document.fonts.ready.then(() => { if (el.dataset.typeWait === String(wait)) { delete el.dataset.typeWait; revealText(el, { mode, delay, stagger, duration, fade }); } });
+    if (fade) prepareText(el, { mode });
+    return delay + 1;
+  }
   const { chars, words } = split(el, mode);
   const units = mode === 'words' ? words : chars;
   const step = stagger ?? (mode === 'words' ? 0.11 : STAGGER);

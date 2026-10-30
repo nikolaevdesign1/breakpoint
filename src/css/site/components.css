@@ -220,3 +220,4 @@ html.has-cursor input, html.has-cursor textarea, html.has-cursor [contenteditabl
 @media (prefers-reduced-motion: reduce) {
   .check__box, .check__box::before, .check__tick path { transition-duration: 0.01s !important; transition-delay: 0s !important; }
 }
+textarea { resize: none; }
