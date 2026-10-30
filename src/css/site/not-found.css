@@ -1,7 +1,7 @@
 /* 404: a number built from photo and clip squares, one line and a link under it. */
-.nf { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: space-between; gap: 40px; padding: calc(var(--bar-h) + 56px) var(--edge) var(--edge); background: var(--paper-2); }
-.nf__mosaic { --cols: 17; display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-auto-rows: 1fr; gap: clamp(2px, 0.3vw, 5px); width: min(100%, 1100px); margin: 0 auto; aspect-ratio: var(--cols) / 7; }
+.nf { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: clamp(24px, 4vh, 48px); padding: calc(var(--bar-h) + 24px) var(--edge) 40px; background: var(--paper-2); }
+.nf__mosaic { --cols: 17; display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-auto-rows: 1fr; gap: clamp(2px, 0.3vw, 5px); width: min(100%, 1000px, 62svh * 17 / 7); margin: 0 auto; aspect-ratio: var(--cols) / 7; }
 .nf__cell { position: relative; display: block; overflow: hidden; background: var(--paper-3); will-change: transform; }
 .nf__cell img, .nf__cell video { width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; }
-.nf__copy { display: grid; justify-items: start; gap: 24px; }
-.nf__title { max-width: 18ch; font-size: clamp(36px, 4.6vw, 72px); }
+.nf__copy { display: grid; justify-items: center; gap: 24px; text-align: center; }
+.nf__title { max-width: 18ch; margin-inline: auto; font-size: clamp(36px, 4.6vw, 72px); }

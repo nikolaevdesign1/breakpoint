@@ -153,14 +153,17 @@ export function initMapGallery({ reducedMotion }) {
   });
   // Moving along the map while zoomed: the wheel (any direction) goes sideways, a drag goes any way.
   const bound = (v, size, view) => (size <= view ? (view - size) / 2 : Math.min(0, Math.max(view - size, v)));
+  let aim = null; // where the running pan is heading, so quick wheel ticks add up instead of restarting
   function pan(dx, dy) {
     const sc = gsap.getProperty(field, 'scale');
-    gsap.to(field, { x: bound(gsap.getProperty(field, 'x') + dx, FW * sc, sw), y: bound(gsap.getProperty(field, 'y') + dy, FH * sc, sh), duration: 0.6, ease: 'power3.out', overwrite: 'auto' });
+    const from = aim && gsap.isTweening(field) ? aim : { x: gsap.getProperty(field, 'x'), y: gsap.getProperty(field, 'y') };
+    aim = { x: bound(from.x + dx, FW * sc, sw), y: bound(from.y + dy, FH * sc, sh) };
+    gsap.to(field, { ...aim, duration: 0.7, ease: 'power3.out', overwrite: 'auto' });
   }
   stage.addEventListener('wheel', (e) => {
     if (!focus) return; // not zoomed: the page scrolls on as usual
     e.preventDefault();
-    pan(-(Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY), 0);
+    pan(-(Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) * 1.6, 0);
   }, { passive: false });
   let grab = null;
   stage.addEventListener('pointerdown', (e) => { if (focus) grab = { x: e.clientX, y: e.clientY, fx: gsap.getProperty(field, 'x'), fy: gsap.getProperty(field, 'y') }; dragged = false; });
