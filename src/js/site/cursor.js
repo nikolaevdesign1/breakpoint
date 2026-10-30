@@ -1,6 +1,5 @@
 import gsap from 'gsap';
 import { revealText } from './type-reveal.js';
-import { initCursorTrail } from './cursor-trail.js';
 
 // Ball cursor: a small dot that inverts what is under it, grows over links, squashes on press
 // and turns into a solid label over blocks marked with data-cursor="…".
@@ -85,7 +84,6 @@ export function initCursor() {
   }, { passive: true });
 
   gsap.set(label, { autoAlpha: 0 });
-  if (!reduced) initCursorTrail(dot); // sand behind the ball (row 58)
 
   api = {
     // Let canvas scenes drive the label (e.g. "Book Clay 3" over a court).

@@ -4,8 +4,9 @@ import { GALLERY, TILES } from './gallery-data.js';
 
 // Club life: one big field of small pictures, laid out like a map. Over the field the cursor is a "+":
 // a click zooms the whole field in on that spot until three to five pictures fill the frame; a click on
-// those opens one picture full size in a lightbox (Esc or Close to leave it); the Back button or Esc in the
-// zoomed view returns to the overview. Hovering a picture lifts and enlarges it.
+// those, or any picture, zooms in further, down to a single picture filling the frame. While zoomed the page
+// does not scroll: the wheel, a drag or the arrow keys move along the map instead. The Back button or Esc
+// returns to the overview, and the page scrolls on again. Hovering a picture lifts and enlarges it.
 //
 // The field is FW x FH design units; one transform (x, y, scale) on it does all the zooming.
 
@@ -68,7 +69,6 @@ export function initMapGallery({ reducedMotion }) {
     return { ...t, el, cx: t.x + t.w / 2, cy: t.y + t.h / 2 };
   });
   const videos = [...field.querySelectorAll('video')];
-  const box = lightbox();
 
   let sw = 0;
   let sh = 0;
@@ -93,13 +93,15 @@ export function initMapGallery({ reducedMotion }) {
     go(view(Math.min(scale, 7), (x0 + x1) / 2, (y0 + y1) / 2), instant);
     root.classList.add('is-zoomed');
     back.hidden = false;
-    tiles.forEach((t) => { t.el.dataset.cursor = group.includes(t) ? 'Open' : '+'; });
+    window.__lenis?.stop(); // the page waits while the map is zoomed
+    tiles.forEach((t) => { t.el.dataset.cursor = group.length === 1 && group[0] === t ? 'Back' : '+'; });
   }
   function reset() {
     focus = null;
     go(overview());
     root.classList.remove('is-zoomed');
     back.hidden = true;
+    window.__lenis?.start();
     tiles.forEach((t) => { t.el.dataset.cursor = '+'; });
   }
   // The pictures around a point: the closest first, then more while the group stays compact.
@@ -122,16 +124,50 @@ export function initMapGallery({ reducedMotion }) {
     return [(e.clientX - r.left - gsap.getProperty(field, 'x')) / s, (e.clientY - r.top - gsap.getProperty(field, 'y')) / s];
   };
 
+  let dragged = false;
   tiles.forEach((t) => {
     t.el.dataset.cursor = '+';
     t.el.addEventListener('click', (e) => {
-      if (focus?.includes(t)) { box.open(t); return; }
+      if (dragged) { e.preventDefault(); return; }
+      if (focus?.length === 1 && focus[0] === t) { reset(); return; } // a single picture in frame: a click leaves
+      if (focus?.includes(t)) { zoom([t]); return; } // a picture of the group: closer, down to that picture alone
       const [fx, fy] = e.detail ? toField(e) : [t.cx, t.cy]; // keyboard: around the tile itself
-      zoom(nearest(fx, fy).includes(t) ? nearest(fx, fy) : nearest(t.cx, t.cy));
+      const around = nearest(fx, fy);
+      zoom(around.includes(t) ? around : nearest(t.cx, t.cy));
     });
   });
   back.addEventListener('click', reset);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && focus && !box.isOpen()) reset(); });
+  document.addEventListener('keydown', (e) => {
+    if (!focus) return;
+    if (e.key === 'Escape') reset();
+    else if (e.key === 'ArrowRight') pan(-160, 0);
+    else if (e.key === 'ArrowLeft') pan(160, 0);
+    else if (e.key === 'ArrowDown') pan(0, -160);
+    else if (e.key === 'ArrowUp') pan(0, 160);
+  });
+  // Moving along the map while zoomed: the wheel (any direction) goes sideways, a drag goes any way.
+  const bound = (v, size, view) => (size <= view ? (view - size) / 2 : Math.min(0, Math.max(view - size, v)));
+  function pan(dx, dy) {
+    const sc = gsap.getProperty(field, 'scale');
+    gsap.to(field, { x: bound(gsap.getProperty(field, 'x') + dx, FW * sc, sw), y: bound(gsap.getProperty(field, 'y') + dy, FH * sc, sh), duration: 0.6, ease: 'power3.out', overwrite: 'auto' });
+  }
+  stage.addEventListener('wheel', (e) => {
+    if (!focus) return; // not zoomed: the page scrolls on as usual
+    e.preventDefault();
+    pan(-(Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY), 0);
+  }, { passive: false });
+  let grab = null;
+  stage.addEventListener('pointerdown', (e) => { if (focus) grab = { x: e.clientX, y: e.clientY, fx: gsap.getProperty(field, 'x'), fy: gsap.getProperty(field, 'y') }; dragged = false; });
+  window.addEventListener('pointermove', (e) => {
+    if (!grab) return;
+    const dx = e.clientX - grab.x;
+    const dy = e.clientY - grab.y;
+    if (Math.hypot(dx, dy) > 6) dragged = true;
+    if (!dragged) return;
+    const sc = gsap.getProperty(field, 'scale');
+    gsap.set(field, { x: bound(grab.fx + dx, FW * sc, sw), y: bound(grab.fy + dy, FH * sc, sh) });
+  });
+  window.addEventListener('pointerup', () => { grab = null; setTimeout(() => { dragged = false; }, 0); });
 
   // Clips play only while the map is on screen.
   new IntersectionObserver(([en]) => {
@@ -153,37 +189,4 @@ export function initMapGallery({ reducedMotion }) {
       onEnter: () => gsap.to(els, { autoAlpha: 1, scale: 1, duration: 0.6, ease: 'back.out(1.6)', stagger: { amount: 1.2, from: 'random' } }),
     });
   }
-}
-
-// One picture full size over the page. A clip plays, a photo shows its large file.
-function lightbox() {
-  const el = document.createElement('div');
-  el.className = 'mapg-box';
-  el.hidden = true;
-  el.setAttribute('role', 'dialog');
-  el.setAttribute('aria-modal', 'true');
-  el.setAttribute('aria-label', 'Club gallery picture');
-  el.innerHTML = '<div class="mapg-box__media" data-box-media></div><button class="btn btn--light mapg-box__close" type="button" data-cursor="Close"><span class="btn__bg"></span><span class="btn__label">Close</span></button>';
-  document.body.append(el);
-  const holder = el.querySelector('[data-box-media]');
-  const close = () => {
-    el.hidden = true;
-    holder.innerHTML = '';
-    document.documentElement.classList.remove('mapg-box-open');
-    window.__lenis?.start();
-  };
-  el.addEventListener('click', close);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !el.hidden) close(); });
-  return {
-    isOpen: () => !el.hidden,
-    open(t) {
-      holder.innerHTML = t.src.video
-        ? `<video src="${t.src.video}" poster="${t.src.src}" autoplay muted loop playsinline></video>`
-        : `<img src="${t.src.src}" alt="${t.src.alt || ''}" />`;
-      el.hidden = false;
-      document.documentElement.classList.add('mapg-box-open');
-      window.__lenis?.stop();
-      el.querySelector('button').focus({ preventScroll: true });
-    },
-  };
 }

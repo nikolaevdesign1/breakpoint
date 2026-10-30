@@ -473,6 +473,6 @@ html.apply-open { overflow: hidden; }
 .cal__plate-in::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(60% 90% at var(--gx, 50%) 0%, rgba(255, 255, 255, 0.42), transparent 70%); transition: opacity var(--dur-2); }
 @media (hover: hover) { .cal__plate:hover .cal__plate-in { box-shadow: 0 22px 28px -16px rgba(14, 14, 13, 0.7); } .cal__plate:hover .cal__plate-in::after { opacity: 1; } }
 .cal__plate-dates, .cal__plate-meta, .cal__plate-spots { font-size: 12px; line-height: 16px; opacity: 0.75; }
-.cal__plate-name { font-family: var(--font-display); font-size: 24px; line-height: 1; }
+.cal__plate-name { font-family: var(--font-display); font-size: 24px; line-height: 1; text-transform: uppercase; }
 .cal__plate-meter { display: block; height: 3px; margin-top: 8px; background: rgba(14, 14, 13, 0.14); }
 .cal__plate-meter i { display: block; width: var(--fill); height: 100%; background: currentColor; }

@@ -8,6 +8,7 @@ h1, h2, h3,
 .coach-cloud__title, .cgal__title, .hud-head__title {
   font-family: var(--font-display);
   font-weight: 400;
+  text-transform: uppercase; /* the display face is always set in capitals; no letter-spacing */
   line-height: 0.94;
 }
 h3 { line-height: 1; }
@@ -31,4 +32,5 @@ h3 { line-height: 1; }
 .rc__step b, .rc__note b, .rc__who b, .rc__sign .rc__name, .rules__row b {
   font-family: var(--font-display);
   font-weight: 400;
+  text-transform: uppercase;
 }
