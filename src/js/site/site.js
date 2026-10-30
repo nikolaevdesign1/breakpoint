@@ -23,7 +23,6 @@ import { initButtons } from './buttons.js';
 import { initNoise } from './noise.js';
 import { initFormControls } from './custom-select.js';
 import { playLitePreloader } from './preloader-lite.js';
-import { initPhotoCells, initSectionEdges, initPageTransitions } from './court-grid.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -64,7 +63,6 @@ export function initSite({ holdScroll = false } = {}) {
   initAmbientBed();
   initCta({ reducedMotion });
   initDepth({ reducedMotion });
-  initPageTransitions({ reducedMotion });
   initToTop({ lenis, reducedMotion });
   // The home page shows the cookie card after its intro (see releaseScroll).
   if (!holdScroll) initCookies();
@@ -76,8 +74,6 @@ export function initSite({ holdScroll = false } = {}) {
     initCuts();
     initParallax({ reducedMotion });
     initHeroScroll({ reducedMotion });
-    initPhotoCells({ reducedMotion });
-    initSectionEdges({ reducedMotion });
   });
 
   // Inner pages get the counter-only preloader; the home page runs its own greeting (intro.js).

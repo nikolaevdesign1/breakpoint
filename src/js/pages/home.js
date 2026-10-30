@@ -6,14 +6,12 @@ import { entryDone } from '../site/entry.js';
 import { renderCourtLane, initCourtLane } from '../site/court-lane.js';
 import { initCommunity } from '../site/community.js';
 import { initCoachCloud } from '../site/coaches-cloud.js';
-import { initHeroEdge } from '../site/court-grid.js';
 import { initClubNotes } from '../site/club-notes.js';
 import { initGalleryStrip } from '../site/gallery-strip.js';
 import { watchCut } from '../site/cut.js';
 
 renderCourtLane();
 const { lenis, reducedMotion, ready } = initSite({ holdScroll: true });
-const heroEdge = initHeroEdge(document.querySelector('[data-hero-card]'), { reducedMotion });
 
 // The preloader waits for the poster and the first video frame only (loadeddata, capped at 2.5 s),
 // not for enough buffer to play through: the 5 MB clip keeps streaming behind the intro.
@@ -59,6 +57,5 @@ function cutHero() {
 
 entryDone.then(() => playIntro({ assets, reducedMotion })).then(() => {
   releaseScroll(lenis);
-  heroEdge?.show();
   cutHero();
 });
