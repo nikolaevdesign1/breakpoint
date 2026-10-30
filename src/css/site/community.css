@@ -212,9 +212,6 @@
   .mapg__tile:hover img, .mapg__tile:hover video { scale: 1.08; }
 }
 .mapg__tile:focus-visible { z-index: 3; outline: 2px solid var(--ink); outline-offset: 2px; }
-.mapg__tile { filter: opacity(1); }
-.mapg.is-zoomed .mapg__tile { filter: opacity(0.3); }
-.mapg.is-zoomed .mapg__tile[data-cursor='Back'] { filter: opacity(1); }
 .mapg__back { position: absolute; left: var(--edge); bottom: var(--edge); z-index: 5; }
 .mapg__back[hidden] { display: none; }
 
