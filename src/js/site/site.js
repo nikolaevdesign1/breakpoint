@@ -6,6 +6,7 @@ import { hydrateImages } from './media.js';
 import { initNav } from './nav.js';
 import { initReveals } from './reveal.js';
 import { initCta } from './cta.js';
+import { initDepth } from './depth.js';
 import { initRates } from './pricing.js';
 import { initBigmark } from './bigmark.js';
 import { initSound } from './sound.js';
@@ -57,6 +58,7 @@ export function initSite({ holdScroll = false } = {}) {
   initFormControls();
   initButtons({ reducedMotion });
   initCta({ reducedMotion });
+  initDepth({ reducedMotion });
   initPageTransitions({ reducedMotion });
   initToTop({ lenis, reducedMotion });
   // The home page shows the cookie card after its intro (see releaseScroll).

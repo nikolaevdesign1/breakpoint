@@ -51,12 +51,13 @@ export function initNav(lenis) {
       lenis?.stop();
       tl = gsap.timeline()
         .fromTo(dim, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.7 * d, ease: EASE.out }, 0)
-        .fromTo(tiles, { autoAlpha: 0, y: -24, scale: 0.9, transformOrigin: '50% 0%' }, {
-          autoAlpha: 1, y: 0, scale: 1,
+        // They come forward out of the depth (z, rotationX) as well as down.
+        .fromTo(tiles, { autoAlpha: 0, y: -24, scale: 0.9, z: -320, rotationX: -28, transformPerspective: 900, transformOrigin: '50% 0%' }, {
+          autoAlpha: 1, y: 0, scale: 1, z: 0, rotationX: 0,
           duration: reduced ? 0.01 : DUR.slow,
           ease: 'elastic.out(1, 0.8)',
           stagger: STAGGER.base * d,
-          clearProps: 'transform,transformOrigin',
+          clearProps: 'transform,transformOrigin,transformPerspective',
         }, 0.1 * d);
       if (viaKeyboard) links[0].focus({ preventScroll: true });
     } else {
