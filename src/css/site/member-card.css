@@ -1,13 +1,14 @@
-/* Member card (rows 48, 55): the one card of the site, partials/member-card.html. Clay front with cream court lines
-   and a green plaque, green back with a code, a dark stripe and cream plaques. Square corners.
+/* Member card: the one card of the site, partials/member-card.html. Ink front with a drawn court, a clay service box,
+   Anton name; clay back with a code and a dark stripe. Square corners, no letter-spacing.
    Layers: .clubcard (perspective) → __tilt (follows the pointer) → __flip (turns to the face that carries the active perk, or by drag).
-   --gx / --gy (member-card.js) move the soft light across both faces as the card turns. */
+   --gx / --gy (member-card.js) move the light across both faces as the card turns. */
 .clubcard {
-  --cream: #fff3da;
+  --cream: var(--snow);
   width: 100%;
   max-width: 560px;
   aspect-ratio: 1.586;
   perspective: 1400px;
+  container-type: inline-size;
   touch-action: pan-y;
   cursor: grab;
   user-select: none;
@@ -15,7 +16,7 @@
 .clubcard:active { cursor: grabbing; }
 .clubcard__tilt, .clubcard__flip { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
 .clubcard__face {
-  --pad: clamp(16px, 2vw, 28px);
+  --pad: 5cqw;
   position: absolute;
   inset: 0;
   isolation: isolate;
@@ -23,69 +24,78 @@
   flex-direction: column;
   padding: var(--pad);
   overflow: hidden;
-  color: var(--cream);
+  color: var(--snow);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  box-shadow: 0 40px 60px -36px rgba(54, 37, 27, 0.7);
+  box-shadow: 0 50px 70px -40px rgba(14, 14, 13, 0.75), 0 0 0 1px rgba(244, 243, 239, 0.08);
 }
-.clubcard__front { background: linear-gradient(176deg, #b98568 30%, #8d6652 120%); } /* a soft terracotta, not the saturated clay */
-.clubcard__back { background: var(--finch); transform: rotateY(180deg); }
-.clubcard__face::after { /* clay grain */
+.clubcard__front { background: linear-gradient(160deg, #232322 0%, #0e0e0d 70%); }
+.clubcard__back { background: linear-gradient(160deg, #b0502a 0%, #7e3518 100%); transform: rotateY(180deg); }
+.clubcard__face::after { /* fine grain */
   content: '';
-  display: none;
   position: absolute;
   inset: 0;
   z-index: -1;
-  opacity: 0.16;
-  mix-blend-mode: multiply;
+  opacity: 0.1;
+  mix-blend-mode: screen;
+  pointer-events: none;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.clubcard__glare {
+.clubcard__glare { /* a sheen band that slides across as the card tilts */
   position: absolute;
-  inset: 0;
+  inset: -20%;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(60% 80% at var(--gx, 30%) var(--gy, 20%), rgba(255, 243, 218, 0.14), transparent 70%);
+  background: linear-gradient(105deg, transparent calc(var(--gx, 30%) - 18%), rgba(255, 255, 255, 0.16) var(--gx, 30%), transparent calc(var(--gx, 30%) + 18%));
+  mix-blend-mode: soft-light;
+}
+.clubcard__front::before { /* the clay service box on the court, a block of colour under the lines */
+  content: '';
+  position: absolute;
+  z-index: -1;
+  left: 26.7%;
+  right: 26.7%;
+  top: 21%;
+  height: 29%;
+  background: var(--clay);
+  opacity: 0.9;
 }
 
 .clubcard__court { position: absolute; inset: 0; width: 100%; height: 100%; }
-.clubcard__court path { fill: none; stroke: var(--cream); stroke-opacity: 0.4; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
-.clubcard__back .clubcard__court path { stroke-opacity: 0.34; }
+.clubcard__court path { fill: none; stroke: var(--snow); stroke-opacity: 0.2; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.clubcard__back .clubcard__court path { stroke-opacity: 0.28; }
 
-.clubcard__top { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: flex-start; font-size: 14px; line-height: 20px; }
-.clubcard__logo { width: 48px; height: 38px; fill: currentColor; }
-.clubcard__tier { padding: 2px 8px; background: var(--cream); color: var(--wood); }
+.clubcard__top { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: flex-start; font-size: max(11px, 2.6cqw); line-height: 1.4; }
+.clubcard__logo { width: 9cqw; height: 7cqw; fill: currentColor; }
+.clubcard__tier { padding: 4px 10px; background: var(--snow); color: var(--ink); font-weight: 500; }
 .clubcard__name { position: relative; z-index: 1; margin-top: auto; }
-.clubcard__name b { display: block; overflow: hidden; font-size: clamp(22px, 2.4vw, 34px); font-weight: 500; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
-.clubcard__name span { display: block; margin-top: 4px; font-size: 14px; line-height: 20px; opacity: 0.8; }
+.clubcard__name b {
+  display: block; overflow: hidden;
+  font-family: var(--font-display); font-size: 9.6cqw; font-weight: 400; line-height: 1; text-transform: uppercase;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.clubcard__name span { display: block; margin-top: 1cqw; font-size: max(11px, 2.6cqw); line-height: 1.4; color: rgba(244, 243, 239, 0.6); }
 
-.clubcard__fields { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 16px; }
+.clubcard__fields { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 3cqw; }
 .clubcard__fields--back { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .clubcard__field {
-  padding: 6px 8px;
-  border-top: 1px dashed rgba(255, 243, 218, 0.6);
+  padding: 2cqw 2.4cqw;
+  background: rgba(244, 243, 239, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(244, 243, 239, 0.14);
   transition: background-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), translate var(--dur-3) var(--ease-spring);
 }
-.clubcard__field dt { font-size: 12px; line-height: 16px; opacity: 0.8; }
-.clubcard__field dd { margin: 0; font-size: clamp(14px, 1.2vw, 18px); font-weight: 500; line-height: 1.2; }
-.clubcard__field--rank { background: var(--finch); border-top-color: transparent; } /* the green plaque */
-.clubcard__front .clubcard__field.is-hot { background: var(--cream); color: var(--wood); translate: 0 -4px; }
-.clubcard__back .clubcard__field { border-top-color: transparent; background: var(--cream); color: var(--wood); }
-.clubcard__back .clubcard__field + .clubcard__field { background: var(--wood); color: var(--cream); }
-.clubcard__back .clubcard__field.is-hot { translate: 0 -4px; box-shadow: 0 0 0 2px var(--cream); }
+.clubcard__field dt { font-size: max(10px, 2.3cqw); line-height: 1.3; opacity: 0.7; }
+.clubcard__field dd { margin: 2px 0 0; font-family: var(--font-display); font-size: 4.2cqw; font-weight: 400; line-height: 1.1; text-transform: uppercase; }
+.clubcard__field--rank { background: var(--clay); box-shadow: none; } /* the clay plaque */
+.clubcard__front .clubcard__field.is-hot { background: var(--snow); color: var(--ink); translate: 0 -4px; box-shadow: none; }
+.clubcard__back .clubcard__field { background: var(--snow); color: var(--ink); box-shadow: none; }
+.clubcard__back .clubcard__field + .clubcard__field { background: var(--ink); color: var(--snow); }
+.clubcard__back .clubcard__field.is-hot { translate: 0 -4px; box-shadow: 0 0 0 2px var(--snow); }
 
-.clubcard__stripe { position: relative; z-index: 1; display: block; height: 40px; margin: 0 calc(var(--pad) * -1); background: var(--wood); }
-.clubcard__stripe::after { content: ''; position: absolute; left: var(--pad); right: var(--pad); top: 50%; border-top: 1px dashed var(--cream); }
+.clubcard__stripe { position: relative; z-index: 1; display: block; height: 40px; margin: 0 calc(var(--pad) * -1); background: var(--ink); }
 .clubcard__mid { position: relative; z-index: 1; display: flex; flex: 1; align-items: center; justify-content: space-between; gap: 16px; min-height: 0; padding-top: 12px; }
 .clubcard__small { max-width: 24ch; font-size: 14px; line-height: 20px; }
-.clubcard__code { flex: none; width: clamp(56px, 22%, 88px); aspect-ratio: 1; padding: 6px; background: var(--cream); fill: var(--wood); }
+.clubcard__code { flex: none; width: clamp(56px, 22%, 88px); aspect-ratio: 1; padding: 6px; background: var(--snow); fill: var(--ink); }
 
-@media (max-width: 900px) { .clubcard { max-width: 340px; } }
-@media (max-width: 560px) {
-  .clubcard { max-width: 300px; }
-  .clubcard__face { --pad: 14px; }
-  .clubcard__name b { font-size: 20px; }
-  .clubcard__field { padding: 4px 6px; }
-  .clubcard__field dd { font-size: 14px; }
-  .clubcard__small { font-size: 12px; line-height: 16px; }
-}
+@media (max-width: 900px) { .clubcard { max-width: 420px; } }
+@media (max-width: 560px) { .clubcard { max-width: 340px; } }

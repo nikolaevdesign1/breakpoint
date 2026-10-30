@@ -11,7 +11,7 @@
   margin-bottom: clamp(32px, 4vw, 64px);
 }
 .mhead .h2 { grid-column: 1 / 9; }
-.mhead--r .h2 { grid-column: 4 / 13; } /* mirrors the neighbours: this one starts on column 4 */
+.mhead--r .h2 { grid-column: 1 / 13; }
 .mhead__note { grid-column: 10 / 13; font-size: 14px; line-height: 20px; color: var(--mute); }
 .mplans__head { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--grid-gap); margin-bottom: 32px; }
 .mplans__head .h2 { grid-column: 1 / 10; }
