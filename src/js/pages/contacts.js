@@ -1,4 +1,5 @@
 import gsap from 'gsap';
+import { entryDone } from '../site/entry.js';
 import { initSite } from '../site/site.js';
 import { initContactForm } from '../site/contact-form.js';
 import { initClubStatus } from '../site/club-hours.js';
@@ -13,7 +14,7 @@ initClubStatus();
 initRoutes(initSquareMap());
 initScramble();
 initCopy();
-playIntro();
+entryDone.then(playIntro);
 
 // Big contacts scramble their letters when pointed at (type-reveal, no fade), then fold back to text.
 function initScramble() {

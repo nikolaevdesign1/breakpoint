@@ -2,6 +2,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { initSite, releaseScroll } from '../site/site.js';
 import { MEDIA, videoSrc } from '../site/media.js';
 import { playIntro } from '../site/intro.js';
+import { entryDone } from '../site/entry.js';
 import { renderCourtLane, initCourtLane } from '../site/court-lane.js';
 import { initCommunity } from '../site/community.js';
 import { initCoachCloud } from '../site/coaches-cloud.js';
@@ -56,7 +57,7 @@ function cutHero() {
   watchCut(card);
 }
 
-playIntro({ assets, reducedMotion }).then(() => {
+entryDone.then(() => playIntro({ assets, reducedMotion })).then(() => {
   releaseScroll(lenis);
   heroEdge?.show();
   cutHero();

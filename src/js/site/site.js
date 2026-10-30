@@ -7,6 +7,8 @@ import { initNav } from './nav.js';
 import { initReveals } from './reveal.js';
 import { initCta } from './cta.js';
 import { initDepth } from './depth.js';
+import { initEntry, entryDone } from './entry.js';
+import { initAmbientBed } from './ambient-bed.js';
 import { initRates } from './pricing.js';
 import { initBigmark } from './bigmark.js';
 import { initSound } from './sound.js';
@@ -57,6 +59,8 @@ export function initSite({ holdScroll = false } = {}) {
   initNoise();
   initFormControls();
   initButtons({ reducedMotion });
+  initEntry({ reducedMotion });
+  initAmbientBed();
   initCta({ reducedMotion });
   initDepth({ reducedMotion });
   initPageTransitions({ reducedMotion });
@@ -76,7 +80,7 @@ export function initSite({ holdScroll = false } = {}) {
 
   // Inner pages get the counter-only preloader; the home page runs its own greeting (intro.js).
   if (!reducedMotion && INNER_PAGES.includes(document.body.dataset.page)) {
-    playLitePreloader(imageLoads);
+    entryDone.then(() => playLitePreloader(imageLoads));
   }
 
   return { lenis, reducedMotion, imageLoads, ready };

@@ -81,6 +81,15 @@ function syncToggles() {
   });
 }
 
+const EVENT = 'bp-sound-change';
+export const isMuted = () => muted;
+export function setMuted(value) {
+  muted = value;
+  writeMuted(muted);
+  syncToggles();
+  document.dispatchEvent(new CustomEvent(EVENT, { detail: { muted } }));
+}
+
 export function initSound() {
   syncToggles();
   document.addEventListener('pointerdown', (e) => {
@@ -91,9 +100,7 @@ export function initSound() {
   }, { capture: true, passive: true });
 
   document.querySelectorAll('[data-sound-toggle]').forEach((b) => b.addEventListener('click', () => {
-    muted = !muted;
-    writeMuted(muted);
-    syncToggles();
+    setMuted(!muted);
     if (!muted) pock();
   }));
 }
