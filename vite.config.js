@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 import { fillTokens } from './src/js/shared/club-facts.js';
 
-const PAGES = ['index', 'about', 'tournaments', 'contacts', 'booking', 'coaches', 'memberships', 'privacy', 'terms', 'cookies'];
+const PAGES = ['index', 'about', 'tournaments', 'contacts', 'booking', 'coaches', 'memberships', 'privacy', 'terms', 'cookies', '404'];
 const INCLUDE = /<!--\s*include:([\w./-]+)\s*-->/g;
 
 // Static HTML partials: <!-- include:partials/nav.html --> is replaced at dev and build time.
