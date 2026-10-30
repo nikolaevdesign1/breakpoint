@@ -9,8 +9,10 @@
 }
 
 /* The block ends right after the last message (row 54): an ordinary gap, not the big section padding */
-.section:has(> .reviews) { padding-bottom: 0; }
-.reviews.is-scrubbed { margin-bottom: -34svh; } /* the last bubble rests mid-window: the empty lower part of the window is pulled under the next block */
+.section:has(> .reviews) { padding-bottom: 64px; }
+/* Memberships: the last bubble rests mid-window, so the empty lower part of the window is pulled under the FAQ */
+body[data-page='memberships'] .section:has(> .reviews) { padding-bottom: 0; }
+body[data-page='memberships'] .reviews.is-scrubbed { margin-bottom: -34svh; }
 
 /* Scroll-driven arrival (row 116, reviews.js adds .is-scrubbed): the track is as tall as the
    messages need, the stage sticks for one screen, the feed slides inside a soft-edged window. */
