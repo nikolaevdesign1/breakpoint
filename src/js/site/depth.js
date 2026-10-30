@@ -56,7 +56,7 @@ export function initDepth({ reducedMotion }) {
     if (open) { menuLean.toPointer(e.clientX, e.clientY); headerLean.to(nx * 0.6, ny * 0.6); wasOpen = true; return; }
     if (wasOpen) { menuLean.rest(); wasOpen = false; }
     headerLean.to(nx, ny);
-    if (drift) { drift.x(-nx * 3); drift.y(-ny * 2); }
+    if (drift) { drift.x(-nx * 6); drift.y(-ny * 4); }
   }, { passive: true });
   document.addEventListener('pointerleave', () => { headerLean.rest(); menuLean.rest(); if (drift) { drift.x(0); drift.y(0); } });
 }
