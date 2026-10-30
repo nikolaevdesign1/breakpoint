@@ -291,7 +291,6 @@ button.cal__day[aria-disabled] { cursor: default; }
 }
 .tcard__close svg { width: 12px; height: 12px; }
 @media (hover: hover) { .tcard__close:hover { background: var(--ink); color: var(--snow); transform: rotate(90deg); } }
-.tcard { border-top: 4px solid var(--clay); }
 .tcard__name { margin-top: 6px; font-size: 32px; font-weight: 500; line-height: 1; }
 /* Retro programme (row 16): match number, court and time, big figure over a small label */
 .tcard__sched { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0 20px; margin-top: 16px; padding: 12px 0; border-top: var(--dash); border-bottom: var(--dash); }

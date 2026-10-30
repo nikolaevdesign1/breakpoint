@@ -136,6 +136,12 @@ export function initMapGallery({ reducedMotion }) {
       zoom(around.includes(t) ? around : nearest(t.cx, t.cy));
     });
   });
+  // The empty space between the pictures zooms too: onto the pictures nearest to the click.
+  stage.addEventListener('click', (e) => {
+    if (dragged || e.target.closest('.mapg__tile, .mapg__back')) return;
+    const [fx, fy] = toField(e);
+    zoom(nearest(fx, fy));
+  });
   back.addEventListener('click', reset);
   document.addEventListener('keydown', (e) => {
     if (!focus) return;
