@@ -43,10 +43,9 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: clamp(8px, 2vw, 32px);
-  border-block: var(--dash);
 }
 .mhero__facts li { display: flex; flex-direction: column; padding: 24px 24px 24px 0; }
-.mhero__facts li + li { padding-left: 24px; border-left: var(--dash); }
+.mhero__facts li + li { padding-left: 24px; }
 .mhero__facts b { display: flex; align-items: baseline; gap: 8px; font-size: var(--fs-xl); font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
 .mhero__facts b small { font-size: 16px; font-weight: 400; line-height: 24px; color: var(--mute); }
 .mhero__facts .is-accent b, .mhero__facts .is-accent b small { color: var(--clay); }
@@ -57,7 +56,8 @@ body[data-page='memberships'] .pricing-faq { display: none; }
 
 /* 3. Comparison (membership-compare.js) */
 .cmp { --cols: minmax(200px, 1.3fr) repeat(4, minmax(0, 1fr)); position: relative; }
-.cmp__row { display: grid; grid-template-columns: var(--cols); border-bottom: var(--dash); }
+.cmp__row { display: grid; grid-template-columns: var(--cols); }
+.cmp__row:nth-child(even) { background: var(--paper-2); } /* zebra instead of rules */
 .cmp__head { position: sticky; top: 0; z-index: 3; background: var(--paper); transition: top var(--dur-3) var(--ease-out); }
 body:has(.nav:not(.is-hidden)) .cmp__head { top: var(--bar-h); }
 .cmp__head .cmp__row { border-bottom: 1px solid var(--ink); }
@@ -84,7 +84,7 @@ body:has(.nav:not(.is-hidden)) .cmp__head { top: var(--bar-h); }
 .cmp__row--foot .btn { width: 100%; }
 
 /* 4. Perks (row 59): a 3 x 2 board of compact cells; hover or tap fills a cell with clay from the left */
-.perks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: var(--dash); border-left: var(--dash); }
+.perks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .perk {
   position: relative;
   isolation: isolate;
@@ -94,8 +94,7 @@ body:has(.nav:not(.is-hidden)) .cmp__head { top: var(--bar-h); }
   min-height: 224px;
   padding: 24px;
   overflow: hidden;
-  border-right: var(--dash);
-  border-bottom: var(--dash);
+  background: var(--paper-2);
   cursor: default;
   transition: color var(--dur-2) var(--ease-out);
 }

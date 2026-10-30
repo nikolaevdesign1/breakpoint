@@ -8,6 +8,7 @@ import { initMembershipApply } from '../site/membership-apply.js';
 import { initMemberCard } from '../site/member-card.js';
 import { initCountUps } from '../site/count-up.js';
 import { DUR, EASE, STAGGER } from '../site/motion.js';
+import { initTilt } from '../site/tilt.js';
 
 // Memberships (row 128). Markup that other modules wire up (buttons, anchors, prices) is in place
 // before initSite runs: the comparison table, and the plan buttons of the shared pricing block,
@@ -90,3 +91,6 @@ function initJoin() {
   });
   light(0);
 }
+
+// Plans and perks lean toward the pointer.
+initTilt({ reducedMotion }, '.plan, .perk');
