@@ -13,6 +13,11 @@ const CLIPS = [
 ];
 
 const EXTRA = [ // { src: '/media/club/court-1.webp', ar: 1.5 }; the clips carry a still (webp) and the mp4
+  { src: '/media/club/photo-01.webp', ar: 733 / 1100, alt: '' },
+  { src: '/media/club/photo-02.webp', ar: 733 / 1100, alt: '' },
+  { src: '/media/club/photo-03.webp', ar: 733 / 1100, alt: '' },
+  { src: '/media/club/photo-04.webp', ar: 825 / 1100, alt: '' },
+  { src: '/media/club/photo-05.webp', ar: 825 / 1100, alt: '' },
   { src: '/media/clips/courts-sunset.webp', video: '/media/clips/courts-sunset.mp4', ar: 16 / 9, alt: '' },
   { src: '/media/clips/court-tall-1.webp', video: '/media/clips/court-tall-1.mp4', ar: 540 / 972, alt: '' },
   { src: '/media/clips/court-wide-1.webp', video: '/media/clips/court-wide-1.mp4', ar: 16 / 9, alt: '' },
