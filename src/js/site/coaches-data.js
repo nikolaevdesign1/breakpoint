@@ -248,11 +248,17 @@ export const COACHES = [
 // Short muted loops for the home cloud (Mixkit Free License, see docs/media-sources.md).
 // Row 145: clay-rally, junior-lesson, padel-aerial, padel-night, clay-serve and padel-coach are left out,
 // they show venue names, sponsor banners or brand logos.
+// `ar` is the clip's real width / height: the cloud card takes that shape, so a wide clip stays wide and a
+// tall one stays tall. `poster` is the still next to the file (webp; the older .jpg ones sit in Git LFS).
 export const CLIPS = [
-  { file: 'serve-studio' },
-  { file: 'clay-aerial', wide: true },
-  { file: 'junior-rally' },
-  { file: 'padel-sunset' },
+  { file: 'courts-sunset', ar: 16 / 9, poster: 'webp' },
+  { file: 'court-tall-1', ar: 540 / 972, poster: 'webp' },
+  { file: 'court-wide-2', ar: 960 / 506, poster: 'webp' },
+  { file: 'court-wide-1', ar: 16 / 9, poster: 'webp' },
+  { file: 'serve-studio', ar: 540 / 676 },
+  { file: 'clay-aerial', ar: 540 / 676 },
+  { file: 'junior-rally', ar: 540 / 676 },
+  { file: 'padel-sunset', ar: 540 / 676 },
 ];
 
 export const SPORT_LABEL = { tennis: 'Tennis', padel: 'Padel' };

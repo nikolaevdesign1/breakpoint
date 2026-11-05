@@ -45,8 +45,9 @@ function cardHtml(item) {
   }
   if (item.kind === 'clip') {
     const { clip } = item;
-    return `<div class="cc-card cc-card--${clip.wide ? 'wide' : 'tall'} cut ${cutOf(clip.file)}">
-      <video muted playsinline loop preload="none" poster="/media/clips/${clip.file}.jpg" data-src="/media/clips/${clip.file}"></video></div>`;
+    const shape = clip.ar > 1.2 ? 'wide' : clip.ar < 0.7 ? 'tall' : 'photo';
+    return `<div class="cc-card cc-card--${shape} cut ${cutOf(clip.file)}" style="--ar:${clip.ar.toFixed(3)}">
+      <video muted playsinline loop preload="none" poster="/media/clips/${clip.file}.${clip.poster || 'jpg'}" data-src="/media/clips/${clip.file}"></video></div>`;
   }
   return `<div class="cc-card cc-card--wide cut ${cutOf(item.key)}"><img src="${mediaUrl(item.key, 420)}" alt="" width="420" height="315" loading="lazy" decoding="async" /></div>`;
 }
