@@ -29,6 +29,7 @@
 html.intro .preloader__greet { visibility: hidden; }
 /* The greeting is small, in the text face */
 .preloader .preloader__title {
+  text-transform: none;
   margin: 0;
   font-family: var(--font-sans);
   font-size: 14px;

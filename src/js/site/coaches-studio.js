@@ -25,7 +25,7 @@ const CYCLE = 2400; // ms the plate holds the name or the role
 const matches = (c, on) => on.every((f) => c.sports.includes(f) || c.ages.includes(f));
 
 const coachTile = (c) => `
-  <button class="mt cut" type="button" data-slug="${c.slug}" data-cursor="${c.name}" aria-label="${c.name}, ${c.role}" aria-haspopup="dialog">
+  <button class="mt cut" data-parallax="0.035" type="button" data-slug="${c.slug}" data-cursor="${c.name}" aria-label="${c.name}, ${c.role}" aria-haspopup="dialog">
     <img class="mt__img" src="${coachPhoto(c)}" alt="" width="720" height="900" loading="lazy" decoding="async" />
     <span class="mt__cap"><span class="mt__name">${c.name}</span><span class="mt__role">${c.role}</span></span>
   </button>`;

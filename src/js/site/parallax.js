@@ -98,8 +98,8 @@ export function initParallax({ reducedMotion }) {
 
   const addMedia = (m) => {
     if (m.dataset.px !== undefined || m.closest(SKIP) || !enabled(m)) return;
-    if (getComputedStyle(m).objectFit === 'contain') return; // cut-out portraits: scaling would crop them
     const box = frameOf(m);
+    if (getComputedStyle(m).objectFit === 'contain' && !box.hasAttribute('data-parallax')) return; // cut-out portraits: scaling would crop them, unless the frame asks for a light drift
     if (!box.matches('.cc-card') && box.getBoundingClientRect().width < MIN_W) return;
     if (stage(box) === 'fixed') return;
     if (!frames.has(box)) frames.set(box, []);

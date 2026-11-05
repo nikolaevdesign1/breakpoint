@@ -209,6 +209,8 @@
   transition: opacity var(--dur-1) ease var(--d), transform var(--dur-3) var(--ease-spring) var(--d), fill var(--dur-1);
 }
 .smap.is-in rect:not(.smap__pulse, .smap__rt) { opacity: 1; transform: none; }
+.smap path { opacity: 0; transition: opacity 0.9s ease 0.15s, fill var(--dur-1); }
+.smap.is-in path { opacity: 1; }
 .smap__land { fill: var(--paper-3); }
 .smap__road, .smap__station { fill: var(--ink); }
 .smap__park { fill: var(--finch); }

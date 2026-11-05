@@ -41,11 +41,21 @@ export function initDepth({ reducedMotion }) {
   const tx = gsap.quickTo(nav, '--tx', { duration: 0.9, ease: 'power3.out' });
   const ty = gsap.quickTo(nav, '--ty', { duration: 0.9, ease: 'power3.out' });
   const headerLean = { to: (nx, ny) => { ty(nx * 0.9); tx(-ny * 0.6); }, rest: () => { ty(0); tx(0); } };
-  // Headings drift a hair against the pointer (--fx / --fy on the root, read by headings.css). Not on the booking page.
-  const drift = document.body.dataset.page === 'booking' ? null : {
-    x: gsap.quickTo(document.documentElement, '--fx', { duration: 1.2, ease: 'power3.out' }),
-    y: gsap.quickTo(document.documentElement, '--fy', { duration: 1.2, ease: 'power3.out' }),
-  };
+  // Headings drift a hair against the pointer. The offset is written to the headings on screen only; a CSS variable on the
+  // root would restyle the whole page on every frame. Not on the booking page.
+  const SEL = 'h1, h2, .h2, .h-xl, .h-xxl';
+  const seen = new Set();
+  let drift = null;
+  if (document.body.dataset.page !== 'booking') {
+    const io = new IntersectionObserver((entries) => entries.forEach((en) => { if (en.isIntersecting) { if (getComputedStyle(en.target).position === 'static') en.target.style.position = 'relative'; seen.add(en.target); } else seen.delete(en.target); }));
+    document.querySelectorAll(SEL).forEach((el) => { if (!el.closest('.preloader, .menu, .rc__big')) io.observe(el); });
+    const pos = { x: 0, y: 0 };
+    const write = () => seen.forEach((el) => { el.style.left = `${pos.x.toFixed(2)}px`; el.style.top = `${pos.y.toFixed(2)}px`; });
+    drift = {
+      x: (v) => gsap.to(pos, { x: v, duration: 1.2, ease: 'power3.out', overwrite: 'auto', onUpdate: write }),
+      y: (v) => gsap.to(pos, { y: v, duration: 1.2, ease: 'power3.out', overwrite: 'auto', onUpdate: write }),
+    };
+  }
   const menuLean = tileLean(tiles);
   let wasOpen = false;
 

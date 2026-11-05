@@ -57,6 +57,8 @@ export function initSquareMap(root = document) {
   if (!host) return null;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const rects = [];
+  let landD = ''; // land and water cells are two paths, not two thousand rects: far less to paint and animate
+  let waterD = '';
   const far = Math.hypot(1, 1);
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
@@ -66,12 +68,18 @@ export function initSquareMap(root = document) {
       const delay = ((Math.hypot(x - CLUB[0], y - CLUB[1]) / far) * 1.4 + Math.random() * 0.12).toFixed(2);
       const size = kind === 'water' ? 2 : 8;
       const o = (CELL - size) / 2;
+      if (kind === 'land' || kind === 'water') {
+        const cell = `M${col * CELL + o} ${row * CELL + o}h${size}v${size}h-${size}z`;
+        if (kind === 'land') landD += cell; else waterD += cell;
+        continue;
+      }
       rects.push(`<rect class="smap__${kind}" x="${col * CELL + o}" y="${row * CELL + o}" width="${size}" height="${size}" style="--d:${delay}s"/>`);
     }
   }
   // A 2 × 2 cell block drawn over the grid (the club, the Metrorail station)
   const at = ([x, y]) => `x="${Math.round(x * COLS - 1) * CELL + 1}" y="${Math.round(y * ROWS - 1) * CELL + 1}" width="${CELL * 2 - 2}" height="${CELL * 2 - 2}"`;
   host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true">
+    <path class="smap__land" d="${landD}"/><path class="smap__water" d="${waterD}"/>
     ${rects.join('')}
     <g class="smap__routes" data-routes></g>
     <rect class="smap__station" ${at(STATION)} style="--d:0.5s"/>
