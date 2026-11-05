@@ -5,8 +5,8 @@ const U = (id) => `https://images.unsplash.com/${id}`;
 export const MEDIA = {
   hero: {
     // Mixkit Stock Video Free License: courts and a green park from above (row 44). docs/media-sources.md.
-    video: '/media/hero-clay-park',
-    poster: '/media/hero-clay-park.jpg',
+    video: '/media/hero-courts',
+    poster: '/media/hero-courts.webp',
     thumb: U('photo-1554068865-24cecd4e34b8'),
   },
   advantages: [

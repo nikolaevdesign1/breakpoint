@@ -13,7 +13,13 @@ const CLIPS = [
   { name: 'padel-sunset' }, { name: 'serve-studio', video: true }, { name: 'tournaments-night' },
 ];
 
-const EXTRA = []; // { src: '/media/club/court-1.jpg', ar: 1.5 }
+const EXTRA = [ // { src: '/media/club/court-1.webp', ar: 1.5 }; the clips carry a still (webp) and the mp4
+  { src: '/media/clips/courts-sunset.webp', video: '/media/clips/courts-sunset.mp4', ar: 16 / 9, alt: '' },
+  { src: '/media/clips/court-tall-1.webp', video: '/media/clips/court-tall-1.mp4', ar: 540 / 972, alt: '' },
+  { src: '/media/clips/court-wide-1.webp', video: '/media/clips/court-wide-1.mp4', ar: 16 / 9, alt: '' },
+  { src: '/media/clips/court-wide-2.webp', video: '/media/clips/court-wide-2.mp4', ar: 960 / 506, alt: '' },
+  { src: '/media/clips/cta-aerial.webp', video: '/media/clips/cta-aerial.mp4', ar: 16 / 9, alt: '' },
+];
 
 // The stock photos of the other blocks (hotlinked, see media.js), landscape and portrait mixed.
 const STOCK = ['services', 'community', 'advantages']
