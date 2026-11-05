@@ -15,10 +15,10 @@ const FH = 900;
 const GAP = 4;
 const GROUP_MIN = 3; // pictures that fill the frame after a zoom: three to five
 const GROUP_MAX = 5;
-const GROUP_W = 900; // widest and tallest area a group may cover, in field units
-const GROUP_H = 600;
+const GROUP_W = 380; // widest and tallest area a group may cover, in field units
+const GROUP_H = 250;
 const PAD = 0.1; // share of the frame left empty around the group
-const WIDTHS = [138, 168, 200, 236, 276, 330]; // three times the first map's pictures
+const WIDTHS = [46, 56, 66, 78, 92, 110];
 
 // Small deterministic generator, so the map looks the same on every visit.
 function rng(seed) {
@@ -26,8 +26,9 @@ function rng(seed) {
   return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
 }
 
-// The map is the whole field with a small margin; pictures never overlap and never repeat.
-const inField = (x, y) => x > 24 && x < FW - 24 && y > 70 && y < FH - 24;
+// An organic blob: three overlapping ellipses, like the reference's cluster.
+const inBlob = (x, y) => [[0.3, 0.46, 0.3, 0.42], [0.58, 0.54, 0.34, 0.4], [0.82, 0.4, 0.2, 0.34]]
+  .some(([cx, cy, rx, ry]) => (((x / FW - cx) / rx) ** 2 + ((y / FH - cy) / ry) ** 2) < 1);
 
 function layout() {
   const rand = rng(20261030);
@@ -40,7 +41,7 @@ function layout() {
     const h = Math.round(w / src.ar);
     const x = Math.round(rand() * (FW - w));
     const y = Math.round(rand() * (FH - h));
-    if (![[x, y], [x + w, y], [x, y + h], [x + w, y + h], [x + w / 2, y + h / 2]].every(([px, py]) => inField(px, py))) continue;
+    if (![[x, y], [x + w, y], [x, y + h], [x + w, y + h], [x + w / 2, y + h / 2]].every(([px, py]) => inBlob(px, py))) continue;
     if (placed.some((p) => x < p.x + p.w + GAP && x + w + GAP > p.x && y < p.y + p.h + GAP && y + h + GAP > p.y)) continue;
     placed.push({ x, y, w, h, src, pos: `${Math.round(rand() * 40 + 30)}% ${Math.round(rand() * 30 + 10)}%` });
     n += 1;
