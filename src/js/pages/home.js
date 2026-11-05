@@ -7,7 +7,6 @@ import { initCommunity } from '../site/community.js';
 import { initCoachCloud } from '../site/coaches-cloud.js';
 import { initClubNotes } from '../site/club-notes.js';
 import { initMapGallery } from '../site/map-gallery.js';
-import { watchCut } from '../site/cut.js';
 import { markPageReady } from '../site/page-ready.js';
 
 renderCourtLane();
@@ -45,14 +44,10 @@ ready.then(() => {
   ScrollTrigger.refresh();
 });
 
-// Row 21: once the intro has opened the card to full size it takes a cut top right (page white shows in the notch).
-// The intro owns the inline clip-path until then.
+// The intro owns the inline clip-path until it ends; afterwards the card is a plain full rectangle. (It used to take a
+// cut top right, but the notch ran under the header buttons and the right hero caption.)
 function cutHero() {
-  const card = document.querySelector('[data-hero-card]');
-  card.style.clipPath = '';
-  card.style.setProperty('--cut-x', '7%');
-  card.classList.add('cut', 'cut--a');
-  watchCut(card);
+  document.querySelector('[data-hero-card]').style.clipPath = 'none';
 }
 
 playIntro({ assets, reducedMotion }).then(() => {

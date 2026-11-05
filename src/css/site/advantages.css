@@ -15,7 +15,7 @@
 
 /* A small mark before a big paragraph: a star and a two-line caption in 12px capitals */
 .mark { display: flex; align-items: flex-start; gap: 14px; max-width: 28ch; font-size: 10px; line-height: 14px; }
-.mark__icon { flex: none; width: 36px; height: 30px; }
+.mark__icon { flex: none; width: 28px; height: 28px; }
 .club--about .club__text { display: grid; gap: 1.1em; font-size: clamp(24px, 2.9vw, 46px); line-height: 1.1; }
 .club--about .club__text p { margin: 0; }
 

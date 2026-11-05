@@ -35,7 +35,7 @@ function layout() {
   const placed = [];
   const order = GALLERY.map((_, i) => i).sort(() => rand() - 0.5);
   let n = 0;
-  for (let tries = 0; placed.length < TILES && tries < 6000; tries += 1) {
+  for (let tries = 0; placed.length < Math.min(TILES, GALLERY.length) && tries < 6000; tries += 1) {
     const src = GALLERY[order[n % order.length]];
     const w = WIDTHS[Math.floor(rand() * WIDTHS.length)];
     const h = Math.round(w / src.ar);
