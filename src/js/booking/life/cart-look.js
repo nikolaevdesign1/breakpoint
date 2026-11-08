@@ -417,7 +417,7 @@ export function createCartShadow({ renderer, quality }, U, heightAt, ground) {
   decal.receiveShadow = false;
 
   const prevClear = new THREE.Color();
-  let lastKey = '';
+  const sig = []; // what the last redraw was made for
   const VP = decalU.uMaskVP.value;
 
   function setParts(parts) {
@@ -446,9 +446,15 @@ export function createCartShadow({ renderer, quality }, U, heightAt, ground) {
       const texel = (2 * half) / SIZE;
       const cx = Math.round((cart.position.x - (s.x / sy) * ROOF_Y * 0.5) / texel) * texel;
       const cz = Math.round((cart.position.z - (s.z / sy) * ROOF_Y * 0.5) / texel) * texel;
-      const key = `${cart.position.x.toFixed(3)},${cart.position.z.toFixed(3)},${cart.rotation.y.toFixed(3)},${s.x.toFixed(4)},${s.y.toFixed(4)},${s.z.toFixed(4)},${proxies.map((p) => p.userData.src.matrixWorld.elements[0].toFixed(3) + p.userData.src.matrixWorld.elements[2].toFixed(3)).join('')}`;
-      if (key === lastKey) return false;
-      lastKey = key;
+      // Change check without building a string every frame: rounded numbers against the last ones.
+      let n = 0;
+      let same = true;
+      const put = (v, k) => { const q = Math.round(v * k); if (sig[n] !== q) { sig[n] = q; same = false; } n++; };
+      put(cart.position.x, 1e3); put(cart.position.z, 1e3); put(cart.rotation.y, 1e3);
+      put(s.x, 1e4); put(s.y, 1e4); put(s.z, 1e4);
+      for (const p of proxies) { const e = p.userData.src.matrixWorld.elements; put(e[0], 1e3); put(e[2], 1e3); }
+      if (same && n === sig.length) return false;
+      sig.length = n;
 
       // Mask: the cart flattened along the sun, seen from straight above.
       Object.assign(maskCam, { left: -half, right: half, top: half, bottom: -half });

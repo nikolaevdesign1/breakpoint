@@ -622,6 +622,8 @@ export function createPadel({ scene, rig, camera, renderer, courtSurface, qualit
     return {
       apply,
       courts: () => games.map((g) => g.id),
+      /** Row 19 (dev): everybody on the padel courts, for the bounds check. */
+      people: () => games.map((g) => ({ id: g.id, c: [g.c.x, g.c.z], who: g.players.map((p) => [p.x, p.z, `t${p.team}${p.role}`]) })),
       tick() {
         const now = performance.now() / 1000;
         const dt = Math.min(0.1, now - last);

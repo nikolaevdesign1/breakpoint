@@ -63,50 +63,18 @@
 .hero__tag--l { left: var(--gutter); top: 78px; }
 .hero__tag--r { right: var(--gutter); top: 78px; text-align: right; }
 /* A drawn mouse: the wheel runs down and fades, over and over, so the page says "scroll" without a word */
-.hero__mouse { position: absolute; z-index: 1; right: var(--gutter); bottom: calc(var(--gutter) + 4px); display: block; width: 24px; height: 38px; margin: 0; border: 1.5px solid rgba(244, 243, 239, 0.92); border-radius: 12px; filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.5)); }
-.hero__mouse i { position: absolute; left: 50%; top: 7px; width: 3px; height: 8px; margin-left: -1.5px; background: rgba(244, 243, 239, 0.95); border-radius: 2px; animation: hero-wheel 1.8s var(--ease-in-out) infinite; }
+.hero__mouse { position: absolute; z-index: 1; right: var(--gutter); bottom: calc(var(--gutter) + 4px); display: block; width: 24px; height: 38px; margin: 0; border: 2px solid rgba(244, 243, 239, 0.92); border-radius: 12px; filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.5)); }
+.hero__mouse i { position: absolute; left: 50%; top: 7px; width: 4px; height: 8px; margin-left: -2px; background: rgba(244, 243, 239, 0.95); border-radius: 2px; animation: hero-wheel 1.8s var(--ease-in-out) infinite; }
 @keyframes hero-wheel { 0% { opacity: 0; transform: translateY(-3px); } 25% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; transform: translateY(12px); } }
 @media (prefers-reduced-motion: reduce) { .hero__mouse i { animation: none; } }
 @media (max-width: 760px) { .hero__tag--l, .hero__tag--r { display: none; } .hero__tag--c { top: 70px; width: 80%; } }
 .hero__facts { display: flex; gap: clamp(20px, 2.5vw, 40px); margin-top: clamp(24px, 3vw, 40px); }
-.hero__facts li { padding-left: 12px; border-left: 1px dashed rgba(255, 243, 218, 0.5); }
+.hero__facts li { padding-left: 12px; border-left: 1px solid rgba(255, 243, 218, 0.5); }
 .hero__facts b { display: block; font-size: var(--fs-lg); font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
 .hero__facts span { display: block; margin-top: 4px; font-size: 14px; line-height: 20px; color: rgba(244, 243, 239, 0.8); }
 
 /* Next free court (rows 37, 44): translucent plate, corner brackets, scanlines and a slow float, no blur behind it.
    Opens after the intro with a short glitch; the same look as the map hints in booking-club.css. */
-.hero-alert { --edge-c: rgba(255, 243, 218, 0.55); --bright-c: #fff3da; --glow-c: rgba(255, 243, 218, 0.28); position: relative; flex: none; width: min(280px, 100%); }
-.hero-alert[hidden] { display: none; }
-.hero-alert__box {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  padding: 12px 40px 12px 14px;
-  background: rgba(14, 14, 13, 0.5);
-  color: var(--snow);
-  box-shadow: inset 0 0 0 1px var(--edge-c), 0 0 16px var(--glow-c);
-  text-shadow: 0 0 6px var(--glow-c);
-  clip-path: inset(0 100% 0 0);
-  animation: hero-float 5.2s ease-in-out infinite;
-  transition: clip-path var(--dur-4) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
-}
-.hero-alert__box::before { /* corner brackets */
-  content: ''; position: absolute; inset: -1px; pointer-events: none;
-  --b: linear-gradient(var(--bright-c), var(--bright-c));
-  background:
-    var(--b) 0 0 / 8px 1px, var(--b) 0 0 / 1px 8px,
-    var(--b) 100% 0 / 8px 1px, var(--b) 100% 0 / 1px 8px,
-    var(--b) 0 100% / 8px 1px, var(--b) 0 100% / 1px 8px,
-    var(--b) 100% 100% / 8px 1px, var(--b) 100% 100% / 1px 8px;
-  background-repeat: no-repeat;
-}
-.hero-alert__box::after { /* scanlines */
-  content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: repeating-linear-gradient(0deg, rgba(255, 243, 218, 0.07) 0 1px, transparent 1px 4px);
-}
-.hero-alert.is-in .hero-alert__box { clip-path: inset(0); animation: hero-float 5.2s ease-in-out infinite, hero-glitch 0.6s steps(1, end) 1; }
 @keyframes hero-float { 50% { transform: translateY(-2px); } }
 @keyframes hero-glitch {
   0% { translate: -4px 0; opacity: 0.4; }
@@ -115,38 +83,8 @@
   75% { translate: 2px 0; opacity: 1; }
   100% { translate: 0 0; opacity: 1; }
 }
-.hero-alert__l { position: relative; z-index: 1; opacity: 0; translate: 0 6px; font-size: 14px; line-height: 20px; transition: opacity var(--dur-1) var(--ease-out), translate var(--dur-1) var(--ease-out); }
-.hero-alert.is-in .hero-alert__l { opacity: 1; translate: 0 0; transition: opacity var(--dur-3) var(--ease-out) calc(0.9s + var(--i, 0) * 0.18s), translate var(--dur-3) var(--ease-out) calc(0.9s + var(--i, 0) * 0.18s); }
-.hero-alert__l:nth-child(2) { --i: 1; }
-.hero-alert__l:nth-child(3) { --i: 2; }
-.hero-alert__l:nth-child(4) { --i: 3; }
-.hero-alert__l.k { width: 100%; padding-bottom: 4px; border-bottom: 1px dashed var(--edge-c); font-size: var(--fs-xs); line-height: 16px; color: rgba(255, 243, 218, 0.8); }
-.hero-alert__l.b { margin-top: 4px; font-size: 28px; font-weight: 500; line-height: 32px; }
-.hero-alert__l.s { color: rgba(244, 243, 239, 0.85); font-variant-numeric: tabular-nums; }
-.hero-alert__l.go { margin-top: 4px; text-decoration: underline dashed; text-underline-offset: 4px; }
-.hero-alert__close {
-  position: absolute; top: 6px; right: 6px; z-index: 2;
-  display: grid; place-items: center; width: 28px; height: 28px;
-  color: var(--snow); opacity: 0;
-  transition: opacity var(--dur-2) var(--ease-out) 1.4s, background-color var(--dur-1), color var(--dur-1);
-}
-.hero-alert.is-in .hero-alert__close { opacity: 1; }
-.hero-alert__close svg { width: 12px; height: 12px; }
-@media (hover: hover) {
-  .hero-alert__box:hover { box-shadow: inset 0 0 0 1px var(--bright-c), 0 0 24px var(--glow-c); }
-  .hero-alert__close:hover { background: var(--snow); color: var(--ink); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-alert__box, .hero-alert.is-in .hero-alert__box { animation: none; }
-}
 
 /* still used by the booking banner */
-.live-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: #8fd18b;
-  box-shadow: 0 0 0 0 rgba(143, 209, 139, 0.6);
-  animation: live-pulse 2s var(--ease-out) infinite;
-}
 @keyframes live-pulse { 70% { box-shadow: 0 0 0 8px rgba(143, 209, 139, 0); } 100% { box-shadow: 0 0 0 0 rgba(143, 209, 139, 0); } }
 
 @media (max-width: 820px) {

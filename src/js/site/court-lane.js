@@ -26,7 +26,7 @@ export function renderCourtLane() {
   track.innerHTML = SERVICES.map((s, i) => {
     const m = LANE[i] ?? { photo: s.media };
     const media = m.video
-      ? `<video src="${m.video}.mp4" poster="${m.poster}" muted loop playsinline preload="metadata" aria-hidden="true"></video>`
+      ? `<video src="${m.video}.mp4" poster="${m.poster}" muted loop playsinline preload="none" aria-hidden="true"></video>`
       : `<img src="${mediaUrl(m.photo, 1800)}" alt=""${i ? ' loading="lazy"' : ''} />`;
     return `<li class="mlane__slide" data-mlane-slide>
       <div class="mlane__media" data-mlane-media>${media}</div>

@@ -1,15 +1,15 @@
 import { promoRate, CAT_CODE, memberOff } from './extras.js';
+import { loadContact, saveContact, clearContact, hasContact, formatPhone, RULES as CONTACT_RULES, fullName, contactLine } from '../shared/contact.js';
 
-// "Your details" step (row 84): name, phone, e-mail, membership, a note and the cancellation terms.
-// Fields check themselves as you leave them; what you typed is remembered for the next booking.
+// "Your details" step (row 84, row 21 of the 2026-11-06 list): first and last name, a phone or an
+// e-mail, how many people, membership, a note and the cancellation terms. Fields check themselves as
+// you leave them; the contact is remembered for the next booking (shared/contact.js, "Not you? Clear").
 // Promo code (row 134): a valid code applies as soon as it is typed; Apply, Enter or leaving the
 // field checks anything else. The code itself is never stored.
 
 const STORE = 'bp-player';
 const RULES = {
-  name: (v) => v.trim().split(/\s+/).length >= 2 || 'First and last name, please',
-  phone: (v) => v.replace(/\D/g, '').length >= 10 || 'A number we can text, 10 digits or more',
-  email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()) || 'That e-mail looks incomplete',
+  ...CONTACT_RULES,
   card: (v, member) => !member || /^\d{6}$/.test(v.trim()) || 'Six digits, printed on your card',
 };
 
@@ -22,7 +22,7 @@ function save(data) {
 
 const PROMO_BAD = 'That code doesn’t work. Check the spelling.';
 
-export function createPlayerForm(form, { onSubmit, onPromo, onMember }) {
+export function createPlayerForm(form, { onSubmit, onPromo, onMember, onParty }) {
   const field = (name) => form.elements[name];
   const cardRow = form.querySelector('[data-card]');
   const memberRow = form.querySelector('[data-member-row]');
@@ -114,7 +114,35 @@ export function createPlayerForm(form, { onSubmit, onPromo, onMember }) {
 
   // Restore the last player.
   const saved = load();
-  ['name', 'phone', 'email', 'card'].forEach((n) => { if (saved[n]) field(n).value = saved[n]; });
+  if (saved.card) field('card').value = saved.card;
+  const clearBtn = form.querySelector('[data-contact-clear]');
+  const fillContact = (c) => ['first', 'last', 'phone', 'email'].forEach((n) => { field(n).value = c[n] || ''; });
+  const syncClear = () => { clearBtn.hidden = !hasContact() && !['first', 'last', 'phone', 'email'].some((n) => field(n).value); };
+  fillContact(loadContact());
+  syncClear();
+  clearBtn.addEventListener('click', () => {
+    clearContact();
+    ['first', 'last', 'phone', 'email'].forEach((n) => { field(n).value = ''; mark(field(n), true); });
+    syncClear();
+    field('first').focus();
+  });
+  field('phone').addEventListener('input', () => { field('phone').value = formatPhone(field('phone').value); });
+
+  // People: a stepper with the limits of the court (set by the booking, see setParty).
+  const partyBox = form.querySelector('[data-party]');
+  const partyN = partyBox.querySelector('[data-party-n]');
+  const partyBtns = partyBox.querySelectorAll('[data-party-step]');
+  let party = { min: 1, max: 4, n: 2 };
+  function renderParty() {
+    partyN.textContent = party.n;
+    partyBox.querySelector('[data-party-hint]').textContent = ` ${party.min === party.max ? party.max : `${party.min} to ${party.max}`}`;
+    partyBtns.forEach((b) => { b.disabled = Number(b.dataset.partyStep) < 0 ? party.n <= party.min : party.n >= party.max; });
+  }
+  partyBtns.forEach((b) => b.addEventListener('click', () => {
+    party.n = Math.min(party.max, Math.max(party.min, party.n + Number(b.dataset.partyStep)));
+    renderParty();
+    onParty?.(party.n);
+  }));
   setMember(saved.plan || (saved.member ? 'club' : false));
 
   memberBtns.forEach((b) => b.addEventListener('click', () => {
@@ -128,28 +156,47 @@ export function createPlayerForm(form, { onSubmit, onPromo, onMember }) {
     if (digits !== field('card').value) field('card').value = digits;
     syncMember();
   });
+  const CONTACT_NEED = 'A phone or an e-mail, so we can confirm';
+  const contactFields = ['first', 'last', 'phone', 'email'];
+  contactFields.forEach((n) => field(n).addEventListener('input', syncClear));
   Object.keys(RULES).forEach((n) => {
     field(n).addEventListener('blur', () => { if (field(n).value) check(n); });
-    field(n).addEventListener('input', () => { if (field(n).closest('.is-invalid')) check(n); });
+    field(n).addEventListener('input', () => {
+      if (field(n).closest('.is-invalid')) check(n);
+      // typing one of phone / e-mail satisfies "at least one"
+      if ((n === 'phone' || n === 'email') && field(n).value) ['phone', 'email'].forEach((m) => { if (field(m).closest('.is-invalid')) check(m); });
+    });
   });
   field('policy').addEventListener('change', () => field('policy').closest('.hud-check-row').classList.remove('is-invalid'));
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const bad = Object.keys(RULES).filter((n) => !check(n));
+    // Phone and e-mail may each be empty, but not both.
+    if (!field('phone').value.trim() && !field('email').value.trim()) {
+      mark(field('phone'), CONTACT_NEED);
+      field('email').closest('.hud-input').classList.add('is-invalid');
+      field('email').setAttribute('aria-invalid', 'true');
+      bad.push('phone');
+    }
     const policy = field('policy').checked;
     field('policy').closest('.hud-check-row').classList.toggle('is-invalid', !policy);
     if (bad.length) { field(bad[0]).focus(); return; }
     if (!checkPromo()) { promoIn.focus(); return; }
     if (!policy) { field('policy').focus(); return; }
-    save({ name: field('name').value.trim(), phone: field('phone').value.trim(), email: field('email').value.trim(), plan: member, card: member ? field('card').value.trim() : '' });
+    saveContact(contactValue());
+    save({ plan: member, card: member ? field('card').value.trim() : '' });
     onSubmit();
   });
 
+  const contactValue = () => ({ first: field('first').value.trim(), last: field('last').value.trim(), phone: field('phone').value.trim(), email: field('email').value.trim() });
+
   return {
-    value: () => ({ name: field('name').value.trim(), email: field('email').value.trim(), phone: field('phone').value.trim(), member, card: validCard(), note: field('note').value.trim() }),
+    value: () => ({ ...contactValue(), name: fullName(contactValue()), contact: contactLine(contactValue()), party: party.n, member, card: validCard(), note: field('note').value.trim() }),
+    /** The people allowed for this court and the number to start with. */
+    setParty: (min, max, n) => { party = { min, max, n: Math.min(max, Math.max(min, n)) }; renderParty(); return party.n; },
     memberCard: validCard,
     memberPlan: () => (validCard() ? member : null),
-    focusFirst: () => (Object.keys(RULES).map(field).find((i) => !i.value && !i.closest('[inert]')) || field('policy')).focus({ preventScroll: true }),
+    focusFirst: () => (['first', 'last', 'phone', 'card'].map(field).find((i) => !i.value && !i.closest('[inert]') && (i.name !== 'phone' || !field('email').value)) || field('policy')).focus({ preventScroll: true }),
   };
 }

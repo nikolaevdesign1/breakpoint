@@ -1,3 +1,4 @@
+import { perf } from '../perf.js';
 import * as THREE from 'three';
 import { LIFE_LAYER } from './shared.js';
 import { gradeLife } from '../lookdev.js';
@@ -5,6 +6,7 @@ import { ambientBus } from '../ambient.js';
 import { builder, loft, wingStrip, birdMaterial, shadowMaterial } from './birds.js';
 import { liveSunDir } from './clock.js';
 import { curve, stroke } from './bird-flight.js';
+import { createPerch } from './parrot-perch.js';
 
 // Monk parakeets (round 7, "clublife"): the green parrots that nest in Miami's palms and light
 // poles cross the club now and then in a loose, noisy flock, flying fast and straight on quick,
@@ -19,6 +21,8 @@ import { curve, stroke } from './bird-flight.js';
 const ALT = [7, 12];
 const FIRST = [26, 50]; // s after the map shows
 const EVERY = [60, 130];
+const FIRST_PERCH = [22, 40]; // s after the map shows: the first visit to a tree or mast
+const PERCH_EVERY = [60, 130];
 const SPEED = 12.5; // m/s
 const MAX = 16;
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -116,6 +120,23 @@ export function createParrots(ctx, { still }) {
   mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
   const tint = new THREE.Color();
 
+  // Row 12: parakeets that come down in a tree crown or on a floodlight mast, preen, call and hop on.
+  const makeFly = () => {
+    const g = parakeetGeometry();
+    g.setAttribute('aFold', new THREE.InstancedBufferAttribute(new Float32Array(8 * 2), 2).setUsage(THREE.DynamicDrawUsage));
+    const m = new THREE.InstancedMesh(g, gradeLife(birdMaterial()), 8);
+    const sh = new THREE.InstancedMesh(g, shadowFor(0.22), 8);
+    return { mesh: m, shadow: sh, fold: g.attributes.aFold };
+  };
+  function shadowFor(opacity) {
+    const mat = shadowMaterial(sun.dir, opacity);
+    const first = mat.onBeforeCompile;
+    mat.onBeforeCompile = (shader, r) => { first(shader, r); shader.uniforms.uSun.value = sun.dir; };
+    return mat;
+  }
+  const perch = createPerch({ scene, rig, camera, tints: TINTS, makeFly, shadowFor, lib: { builder, loft, birdMaterial, gradeLife }, call: (x, z, k) => callAt(x, z, k) });
+  let nextPerch = performance.now() / 1000 + rand(...FIRST_PERCH);
+
   let flock = null;
   let next = performance.now() / 1000 + rand(...FIRST);
   let nextCall = 0;
@@ -143,7 +164,7 @@ export function createParrots(ctx, { still }) {
     const k = (cam.y - alt) / cam.y;
     const mid = new THREE.Vector3(cam.x + (x - cam.x) * k, alt, cam.z + (z - cam.z) * k);
     const origin = mid.addScaledVector(side, lateral).addScaledVector(dir, -reach);
-    const n = 9 + Math.floor(Math.random() * (MAX - 8));
+    const n = Math.max(5, Math.round((9 + Math.floor(Math.random() * (MAX - 8))) * perf.budget.birds)); // fewer on a weaker tier (perf.js)
     const birds = Array.from({ length: n }, () => ({
       off: new THREE.Vector3().addScaledVector(side, rand(-5, 5)).addScaledVector(dir, rand(-7, 7)).setY(rand(-1.5, 1.5)),
       phase: rand(0, 1),
@@ -170,6 +191,22 @@ export function createParrots(ctx, { still }) {
     return [0.1 + 0.62 * stroke(ph), -0.25 * (1 - Math.cos(ph - 0.8))];
   }
 
+  /** One call from a perched bird at (x, z): louder the nearer it is to what the visitor looks at; k scales it. */
+  function callAt(x, z, k = 1) {
+    const bus = ambientBus();
+    if (!bus) return;
+    const v = rig.state;
+    const d = Math.hypot(x - v.x, z - v.z);
+    const level = THREE.MathUtils.clamp(1 - d / 85, 0, 1) * THREE.MathUtils.clamp(45 / v.dist, 0.4, 1.2) * 0.05 * k;
+    if (level < 0.003) return;
+    const s = rig.screenOf(x, z);
+    const pan = THREE.MathUtils.clamp((s.x / innerWidth) * 2 - 1, -0.85, 0.85);
+    const when = bus.ctx.currentTime + 0.01;
+    squawk(bus, when, level * rand(0.6, 1), pan);
+    calls++;
+    if (Math.random() < 0.6) squawk(bus, when + rand(0.13, 0.22), level * rand(0.5, 1), pan);
+  }
+
   function chatter(now) {
     if (now < nextCall) return;
     nextCall = now + rand(0.05, 0.28);
@@ -192,9 +229,16 @@ export function createParrots(ctx, { still }) {
     name: 'parrots',
     tick() {
       const now = performance.now() / 1000;
+      // Parakeets perched in a tree or on a mast: their own visits, whatever the crossings do.
+      if (!perch.active && now > nextPerch) nextPerch = perch.launch() ? now + 1e9 : now + 12; // none in view: look again soon
+      let perched = false;
+      if (perch.active) {
+        perched = perch.tick(now);
+        if (!perched) nextPerch = now + rand(...PERCH_EVERY);
+      }
       if (!flock) {
         if (now > next) launch();
-        else return false;
+        else return perched;
       }
       sun.update();
       const t = now - flock.t0;
@@ -202,7 +246,7 @@ export function createParrots(ctx, { still }) {
         mesh.visible = shadow.visible = false;
         flock = null;
         next = now + rand(...EVERY);
-        return false;
+        return perched;
       }
       mid.set(0, 0, 0);
       const { path } = flock;
@@ -232,6 +276,9 @@ export function createParrots(ctx, { still }) {
       chatter(now);
       return true;
     },
+    perch: () => perch.debug(),
+    /** Dev: a few parakeets come down on a tree or mast near the view now. */
+    land: () => perch.launch(),
     debug: () => (flock ? { calls, bus: !!ambientBus(), n: flock.birds.length, t: +(performance.now() / 1000 - flock.t0).toFixed(1), at: [+mid.x.toFixed(0), +mid.z.toFixed(0)] } : { next: +(next - performance.now() / 1000).toFixed(0) }),
     /** Dev: send a flock over now; `at` seconds into its crossing (mid-way ≈ 11). */
     trigger(at = 0, lateral) {

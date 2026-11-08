@@ -1,5 +1,7 @@
 import { ambientBus } from '../ambient.js';
 import { createListener } from './listener.js';
+import { currentSeason } from '../seasons/season.js';
+import { holidayById } from '../seasons/calendar.js';
 
 // Music from the café (round 9, row 17). When the café deck is serving in the evening (its string
 // lights on: life/clubhouse.js, open until 22:00), a quiet lounge loop plays from the terrace:
@@ -176,7 +178,9 @@ export function createCafeMusic({ rig, clubhouse }) {
       if (now - lastCheck < 0.1) return false;
       lastCheck = now;
       const bus = ambientBus();
-      const open = clubhouse.debug?.().cafe ?? 0; // the deck serving: dark and open (string lights)
+      // A holiday with music of its own (calendar.js `music`: Cinco de Mayo) takes the terrace: the café music fades out under it.
+      const own = holidayById(currentSeason())?.music ? 0 : 1;
+      const open = (clubhouse.debug?.().cafe ?? 0) * own; // the deck serving: dark and open (string lights)
       const close = ear.reach(DECK.x, DECK.z, 1.4); // heard across the club, much clearer up close
       const want = bus ? open * (0.12 + 0.88 * close) * (0.55 + 0.45 * ear.near()) : 0;
       if (bus && !audio && want > 0.01) audio = build(bus);

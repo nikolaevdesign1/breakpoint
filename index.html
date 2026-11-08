@@ -6,7 +6,6 @@
   <title>Break Point by Alexander Milevski | Tennis Club, Miami</title>
   <meta name="description" content="Sixteen courts in Miami: red clay, indoor hard, grass and padel. Book a court, train with a coach, play in club tournaments." />
 <!-- include:partials/head.html -->
-  <link rel="preconnect" href="https://images.unsplash.com" />
     <link rel="preload" as="image" href="/media/hero-courts.webp" fetchpriority="high" />
   <script>
     // Hide the hero before first paint so the preloader → intro hand-off never flashes.
@@ -26,6 +25,8 @@
       <p class="preloader__sub">Tennis club of Alexander Milevski</p>
     </div>
   </div>
+  <!-- Sound on: shown over the preloader only if the browser blocked the music; a click starts it (ambient-music.js) -->
+  <button class="preloader-sound" type="button" data-music-start hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 6h3l4-3v10L5 10H2zM12 5.5a3.5 3.5 0 010 5"/></svg><span>Sound on</span></button>
 
   <main id="main">
     <!-- 01 Hero -->
@@ -106,7 +107,7 @@
     <!-- 07 Community & reviews -->
     <section class="section community" id="community" aria-labelledby="community-title">
       <div class="grid grid--rows community__head">
-        <h2 class="h2 h-xl col-10 start-3" id="community-title" data-lines>Draws finals and the <em>occasional</em> upset</h2>
+        <h2 class="h2 h-xl col-10 start-3" id="community-title" data-lines>Draws, finals and the <em>occasional</em> upset.</h2>
         <div class="note col-5 start-3">
           <p class="note__lead" data-lines>Friday Night Doubles, the Club Open and the Club Championship. Members apply first; guests take every open spot.</p>
           <a class="btn" href="/tournaments.html"><span class="btn__bg"></span><span class="btn__label">Tournament calendar</span></a>

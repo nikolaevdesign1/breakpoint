@@ -18,7 +18,7 @@
   --sun: #fff3da;
 
   --font-sans: 'Switzer', 'Helvetica Neue', Arial, sans-serif;
-  --font-display: 'Anton', 'Impact', 'Arial Narrow', sans-serif; /* headings: dense, tall, capitals (headings.css) */
+  --font-display: 'Anton', 'Anton Fallback', 'Impact', 'Arial Narrow', sans-serif; /* headings: dense, tall, capitals (headings.css) */
 
   --fs-display: clamp(40px, 3.6vw, 64px);
   --fs-h2: clamp(34px, 3.4vw, 60px);
@@ -49,7 +49,8 @@
   --gutter: var(--edge);
   --frame: var(--edge);
   --bar-h: 56px; /* header bar */
-  --section-y: clamp(96px, 14vw, 220px);
+  --section-y-m: 72px; /* phone: the gap between blocks (row 12) */
+  --section-y: clamp(var(--section-y-m), 14vw, 220px);
 
   /* Tempo (row 17): tennis does not hurry. One scale for durations and curves; the JS twin is motion.js.
      Soft curves: a gentle start and a long tail, no hard stops. */

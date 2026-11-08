@@ -1,3 +1,4 @@
+import { perf } from '../perf.js';
 import * as THREE from 'three';
 import { LIFE_LAYER, rng, lifeTime } from '../life/shared.js';
 import { gradeLife } from '../lookdev.js';
@@ -297,7 +298,14 @@ export function buildGhosts({ ctx, plan, fences }) {
     const night = nl;
     sheetMat.emissiveIntensity = night * 0.16;
     const base = 0.92 + 0.08 * night; // the sprites are see-through themselves; after dark the glow cards add to them
+    const flyKeep = Math.ceil(GHOSTS.fly * perf.budget.people); // a weaker tier lets fewer ghosts drift (perf.js)
     ghosts.forEach((g, i) => {
+      if (g.mesh) g.mesh.visible = !(g.fly && i >= flyKeep);
+      if (g.fly && i >= flyKeep) {
+        shadeMesh.setMatrixAt(i, m4.makeScale(0, 0, 0));
+        glowMesh.setMatrixAt(i, m4);
+        return;
+      }
       if (g.fly) {
         g.x = g.cx + Math.sin(t * g.w1 + g.ph) * g.rx;
         g.z = g.cz + Math.cos(t * g.w2 + g.ph * 1.3) * g.rz;

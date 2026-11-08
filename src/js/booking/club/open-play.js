@@ -53,9 +53,10 @@ export function openGames(dayKey) {
   return out;
 }
 
-export function join(g) {
+/** `who`: { name, party, contact } from the data step; `party` places are taken (1 by default). */
+export function join(g, who = {}) {
   if (isJoined(g) || isPastGame(g)) return;
-  save({ joined: [...club().joined, { courtId: g.courtId, dayKey: g.dayKey, hour: g.hour, level: g.level, with: g.host }] });
+  save({ joined: [...club().joined, { courtId: g.courtId, dayKey: g.dayKey, hour: g.hour, level: g.level, with: g.host, party: who.party || 1, ...(who.name ? { name: who.name } : {}) }] });
   document.dispatchEvent(new CustomEvent('bp-joined', { detail: { courtId: g.courtId, dayKey: g.dayKey, hour: g.hour } }));
 }
 

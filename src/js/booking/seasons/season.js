@@ -1,31 +1,29 @@
 import { miamiNow } from '../miami-clock.js';
+import { SEASONS, SEASON_NAMES, holidayForDate, resolveId, holidayById } from './calendar.js';
 
-// Holiday decor on the booking map (round 8, "seasons"). The club dresses up by the date in Miami:
-// Halloween (Oct 20 to Nov 1), the December holidays (Dec 1 to Jan 6) and the Fourth of July
-// (Jul 1 to Jul 5). The visitor can force any of them, or none, from the top bar (season-menu.js);
-// the choice lasts for the session. `?season=halloween|holidays|july4|off|auto` sets it from a link.
+// Holiday decor on the booking map (round 8, "seasons"; row 1 of round 11 widened it to the whole
+// year). The club dresses up by the date in Miami, by the registry in calendar.js: Halloween, the
+// December holidays, July 4th, New Year, Valentine's Day, … The visitor can force any of them, or
+// none, from the top bar (season-menu.js); the choice lasts for the session.
+// `?season=<id>|off|auto` sets it from a link (`?season=new-year`, `?season=cinco-de-mayo`; the
+// ids are in calendar.js, spelling is forgiven) and the address follows the choice.
 // Every change goes out as `bp-season` { mode, season }.
 
-export const SEASONS = ['halloween', 'holidays', 'july4'];
+export { SEASONS, SEASON_NAMES };
 export const MODES = ['auto', ...SEASONS, 'off'];
-export const SEASON_NAMES = { halloween: 'Halloween', holidays: 'Holidays', july4: 'July 4th' };
+export const seasonInfo = holidayById;
 
 const KEY = 'bp-season';
 const EVENT = 'bp-season';
 
-/** Season for a Miami calendar date (month 1…12), or null. */
-export function seasonForDate({ m, d }) {
-  if ((m === 10 && d >= 20) || (m === 11 && d <= 1)) return 'halloween';
-  if (m === 12 || (m === 1 && d <= 6)) return 'holidays';
-  if (m === 7 && d <= 5) return 'july4';
-  return null;
-}
+/** Season for a Miami calendar date { y, m, d }, or null. */
+export const seasonForDate = (date) => holidayForDate(date);
 
-const valid = (v) => (MODES.includes(v) ? v : null);
+const valid = (v) => (v === 'auto' || v === 'off' ? v : resolveId(v));
 const read = () => { try { return valid(sessionStorage.getItem(KEY)); } catch { return null; } };
 const write = (v) => { try { sessionStorage.setItem(KEY, v); } catch { /* private mode */ } };
 
-let mode = valid(new URLSearchParams(location.search).get('season')?.toLowerCase()) ?? read() ?? 'auto';
+let mode = valid(new URLSearchParams(location.search).get('season')) ?? read() ?? 'auto';
 
 export const seasonMode = () => mode;
 
@@ -39,10 +37,20 @@ export function currentSeason() {
 /** The season the date gives, whatever the visitor picked. */
 export const datedSeason = () => seasonForDate(miamiNow());
 
+function syncUrl() {
+  try {
+    const u = new URL(location.href);
+    if (mode === 'auto') u.searchParams.delete('season'); else u.searchParams.set('season', mode);
+    history.replaceState(history.state, '', u);
+  } catch { /* sandboxed frame */ }
+}
+
 export function setSeasonMode(next) {
-  if (!valid(next) || next === mode) return;
+  next = valid(next);
+  if (!next || next === mode) return;
   mode = next;
   write(mode);
+  syncUrl();
   document.dispatchEvent(new CustomEvent(EVENT, { detail: { mode, season: currentSeason() } }));
 }
 

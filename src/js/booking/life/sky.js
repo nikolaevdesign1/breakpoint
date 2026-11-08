@@ -17,7 +17,7 @@ export function onWeather(fn) {
 }
 
 /** Holiday decor asks the clubhouse for warm windows by day too: 0…1 (seasons/winter.js writes it, life/clubhouse.js reads it). */
-export const decorLight = { windows: 0, nightKeeper: false }; // nightKeeper: Death works after dark too (seasons/death.js, life/keeper.js)
+export const decorLight = { windows: 0, nightKeeper: false, tint: null }; // tint: [r, g, b] balance a holiday lays on the whole map (round 11; daylight.js) // nightKeeper: Death works after dark too (seasons/death.js, life/keeper.js)
 
 /** Display-space brightness of effects drawn without tone mapping (rain streaks, puddle sheen). */
 export const skyLight = { value: 1 };

@@ -4,6 +4,7 @@ import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 import { CopyShader } from 'three/addons/shaders/CopyShader.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { perf } from './perf.js';
 
 // Look-dev for the booking map: Poly Haven sky (CC0) for ambient light and reflections,
 // a warm late-afternoon sun with static shadows, baked lightmaps (sky + bounce, from Blender),
@@ -20,15 +21,14 @@ export const EXPOSURE = 0.47; // row 142: a touch brighter than the first look-d
 const HAZE = new THREE.Color(0.5, 0.57, 0.64);
 const BLOOM = 0.32; // bulb glow only: a lamp, not a flare (row 138)
 
-/** 'high' gets AO, bloom, grade and MSAA; phones and small GPUs get the plain renderer. */
+/** 'high' gets AO, bloom, grade and MSAA; phones and small GPUs get the plain renderer. The machine
+ * check lives in perf.js (cores, memory, screen; 'medium' keeps the look and trims the budgets). */
 export function detectQuality() {
-  const small = window.matchMedia('(max-width: 820px), (pointer: coarse)').matches;
-  const weak = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
-  return small || weak ? 'low' : 'high';
+  return perf.tier === 'low' ? 'low' : 'high';
 }
 
 export function setupRenderer(renderer, quality) {
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, quality === 'high' ? 1.5 : 1.5));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, perf.budget.pixelCap));
   renderer.toneMapping = THREE.AgXToneMapping;
   renderer.toneMappingExposure = EXPOSURE;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -321,6 +321,7 @@ export function createComposer(renderer, scene, camera, quality, { lifeLayer }) 
   live.material.uniforms.amount.value = grade;
   let gtao = null;
   let bloom = null;
+  let effects = true; // perf.js can switch AO and bloom off when the machine cannot hold them
   if (high) {
     gtao = new GTAOPass(scene, camera, size.x / 2, size.y / 2);
     gtao.updateGtaoMaterial({ radius: 1.6, distanceExponent: 1.4, thickness: 1.2, scale: 1, samples: 8, distanceFallOff: 1 });
@@ -379,7 +380,7 @@ export function createComposer(renderer, scene, camera, quality, { lifeLayer }) 
       staticLayers();
       renderer.setRenderTarget(sceneRT);
       renderer.render(scene, camera);
-      if (high) {
+      if (high && effects) {
         gtao.blendIntensity = 0.6 * amount; // contact shadows, not a darker picture when the camera stops
         gtao.render(renderer, cacheRT, sceneRT); // copies the frame into the cache, AO blended on
         bloom.strength = BLOOM * amount;
@@ -390,6 +391,7 @@ export function createComposer(renderer, scene, camera, quality, { lifeLayer }) 
       }
       allLayers();
     },
+    setEffects(on) { effects = on; },
     life() {
       finish.material.uniforms.toneMappingExposure.value = renderer.toneMappingExposure;
       cloudView();

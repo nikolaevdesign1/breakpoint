@@ -512,6 +512,7 @@ export function createKeeper(ctx, { still }) {
 
     let last = performance.now() / 1000;
     let drawn = false;
+    let idleSig = NaN;
     let held = false; // round 9: off squeegeeing the hard courts (life/squeegee.js)
     return {
       /** Round 9: keep him off the clay while he works elsewhere (true sends him off at once). */
@@ -551,6 +552,11 @@ export function createKeeper(ctx, { still }) {
         const was = k.active;
         step(t, dt);
         if (was && !k.active) next = t + rand(...EVERY);
+        // Idle and the sun has not moved: nothing to rewrite (brushes parked, keeper hidden).
+        const sd = sun.update();
+        const sig = Math.round(sd.x * 1e3) + Math.round(sd.y * 1e3) * 7919 + Math.round(sd.z * 1e3) * 104729;
+        if (!was && !k.active && drawn && sig === idleSig) return false;
+        idleSig = sig;
         writeKeeper(t);
         writeBrushes();
         const first = !drawn;

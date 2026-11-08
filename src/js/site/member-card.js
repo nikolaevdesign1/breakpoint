@@ -85,21 +85,26 @@ function initCard(card, reducedMotion) {
   // Drag to spin; release springs to the nearest face (and lights the first perk on it).
   let startX = 0;
   let startAngle = 0;
+  let moved = false;
   card.addEventListener('pointerdown', (e) => {
     dragging = true;
     startX = e.clientX;
+    moved = false;
     startAngle = gsap.getProperty(flip, 'rotationY');
     gsap.killTweensOf(flip);
     card.setPointerCapture(e.pointerId);
     rx(0); ry(0);
   });
   card.addEventListener('pointermove', (e) => {
-    if (dragging) gsap.set(flip, { rotationY: startAngle + (e.clientX - startX) * 0.6 });
+    if (!dragging) return;
+    if (Math.abs(e.clientX - startX) > 6) moved = true;
+    gsap.set(flip, { rotationY: startAngle + (e.clientX - startX) * 0.6 });
   });
-  const release = () => {
+  const release = (e) => {
     if (!dragging) return;
     dragging = false;
-    turnTo(Math.round(gsap.getProperty(flip, 'rotationY') / 180) * 180);
+    const tap = !moved && e && e.type === 'pointerup' && e.pointerType === 'touch'; // a tap on a phone turns the card over
+    turnTo(Math.round(gsap.getProperty(flip, 'rotationY') / 180) * 180 + (tap ? 180 : 0));
     if (rows.length && BACK.has(active) !== faceBack()) {
       active = faceBack() ? 3 : 0;
       mark(active);

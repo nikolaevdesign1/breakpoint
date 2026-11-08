@@ -52,6 +52,7 @@ em { font-weight: inherit; color: var(--em-ink, var(--mute)); }
 /* Section scaffolding */
 .section { position: relative; padding: var(--section-y) var(--gutter); }
 .section--flush { padding-top: 0; }
+@media (max-width: 640px) { .section { padding-bottom: calc(var(--section-y-m) / 2); } } /* row 12: two stacked sections leave 108px, not 144px */
 
 /* Text grid (after Wolverine): short heading left, a large paragraph + button right */
 .section-head {

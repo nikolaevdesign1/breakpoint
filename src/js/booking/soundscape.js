@@ -1,3 +1,4 @@
+import { visibleInterval } from './perf.js';
 import { clubHours } from './life/clock.js';
 
 // Time-of-day sounds for the map (round 8, "arrival"), synthesised like the rest of ambient.js and
@@ -280,7 +281,7 @@ export function startSoundscape(ctx, out) {
     for (const [name, g] of Object.entries(layers)) g.gain.setTargetAtTime(audio.levels[name], t, fast ? 0.8 : 3);
   };
   mix(true);
-  setInterval(() => mix(false), 2000);
+  visibleInterval(() => mix(false), 2000);
   ['bp-hour', 'bp-clock', 'bp-weather'].forEach((e) => document.addEventListener(e, () => mix(true)));
 }
 

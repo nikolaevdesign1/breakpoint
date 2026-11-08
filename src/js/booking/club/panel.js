@@ -88,7 +88,7 @@ export function createPanel(pins) {
 
   btn.addEventListener('click', () => { if (open) close(); else { fresh(); openPanel(); } });
   root.querySelector('[data-close]').addEventListener('click', close);
-  root.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => { ctx.result = null; ctx.notice = null; show(b.dataset.tab); }));
+  root.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => { ctx.result = null; ctx.notice = null; ctx.ticket = null; ctx.pending = null; ctx.cdraft = null; show(b.dataset.tab); }));
   root.querySelector('.club__tabs').addEventListener('keydown', (e) => {
     const i = TABS.findIndex(([id]) => id === ctx.tab);
     const next = { ArrowRight: i + 1, ArrowLeft: i - 1 }[e.key];
@@ -110,6 +110,8 @@ export function createPanel(pins) {
       ctx.adding = 'lesson';
       ctx.coachLink = true;
       ctx.notice = null;
+      ctx.ticket = null;
+      ctx.pending = null;
       ctx.result = null;
       show('day');
     },

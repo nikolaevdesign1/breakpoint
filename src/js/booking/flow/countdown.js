@@ -1,3 +1,4 @@
+import { visibleInterval } from '../perf.js';
 import { COURTS, dayKeyForOffset } from '../../shared/availability.js';
 import { sessionBookings } from '../../shared/session-bookings.js';
 import { fmtHour } from '../../shared/slot-ui.js';
@@ -69,7 +70,7 @@ export function initCountdown() {
 
   btn.addEventListener('click', () => document.dispatchEvent(new CustomEvent('bp-sign-focus', { detail: { courtId: btn.dataset.court } })));
   ['bp-booked', 'bp-booked-again', 'bp-clock'].forEach((e) => document.addEventListener(e, update));
-  setInterval(update, 5000);
+  visibleInterval(update, 5000);
   update();
   return { update };
 }

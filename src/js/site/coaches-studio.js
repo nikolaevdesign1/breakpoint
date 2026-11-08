@@ -7,7 +7,7 @@ import { DUR, STAGGER, EASE } from './motion.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Coaches page mosaic (rows 21, 29-31): equal portrait tiles with cut corners, three to a row, 8px apart.
+// Coaches page mosaic (rows 21, 29-31): equal portrait tiles with cut corners, three to a row (two on a phone), 8px apart.
 // The photo stays clean: the cursor turns into a black plate that shows the name, then the role, and so on
 // while the pointer rests on a tile (touch screens get a small caption instead). Video tiles (row 19) take
 // the place of portraits at even intervals while no switch is on; a promo tile fills the last row.
@@ -21,6 +21,9 @@ const VIDEOS = [
   { at: 19, cut: 'd', src: 'clay-aerial', alt: 'Players on clay, seen from above' },
 ];
 const CYCLE = 2400; // ms the plate holds the name or the role
+const PHONE = window.matchMedia('(max-width: 640px)'); // two tiles to a row here, three above
+const cols = () => (PHONE.matches ? 2 : 3);
+const MAX_PLAYING = 2; // video tiles playing at once
 
 const matches = (c, on) => on.every((f) => c.sports.includes(f) || c.ages.includes(f));
 
@@ -90,10 +93,14 @@ export function initStudio({ onOpen, reducedMotion }) {
   }
 
   // Videos load when they come near the screen and pause when they leave it (and while hidden).
+  const playing = new Set();
   const player = new IntersectionObserver((entries) => entries.forEach(({ target: v, isIntersecting }) => {
-    if (!isIntersecting) { v.pause(); return; }
+    if (!isIntersecting) { v.pause(); playing.delete(v); return; }
     if (!v.src) v.src = videoSrc(v.dataset.src);
     v.play().catch(() => {});
+    playing.delete(v);
+    playing.add(v);
+    if (playing.size > MAX_PLAYING) { const old = playing.values().next().value; old.pause(); playing.delete(old); }
   }), { rootMargin: '160px' });
   if (!reducedMotion) videoEls.forEach((el) => player.observe(el.querySelector('video')));
 
@@ -110,7 +117,8 @@ export function initStudio({ onOpen, reducedMotion }) {
   function layout(on) {
     const seq = COACHES.filter((c) => matches(c, on)).map((c) => coachEls.get(c.slug));
     if (!on.length) VIDEOS.forEach((v, i) => seq.splice(Math.min(v.at, seq.length), 0, videoEls[i]));
-    const gap = (3 - (seq.length % 3)) % 3; // empty cells in the last row of three
+    const n = cols();
+    const gap = (n - (seq.length % n)) % n; // empty cells in the last row
     if (gap) { promo.style.setProperty('--fill', gap); seq.push(promo); }
     const rest = [...coachEls.values(), ...videoEls, promo].filter((el) => !seq.includes(el));
     rest.forEach((el) => { el.hidden = true; });
@@ -126,6 +134,8 @@ export function initStudio({ onOpen, reducedMotion }) {
 
   const selected = () => switches.filter((s) => s.getAttribute('aria-checked') === 'true').map((s) => s.dataset.filter);
   layout([]).forEach((el) => reveal.observe(el));
+  // The last row is filled for the current column count; crossing the phone breakpoint refills it.
+  PHONE.addEventListener('change', () => { layout(selected()).forEach((el) => el.classList.add('is-in')); ScrollTrigger.refresh(); });
 
   let run = null;
   function apply() {

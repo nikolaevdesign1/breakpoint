@@ -10,7 +10,9 @@ const SETTLE = 1200; // ms after the booking tiles close, so it doesn't land on 
 const PORTRAIT = '/models/life/cat-portrait.webp';
 
 export function initCatContest({ onFind, isBusy = () => false } = {}) {
-  let done = catCaught();
+  // Row 22 (2026-11-06): once shown, the card does not come back in this tab session (reloads included).
+  const seen = () => { try { return sessionStorage.getItem('bp-cat-rules') === '1'; } catch { return false; } };
+  let done = catCaught() || seen();
   let pop = null;
   let portrait = 'pending'; // 'ok' | 'none' once the image has answered
 
@@ -26,6 +28,7 @@ export function initCatContest({ onFind, isBusy = () => false } = {}) {
   function show() {
     if (done) return;
     done = true;
+    try { sessionStorage.setItem('bp-cat-rules', '1'); } catch { /* shown once per page load then */ }
     const media = portrait === 'ok'
       ? `<div class="cat-contest__media"><img src="${PORTRAIT}" alt="The club cat, an orange tabby" width="640" height="480" /><span class="cat-contest__tag">10% off</span></div>`
       : '';

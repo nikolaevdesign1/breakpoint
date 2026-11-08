@@ -70,7 +70,12 @@ body.hud-open .bp-season__note, body.postcard-on .bp-season__note { display: non
   top: calc(100% + 6px);
   right: 0;
   z-index: 2;
-  width: 240px;
+  width: 256px;
+  max-height: calc(100vh - 96px);
+  max-height: calc(100dvh - 96px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
   padding: 6px 0;
   background: var(--night);
   color: var(--snow);

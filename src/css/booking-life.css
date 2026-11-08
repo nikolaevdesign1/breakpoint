@@ -133,21 +133,46 @@
 .cat-contest.has-media .cat-pop__title { padding-right: 0; }
 .cat-contest__go { margin-top: 16px; }
 
-/* Narrow screens: under the top bar, the portrait goes to the side */
-@media (max-width: 860px) {
-  .cat-pop {
-    top: calc(var(--frame) + 38px + 8px + env(safe-area-inset-top));
-    bottom: auto;
-    width: min(400px, calc(100vw - 2 * var(--frame)));
-    transform-origin: 0 0;
-    translate: 0 -16px;
-  }
-  .cat-contest.has-media { display: grid; grid-template-columns: 112px minmax(0, 1fr); }
-  .cat-contest.has-media .cat-contest__media { aspect-ratio: auto; min-height: 100%; }
-  .cat-contest.has-media .cat-contest__body { padding: 14px 14px 14px 16px; }
-  .cat-contest.has-media .cat-pop__title { padding-right: 28px; font-size: 20px; }
-  .cat-contest__tag { padding: 6px 8px; font-size: 12px; }
-  .cat-contest__go { margin-top: 12px; }
+/* "Find the club cat": on desktop a compact card under the top bar, left edge on the frame (portrait on the left, one
+   corner cut; title, words and the button in a column). Up to 640px it runs the full width of the top bar (same left
+   and right edges) and up to 480px it stacks: portrait on top, words, a full-width button. */
+.cat-pop.cat-contest {
+  top: calc(var(--frame) + 38px + 8px + env(safe-area-inset-top));
+  bottom: auto;
+  left: var(--frame);
+  right: auto;
+  width: min(600px, calc(100vw - 2 * var(--frame)));
+  max-height: calc(100dvh - 2 * var(--frame) - 38px - 8px - 96px);
+  overflow: hidden auto;
+  transform-origin: 0 0;
+  translate: 0 -16px;
+}
+.cat-pop.cat-contest.is-in { translate: 0 0; }
+.cat-contest.has-media { display: grid; grid-template-columns: 200px minmax(0, 1fr); }
+.cat-contest.has-media .cat-contest__media {
+  aspect-ratio: auto;
+  min-height: 160px;
+  clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%);
+}
+.cat-contest__body { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: 'title' 'text' 'go'; align-content: center; row-gap: 8px; padding: 20px 56px 20px 24px; }
+.cat-contest__body .cat-pop__title { grid-area: title; padding-right: 0; font-size: 24px; }
+.cat-contest__body .cat-pop__text { grid-area: text; margin: 0; max-width: 56ch; }
+.cat-contest .cat-contest__go { grid-area: go; justify-self: start; margin: 8px 0 0; --h: 48px; --pad: 32px; }
+.cat-contest .cat-pop__close { width: 44px; height: 44px; }
+.cat-contest .cat-pop__close span { left: 14px; }
+.cat-contest__tag { padding: 8px 10px; font-size: 14px; }
+@media (max-width: 640px) {
+  .cat-pop.cat-contest { right: var(--frame); width: auto; }
+  .cat-contest.has-media { grid-template-columns: 160px minmax(0, 1fr); }
+  .cat-contest__body { padding: 20px 56px 20px 20px; }
+  .cat-contest__body .cat-pop__title { font-size: 20px; }
+}
+@media (max-width: 480px) {
+  .cat-contest.has-media { grid-template-columns: minmax(0, 1fr); }
+  .cat-contest.has-media .cat-contest__media { aspect-ratio: 21 / 9; min-height: 0; }
+  .cat-contest__body { padding: 16px; }
+  .cat-contest .cat-contest__go { justify-self: stretch; width: 100%; --h: 48px; }
+  .cat-contest:not(.has-media) .cat-contest__body { padding-right: 56px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

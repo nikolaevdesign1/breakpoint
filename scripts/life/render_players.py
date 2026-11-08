@@ -69,14 +69,17 @@ CLIPS = {
     'strafe_r': dict(fbx='strafe_right', loop=True, net='lateral'),
     'walk': dict(fbx='walk', loop=True, net='travel', facings=('away', 'toward', 'left', 'right')),
     'walk_back': dict(fbx='walk_back', loop=True, net='reverse'),
+    # Row 19 (final): the strokes now start 24 source frames earlier (the unit turn and the racket drawn
+    # back, 8 frames at 40 fps) and run 36 (serve 24) frames longer (the follow-through over the shoulder
+    # and the recovery), contact frames unchanged.
     # Row 181 (motion): strokes at 40 fps (the racket is the fastest thing on the map: at 24 fps its
     # frames were too far apart for the page's cross-fade, which showed two rackets).
-    'forehand': dict(bvh='124_07', f0=283, f1=409, net=(0, -1), contact=343, layer='forehand', fps=40),
-    'backhand': dict(bvh='124_07', f0=283, f1=409, net=(0, -1), contact=343, mirror=True, fps=40),
+    'forehand': dict(bvh='124_07', f0=259, f1=445, net=(0, -1), contact=343, layer='forehand', fps=40),
+    'backhand': dict(bvh='124_07', f0=259, f1=445, net=(0, -1), contact=343, mirror=True, fps=40),
     # The serve now starts from the set stance (frame 250: side-on, ball and racket together at the
     # waist, as a server stands after bouncing the ball) and eases into the wind-up over `pre` s,
     # instead of popping straight into a pitcher's leg kick.
-    'serve': dict(bvh='124_01', f0=384, f1=500, net=(0, -1), contact=445, soften=0.5, travel=0.45, layer='serve', fps=40,
+    'serve': dict(bvh='124_01', f0=384, f1=524, net=(0, -1), contact=445, soften=0.5, travel=0.45, layer='serve', fps=40,
                   pre=dict(frame=250, seconds=0.4), hand=True,
                   body=dict(BODY, y1=2.12)),  # row 149: the racket at full reach stays in the frame
     # Row 181: bouncing the ball before the serve, in that same set stance (a held frame of the take)

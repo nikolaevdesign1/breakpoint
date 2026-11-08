@@ -2,7 +2,7 @@ import gsap from 'gsap';
 import { landIn } from './bounce.js';
 import { createPeek, preloadPhotos } from './tournament-peek.js';
 import { DUR, EASE, STAGGER } from './motion.js';
-import { dayWeather, weatherHTML } from './day-weather.js';
+import { dayWeather, weatherHTML, weatherKind } from './day-weather.js';
 import {
   EVENTS, LEVELS, AGES, dayKey, eventDays, formatDates, formatStart, levelText, ageText, feeText, spotsLeft, isPast,
 } from './tournaments-data.js';
@@ -19,6 +19,11 @@ const LOW = 5; // "3 left" from this many spots down
 const DAY = 864e5;
 const CLOSE_SVG = '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12"/></svg>';
 
+const KIND = { singles: 'Singles', doubles: 'Doubles', padel: 'Padel', junior: 'Juniors' };
+const isoKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const mondayOf = (d) => addDays(midnight(d), -((d.getDay() + 6) % 7));
+const shortDay = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 const midnight = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
 const longDate = (d) => d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 const countText = (n) => (n ? `${n} ${n === 1 ? 'event' : 'events'}` : 'No events');
@@ -67,6 +72,29 @@ function cardHTML(list, index) {
       <div><dt>Prizes</dt><dd>${e.prizes}</dd></div>
     </dl>
     <button class="btn btn--block tcard__apply" type="button" data-apply="${e.id}"${isPast(e) ? ' disabled' : ''}><span class="btn__bg"></span><span class="btn__label">${applyLabel(e)}</span></button>`;
+}
+
+// Phone, week view: an event as a card (type, name, when, level, spots, fee, Apply and Details).
+function weekCardHTML(e) {
+  const left = spotsLeft(e);
+  const low = left > 0 && left <= LOW;
+  return `<article class="wc tone--${e.kind}${isPast(e) ? ' is-past' : ''}" data-wc="${e.id}">
+    <div class="wc__top"><span class="wc__type"><i class="tone--${e.kind}"></i>${KIND[e.kind]}</span><span class="wc__when">${formatDates(e)}, ${formatStart(e).replace('Starts ', '')}</span></div>
+    <h5 class="wc__name">${e.plain}</h5>
+    <p class="wc__meta">${levelText(e)}. ${ageText(e)}.</p>
+    <div class="wc__spots${low ? ' is-low' : ''}"><span>${left > 0 ? `${left} of ${e.spots} ${e.perPair ? 'pairs' : 'spots'} left` : 'Full, waitlist open'}</span><b>${feeText(e)}</b></div>
+    <div class="wc__meter"><i style="--p:${(e.taken / e.spots).toFixed(3)}"></i></div>
+    <div class="wc__act">
+      <button class="btn btn--block" type="button" data-apply="${e.id}"${isPast(e) ? ' disabled' : ''}><span class="btn__bg"></span><span class="btn__label">${applyLabel(e)}</span></button>
+      <button class="wc__more" type="button" data-wc-more aria-expanded="false">Details</button>
+    </div>
+    <dl class="wc__facts" hidden>
+      <div><dt>Court</dt><dd>${e.surface}</dd></div>
+      <div><dt>Format</dt><dd>${e.format}</dd></div>
+      <div><dt>Sets</dt><dd>${e.scoring}</dd></div>
+      <div><dt>Prizes</dt><dd>${e.prizes}</dd></div>
+    </dl>
+  </article>`;
 }
 
 // One day's slice of a band. The fill runs across the whole event: on a three-day event two thirds
@@ -124,13 +152,21 @@ export function initCalendar({ reducedMotion }) {
   const plates = document.createElement('div'); // this month's events as tilting plates
   plates.className = 'cal__plates';
   body.before(plates);
+  root.classList.add('is-ready');
   const agenda = $('[data-cal-agenda]');
   const narrow = window.matchMedia('(max-width: 720px)');
+  const strip = $('[data-cal-strip]');
+  const wk = $('[data-cal-wk]');
+  const viewBtns = [...root.querySelectorAll('[data-cal-view]')];
   const hover = window.matchMedia('(hover: hover) and (pointer: fine)');
 
   const today = midnight(new Date());
   const firstMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-  const state = { offset: 0, level: 'all', age: 'all' };
+  const state = { offset: 0, level: 'all', age: 'all', view: 'week', week: mondayOf(today), sel: today };
+  const lastMonthEnd = new Date(firstMonth.getFullYear(), firstMonth.getMonth() + MONTHS_AHEAD + 1, 0);
+  const minWeek = mondayOf(today);
+  const maxWeek = mondayOf(lastMonthEnd);
+  const isWeek = () => narrow.matches && state.view === 'week';
   const open = { list: null, index: 0, opener: null };
   const counter = { n: 0 };
   let month = firstMonth;
@@ -175,7 +211,7 @@ export function initCalendar({ reducedMotion }) {
   const matchingOn = (key) => (dayEvents.get(key) || []).filter(matches);
 
   // Every event in view is drawn, so lanes stay put while filters change; filters only dim bands.
-  function render() {
+  function renderMonth() {
     closeCard({ restoreFocus: false });
     peek.hide();
     month = new Date(firstMonth.getFullYear(), firstMonth.getMonth() + state.offset, 1);
@@ -207,10 +243,10 @@ export function initCalendar({ reducedMotion }) {
       const isToday = +d === +today;
       const cls = ['cal__day', d.getMonth() !== m && 'is-out', d < today && 'is-past', isToday && 'is-today', list.length && 'has-events'].filter(Boolean).join(' ');
       const ball = isToday ? '<span class="cal__ball" aria-hidden="true"></span>' : '';
-      const inner = `<span class="cal__num">${d.getDate()}</span><span class="cal__wx" data-wx="${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}" title="" hidden></span>${ball}${list.map((e) => bandHTML(e, d, lane.get(e), events.indexOf(e))).join('')}`;
+      const inner = `<span class="cal__num">${d.getDate()}</span><span class="cal__wx" data-wx="${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}" title="" hidden></span>${ball}${list.map((e) => bandHTML(e, d, lane.get(e), events.indexOf(e))).join('')}${list.length ? `<span class="cal__dots" aria-hidden="true">${list.map((e) => `<i class="tone--${e.kind}"></i>`).join('')}</span>` : ''}`;
       html += list.length
-        ? `<button class="${cls}" type="button" data-day="${key}" data-date="${longDate(d)}">${inner}</button>`
-        : `<div class="${cls}">${inner}</div>`;
+        ? `<button class="${cls}" type="button" data-day="${key}" data-d="${key}" data-date="${longDate(d)}">${inner}</button>`
+        : `<div class="${cls}" data-d="${key}">${inner}</div>`;
     }
     grid.style.setProperty('--lanes', Math.max(1, laneEnds.length));
     grid.innerHTML = html;
@@ -220,26 +256,153 @@ export function initCalendar({ reducedMotion }) {
     monthEl.textContent = month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     prev.disabled = state.offset === 0;
     next.disabled = state.offset === MONTHS_AHEAD;
+    prev.setAttribute('aria-label', 'Previous month');
+    next.setAttribute('aria-label', 'Next month');
     counter.n = 0;
     applyFilter();
+  }
+
+  // Phone, week view: a strip of seven days and, under it, the week's events as cards.
+  const dayWx = (d) => (forecast ? forecast.get(isoKey(d)) : null);
+  const weekDays = () => Array.from({ length: 7 }, (_, i) => addDays(state.week, i));
+
+  function pickDay(days) {
+    if (state.sel >= days[0] && state.sel <= days[6]) return state.sel;
+    if (today >= days[0] && today <= days[6]) return today;
+    return days.find((d) => matchingOn(dayKey(d)).length) || days[0];
+  }
+
+  function renderWeek() {
+    closeCard({ restoreFocus: false });
+    peek.hide();
+    const days = weekDays();
+    const events = EVENTS.filter((e) => e.end >= days[0] && e.start <= days[6]);
+    dayEvents = new Map();
+    events.forEach((e) => eventDays(e).forEach((k) => dayEvents.set(k, [...(dayEvents.get(k) || []), e])));
+    state.sel = pickDay(days);
+    const shown = events.filter(matches);
+
+    strip.innerHTML = days.map((d) => {
+      const key = dayKey(d);
+      const list = matchingOn(key);
+      const cls = ['sd', d < today && 'is-past', +d === +today && 'is-today', +d === +state.sel && 'is-sel', list.length && 'has-events'].filter(Boolean).join(' ');
+      const marks = [...new Set(list.map((e) => e.kind))].map((k) => `<i class="tone--${k}"></i>`).join('');
+      return `<button class="${cls}" type="button" data-sd="${key}" aria-pressed="${+d === +state.sel}" aria-label="${longDate(d)}${list.length ? `, ${list.length} ${list.length === 1 ? 'event' : 'events'}` : ''}">
+        <span class="sd__dow">${d.toLocaleDateString('en-US', { weekday: 'short' })}</span><span class="sd__num">${d.getDate()}</span>
+        <span class="sd__wx" data-wx="${isoKey(d)}"></span><span class="sd__marks" aria-hidden="true">${marks}</span></button>`;
+    }).join('');
+
+    // events are listed once, under the first day of the week they run on
+    const groups = new Map();
+    shown.forEach((e) => {
+      const first = e.start < days[0] ? days[0] : e.start;
+      const k = dayKey(first);
+      groups.set(k, [...(groups.get(k) || []), e]);
+    });
+    wk.innerHTML = `<div class="wk__sel" data-wk-sel></div>${[...groups].map(([k, list]) => {
+      const d = days.find((x) => dayKey(x) === k);
+      return `<section class="wk__day" data-wk-day="${k}"><h4 class="wk__head">${d.toLocaleDateString('en-US', { weekday: 'long' })}, ${shortDay(d)}</h4>${list.map(weekCardHTML).join('')}</section>`;
+    }).join('')}`;
+
+    const first = days[0];
+    const lastD = days[6];
+    const range = first.getMonth() === lastD.getMonth() ? `${shortDay(first)}-${lastD.getDate()}` : `${shortDay(first)}-${shortDay(lastD)}`;
+    countEl.textContent = `${range} · ${countText(shown.length)}`;
+    monthEl.textContent = state.sel.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    prev.disabled = +state.week <= +minWeek;
+    next.disabled = +state.week >= +maxWeek;
+    prev.setAttribute('aria-label', 'Previous week');
+    next.setAttribute('aria-label', 'Next week');
+    empty.hidden = true;
+    paintWeather();
+    paintBanner();
+  }
+
+  // The line under the strip: the selected day, its forecast and what is on it (or the next event).
+  function paintBanner() {
+    const el = wk.querySelector('[data-wk-sel]');
+    if (!el) return;
+    const d = state.sel;
+    const list = matchingOn(dayKey(d));
+    const w = dayWx(d);
+    let line = '';
+    if (w) {
+      const [, label] = weatherKind(w.code);
+      line = `<p class="wk__wx">${label}, ${w.hi}° / ${w.lo}°F${w.rain >= 30 ? `, ${w.rain}% chance of rain` : ''}</p>`;
+    }
+    let body = '';
+    if (!list.length) {
+      const later = EVENTS.filter((e) => e.end > d && matches(e)).sort((a, b) => a.start - b.start)[0];
+      body = `<p class="wk__none">Nothing on this day.</p>${later ? `<button class="wk__next" type="button" data-wk-jump="${isoKey(later.start > d ? later.start : d)}">Next: ${later.plain}, ${formatDates(later)}</button>` : ''}`;
+    }
+    el.innerHTML = `<h4 class="wk__date">${longDate(d)}</h4>${line}${body}`;
+    wk.querySelectorAll('.wc').forEach((c) => c.classList.toggle('is-on', list.some((e) => e.id === c.dataset.wc)));
+  }
+
+  function selectDay(d, { scroll = true } = {}) {
+    state.sel = d;
+    strip.querySelectorAll('.sd').forEach((b) => {
+      const on = b.dataset.sd === dayKey(d);
+      b.classList.toggle('is-sel', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+    monthEl.textContent = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    paintBanner();
+    if (!scroll) return;
+    const target = wk.querySelector('.wc.is-on') || wk.querySelector('[data-wk-sel]');
+    if (!target) return;
+    const offset = -(strip.getBoundingClientRect().bottom + 12);
+    const lenis = window.__lenis;
+    if (lenis) lenis.scrollTo(target, { offset: offset - 0 });
+    else window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY + offset, behavior: reducedMotion ? 'auto' : 'smooth' });
+  }
+
+  function showWeek(monday, sel) {
+    state.week = monday;
+    if (sel) state.sel = sel;
+    renderWeek();
+  }
+
+  function render() {
+    root.dataset.view = isWeek() ? 'week' : 'month';
+    viewBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.calView === state.view)));
+    if (isWeek()) renderWeek(); else renderMonth();
+  }
+
+  // Both views move with the arrows, swipes and keys: a week at a time in the week view, a month in the month view.
+  function step(dir) {
+    if (!isWeek()) return go(dir);
+    const to = addDays(state.week, 7 * dir);
+    if (to < minWeek || to > maxWeek) return false;
+    state.week = to;
+    state.sel = addDays(state.sel, 7 * dir);
+    const swap = () => renderWeek();
+    if (reducedMotion) { swap(); return true; }
+    gsap.timeline()
+      .to([strip, wk], { autoAlpha: 0, x: -16 * dir, duration: DUR.fast, ease: 'power2.in', overwrite: 'auto' })
+      .add(swap)
+      .fromTo([strip, wk], { autoAlpha: 0, x: 16 * dir }, { autoAlpha: 1, x: 0, duration: DUR.base, ease: EASE.out, clearProps: 'transform' });
+    return true;
   }
 
   // The forecast for the days that have one (today and about two weeks ahead); filled in once it has loaded.
   let forecast = null;
   function paintWeather() {
     if (!forecast) return;
-    grid.querySelectorAll('.cal__wx').forEach((el) => {
+    root.querySelectorAll('.cal__wx, .sd__wx').forEach((el) => {
       const w = forecast.get(el.dataset.wx);
       if (!w) return;
       el.innerHTML = weatherHTML(w);
       el.title = `Miami: high ${w.hi}°F, low ${w.lo}°F`;
       el.hidden = false;
     });
+    if (isWeek()) paintBanner();
   }
   dayWeather().then((map) => { forecast = map; paintWeather(); }).catch(() => {});
 
   // Dim what doesn't match, update the cells, the counter and the phone agenda.
   function applyFilter({ animate = false } = {}) {
+    if (isWeek()) { renderWeek(); return; }
     const bounced = new Set();
     grid.querySelectorAll('.cal__band').forEach((band) => {
       const e = EVENTS.find((x) => x.id === band.dataset.event);
@@ -352,7 +515,44 @@ export function initCalendar({ reducedMotion }) {
       applyFilter({ animate: true });
       return;
     }
+    const view = e.target.closest('[data-cal-view]');
+    if (view) {
+      state.view = view.dataset.calView;
+      if (state.view === 'week') {
+        const d = month <= today ? today : month; // first day of the month on screen, or today
+        state.sel = d;
+        state.week = mondayOf(d);
+      } else {
+        const diff = (state.sel.getFullYear() - firstMonth.getFullYear()) * 12 + state.sel.getMonth() - firstMonth.getMonth();
+        state.offset = Math.min(MONTHS_AHEAD, Math.max(0, diff));
+      }
+      render();
+      return;
+    }
+    const sd = e.target.closest('[data-sd]');
+    if (sd) { selectDay(new Date(...sd.dataset.sd.split('-').map(Number))); return; }
+    const jump = e.target.closest('[data-wk-jump]');
+    if (jump) { const d = midnight(new Date(`${jump.dataset.wkJump}T00:00`)); showWeek(mondayOf(d), d); selectDay(d, { scroll: false }); return; }
+    const more = e.target.closest('[data-wc-more]');
+    if (more) {
+      const expand = more.getAttribute('aria-expanded') !== 'true';
+      more.setAttribute('aria-expanded', String(expand));
+      more.textContent = expand ? 'Less' : 'Details';
+      more.closest('.wc').querySelector('.wc__facts').hidden = !expand;
+      return;
+    }
     const day = e.target.closest('[data-day]');
+    const phoneDay = narrow.matches && e.target.closest('.cal__day[data-d], [data-cal-agenda] [data-day]');
+    if (phoneDay) {
+      // phone month view: a day (or an agenda line) leads to its week
+      const [y, m, dd] = (phoneDay.dataset.d || phoneDay.dataset.day).split('-').map(Number);
+      const d = new Date(y, m, dd);
+      state.view = 'week';
+      state.sel = d < today ? today : d;
+      state.week = mondayOf(state.sel);
+      render();
+      return;
+    }
     if (day) {
       const list = matchingOn(day.dataset.day);
       const at = Math.max(0, list.findIndex((x) => x.id === day.dataset.event));
@@ -370,8 +570,8 @@ export function initCalendar({ reducedMotion }) {
       applyFilter({ animate: true });
     }
   });
-  prev.addEventListener('click', () => go(-1));
-  next.addEventListener('click', () => go(1));
+  prev.addEventListener('click', () => step(-1));
+  next.addEventListener('click', () => step(1));
 
   // Hover (mouse) or keyboard focus on a day: lift the cell and assemble the event photo inside it.
   const peekCell = (target) => target.closest?.('button.cal__day.has-match');
@@ -404,14 +604,18 @@ export function initCalendar({ reducedMotion }) {
     }
   }, { passive: false });
   let touch = null;
-  body.addEventListener('touchstart', (e) => { touch = [e.touches[0].clientX, e.touches[0].clientY]; }, { passive: true });
-  body.addEventListener('touchend', (e) => {
-    if (!touch) return;
-    const dx = e.changedTouches[0].clientX - touch[0];
-    const dy = e.changedTouches[0].clientY - touch[1];
-    touch = null;
-    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) go(dx < 0 ? 1 : -1);
-  }, { passive: true });
+  [body, strip].forEach((host) => {
+    host.addEventListener('touchstart', (e) => { touch = [e.touches[0].clientX, e.touches[0].clientY]; }, { passive: true });
+    host.addEventListener('touchend', (e) => {
+      if (!touch) return;
+      const dx = e.changedTouches[0].clientX - touch[0];
+      const dy = e.changedTouches[0].clientY - touch[1];
+      touch = null;
+      if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.4) step(dx < 0 ? 1 : -1);
+    }, { passive: true });
+  });
+  // Crossing the phone breakpoint switches between the week view and the full month grid.
+  narrow.addEventListener('change', () => render());
 
   // ← → change the month while the calendar has focus, or while it fills the screen and nothing else does.
   const inView = () => { const r = root.getBoundingClientRect(); return r.top < window.innerHeight * 0.5 && r.bottom > window.innerHeight * 0.5; };
@@ -422,7 +626,7 @@ export function initCalendar({ reducedMotion }) {
     const focusHere = root.contains(document.activeElement) && !card.contains(document.activeElement);
     const idle = document.activeElement === document.body || !document.activeElement;
     if (!focusHere && !(idle && inView())) return;
-    if (go(e.key === 'ArrowRight' ? 1 : -1)) e.preventDefault();
+    if (step(e.key === 'ArrowRight' ? 1 : -1)) e.preventDefault();
   });
 
   // Click outside closes the card (the application modal handles its own Esc first).

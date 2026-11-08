@@ -10,6 +10,7 @@ import { kidsCourtOn } from '../../shared/availability.js';
 import { KIDS_HOUR } from '../../shared/academy.js';
 import { box, merge, softRect } from './geom.js';
 import { drinkingFountains as fountains } from './fountains-drinking.js';
+import { apart } from './court-bounds.js';
 import {
   loadLessonAtlas, coachVariant, actor, setClip, writeActor, walkPath, clipLength, aimed, overNet, track,
   ballPool, hoppers, pock, whistle, rand, HOPPER_CAP,
@@ -70,6 +71,7 @@ export function createKids(ctx, { still }) {
     const data = L.data;
     const sun = liveSunDir(ctx);
     const MAXK = 7;
+    const KID_APART = 0.62; // m between two kids (the tennis players keep 0.8)
     const body = spriteMesh(L.bodyTex, MAXK + 1, { slide: 0.42 });
     const shadow = spriteMesh(L.shadowTex, MAXK + 1, { ground: true, shadow: true });
     body.name = 'life_players_kids';
@@ -127,7 +129,7 @@ export function createKids(ctx, { still }) {
       const co = actor(data, coachVariant(coach, data), K.x, c.y, K.z, 'stand', 'away');
       const group = {
         id, c, K, H, geo, kids, co, coach: coach?.name ?? null,
-        bounds: { x0: c.x - 7.9, x1: c.x + 7.9, z0: c.z - 16.9, z1: c.z + 16.9 },
+        bounds: { x0: c.x - 7.9, x1: c.x + 7.9, z0: c.z - 15.2, z1: c.z + 15.2 },
         count: Math.round(rand(40, 64)), rest: [], flying: [], hopperShown: true,
         drill: -1, drillEnds: 0, queue: [], nextFeed: 0, feedAt: 0, pickup: false,
       };
@@ -193,7 +195,7 @@ export function createKids(ctx, { still }) {
       const s = Math.sign(gz - c.z);
       const pts = [];
       if (s !== -1) pts.push({ x: c.x + 7.7, z: c.z - 1.4 }, { x: c.x + 7.7, z: c.z + 1.4 });
-      pts.push({ x: c.x, z: gz - s * 1.2 }, { x: c.x, z: gz + s * 2 });
+      pts.push({ x: c.x, z: c.z + s * 13 }, { x: c.x, z: gz - s * 1.2 }, { x: c.x, z: gz + s * 2 }); // row 19: line up on the gate inside, then through it
       return pts;
     }
 
@@ -501,6 +503,7 @@ export function createKids(ctx, { still }) {
           }
         }
       }
+      for (const kid of gr.kids) apart(kid, [...gr.kids, co], dt, KID_APART); // row 19: nobody walks through anybody
     }
 
     function draw(now) {
@@ -569,6 +572,8 @@ export function createKids(ctx, { still }) {
         sync(performance.now() / 1000);
         return g?.id ?? null;
       },
+      /** Row 19 (dev): everybody on the kids' court, for the bounds check. */
+      people: () => (g ? [{ id: g.id, c: [g.c.x, g.c.z], who: [[g.co.x, g.co.z, 'coach', false], ...g.kids.map((k) => [k.x, k.z, 'kid', !!k.trip])] }] : []),
       /** Dev: jump to a drill ('line' | 'cones' | 'ladder'). */
       drill(name) {
         if (!g) return null;

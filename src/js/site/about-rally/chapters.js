@@ -15,6 +15,8 @@ const CHAR_SPREAD = 0.55; // share of a heading's arrival that the first and las
 const BLUR = 6;
 const SETTLE = 0.72; // share of a letter's arrival spent swapping through other letters before it locks
 const SWAP_MS = 90;
+const MASK_PAD = 160; // px the word mask reaches past the word on the sides that never move
+const MAX_ZONES = 4;
 
 // Words stay in the page for screen readers; only a faded-out link leaves the tab order.
 function put(el, w, y, link) {
@@ -49,9 +51,11 @@ export function createChapters(stage, onJump) {
   ticks.forEach((b, i) => b.addEventListener('click', () => onJump(i)));
   if (rail) rail.hidden = false;
   let lastOn = -1;
+  let lastP = 0;
 
   return {
     update(p) {
+      lastP = p;
       put(intro, 1 - smooth(clamp(p / (INTRO_END * 0.85))), -clamp(p / INTRO_END) * 60, false);
       let on = -1;
       chapters.forEach((c, i) => {
@@ -62,6 +66,7 @@ export function createChapters(stage, onJump) {
         if (q >= 0 && q < 1) on = i;
         for (const it of c.items) {
           const wi = smooth(clamp((w - it.d * 0.14) / (1 - it.d * 0.14)));
+          it.w = wi;
           put(it.el, it.chars ? (wi > 0.001 ? 1 : 0) : wi, (0.5 - clamp(q, -0.2, 1.2)) * it.depth * DRIFT + (1 - wi) * 28, it.link);
           if (it.chars) {
             const n = it.chars.length;
@@ -92,11 +97,13 @@ export function createChapters(stage, onJump) {
           const draw = smooth(clamp(x / 0.55));
           const gone = smooth(clamp((x - 0.82) / 0.18));
           const o = (x > 0 && x < 1 ? 1 : 0) * (1 - gone) * w;
+          n._o = o;
           const key = `${draw.toFixed(3)}|${o.toFixed(3)}`;
           if (n._k === key) return;
           n._k = key;
           n.style.opacity = o;
-          n.style.clipPath = `inset(0 ${((1 - draw) * 100).toFixed(1)}% 0 0)`;
+          // the mask only moves the right edge; the others sit far outside the word, so the soft shadow of the letters is never cut into a box
+          n.style.clipPath = `inset(-${MASK_PAD}px ${((1 - draw) * 100).toFixed(1)}% -${MASK_PAD}px -${MASK_PAD}px)`;
         });
         for (const n of c.counts) {
           const v = Math.round(n.to * smooth(clamp((q - 0.12) / 0.5)));
@@ -107,6 +114,28 @@ export function createChapters(stage, onJump) {
         lastOn = on;
         ticks.forEach((b, i) => b.classList.toggle('is-on', i === on));
       }
+    },
+    // Where the big words are on screen and how present they are (0..1), as rectangles in stage pixels.
+    // stage.js darkens the render softly under each one, so white letters hold on a light sky.
+    zones(out) {
+      out.length = 0;
+      const box = stage.getBoundingClientRect();
+      const add = (a, ...els) => {
+        if (a < 0.01 || out.length >= MAX_ZONES) return;
+        let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+        for (const el of els) {
+          const q = el.getBoundingClientRect();
+          if (!q.width) continue;
+          l = Math.min(l, q.left); t = Math.min(t, q.top); r = Math.max(r, q.right); b = Math.max(b, q.bottom);
+        }
+        if (l < r) out.push({ x: (l + r) / 2 - box.left, y: (t + b) / 2 - box.top, w: r - l, h: b - t, a });
+      };
+      add(Math.max(0, 1 - smooth(clamp(lastP / (INTRO_END * 0.85)))), intro.querySelector('.rally__title'));
+      chapters.forEach((c) => {
+        c.items.forEach((it) => { if (it.chars) add(it.w || 0, it.el); });
+        c.words.forEach((n) => add(n._o || 0, n.querySelector('b'), n.querySelector('.rc__cap')));
+      });
+      return out;
     },
     reset() {
       [intro, ...chapters.flatMap((c) => [...c.items.map((i) => i.el), ...c.words])].forEach((n) => n.removeAttribute('style'));

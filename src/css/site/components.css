@@ -1,10 +1,11 @@
-/* ---------- Dashed rule (row 110) ----------
-   The pricing block's dash (1px, 28% ink, the browser's native dash step) as one shared motif.
+/* ---------- Hairline rule (the --dash name is kept; dividers are solid since 2026-11-06) ----------
+   1px, 28% ink. Dashes stay only in graphics: court net, ticket perforation, the join track, the Hawk-Eye leader.
    Use `border-*: var(--dash)`, or the utilities below. On dark surfaces add `.dash-inv` to a parent. */
 :root {
   --dash-color: rgba(14, 14, 13, 0.28);
-  --dash: 1px dashed var(--dash-color);
-  --dash-inv: 1px dashed rgba(244, 243, 239, 0.22); /* the same rule on dark surfaces */
+  --dash: 1px solid var(--dash-color);
+  --dash-gfx: 1px dashed var(--dash-color); /* graphics only */
+  --dash-inv: 1px solid rgba(244, 243, 239, 0.22); /* the same rule on dark surfaces */
 }
 .dash-inv { --dash-color: rgba(244, 243, 239, 0.22); --dash: var(--dash-inv); }
 .dashed { border: var(--dash); }

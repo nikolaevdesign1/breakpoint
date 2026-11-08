@@ -15,10 +15,13 @@ const TORSO = { w: 0.52, h: 0.46, below: 0.4 }; // m: jacket card, centre below 
 const JACKETS = ['#e9e6df', '#646544', '#9c441f', '#36251b', '#1d1b19', '#646544', '#e9e6df'];
 const ADORNED = (o) => o.userData.flip && !o.userData.ground && !/cat/.test(o.name);
 
-const canvas = (draw) => {
+// Staff only (a holiday hat for the club's own people, row 14): the keeper, the squeegee man, the lesson coaches.
+const STAFF = (o) => /^life_(keeper|squeegee_man|players_lesson_coach|snow_crew)$/.test(o.name);
+
+const canvas = (draw, size = 64) => {
   const c = document.createElement('canvas');
-  c.width = c.height = 64;
-  draw(c.getContext('2d'));
+  c.width = c.height = size;
+  draw(c.getContext('2d'), size);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 4;
@@ -36,6 +39,18 @@ const hatTexture = () => canvas((g) => {
   g.beginPath(); g.arc(49, 14, 7, 0, Math.PI * 2); g.fill();
 });
 
+/** A party hat: a striped cone, tilted, with a gold pompom (round 11, New Year). */
+const partyTexture = () => canvas((g) => {
+  g.fillStyle = '#d7a93a';
+  g.beginPath(); g.moveTo(16, 50); g.lineTo(34, 8); g.lineTo(52, 50); g.closePath(); g.fill();
+  g.fillStyle = '#f3efe4';
+  for (const [x0, x1] of [[22, 27], [30, 35], [38, 43]]) { g.beginPath(); g.moveTo(x0, 50); g.lineTo(34, 8); g.lineTo(x1, 50); g.closePath(); g.fill(); }
+  g.fillStyle = '#1d1b19';
+  g.fillRect(16, 46, 36, 5);
+  g.fillStyle = '#e8e6df';
+  g.beginPath(); g.arc(34, 9, 6, 0, Math.PI * 2); g.fill();
+});
+
 /** A puffer jacket from the front (grey: the card is tinted per person): shoulders, sleeves, collar, zip. */
 const jacketTexture = () => canvas((g) => {
   g.fillStyle = '#d8d8d8';
@@ -49,6 +64,18 @@ const jacketTexture = () => canvas((g) => {
   g.fillRect(31, 14, 2, 42);
   g.fillRect(14, 34, 36, 2);
 });
+
+/** A plain jersey from the front (grey: the card is tinted per person): short sleeves, a V collar, two bands. No number, no mark. */
+const jerseyTexture = () => canvas((g) => {
+  g.fillStyle = '#e4e4e4';
+  g.beginPath(); g.moveTo(20, 8); g.lineTo(28, 8); g.lineTo(32, 16); g.lineTo(36, 8); g.lineTo(44, 8); g.lineTo(60, 18); g.lineTo(54, 30); g.lineTo(48, 26); g.lineTo(48, 56); g.lineTo(16, 56); g.lineTo(16, 26); g.lineTo(10, 30); g.lineTo(4, 18); g.closePath(); g.fill();
+  g.fillStyle = '#ffffff';
+  g.fillRect(16, 38, 32, 5);
+  g.beginPath(); g.moveTo(4, 18); g.lineTo(10, 30); g.lineTo(13, 28); g.lineTo(8, 16); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(60, 18); g.lineTo(54, 30); g.lineTo(51, 28); g.lineTo(56, 16); g.closePath(); g.fill();
+  g.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  g.beginPath(); g.moveTo(28, 8); g.lineTo(32, 16); g.lineTo(36, 8); g.closePath(); g.fill();
+}, 64);
 
 let shared = null;
 /** The one set of layers every user shares (the holiday decor wants hats, the cold jackets). */
@@ -74,8 +101,18 @@ function createAdorn({ scene }) {
     return mesh;
   };
   const hats = layer('hats', hatTexture(), 3);
+  const kinds = { santa: hats.material.map };
+  /** Registers a hat card (a 64 px canvas drawing) under a name; `set({ hats: true, hat: name })` shows it. */
+  const defineHat = (name, draw, { size = 64, w = HEAD.w, h = HEAD.h, rise = 0.3, sway = 0 } = {}) => {
+    kinds[name] ??= canvas(draw, size);
+    looks[name] = { w, h, rise, sway };
+  };
+  kinds.party = partyTexture();
   const jackets = layer('jackets', jacketTexture(), 3);
-  const want = { hats: false, jackets: false };
+  const jerseys = layer('jerseys', jerseyTexture(), 3);
+  const looks = {}; // hat name → { w, h, rise, sway } (the default is the Santa hat's)
+  const want = { hats: false, jackets: false, jerseys: false, hat: 'santa', staff: false, jerseyColors: ['#c4261d', '#2f5fb0'] };
+  const last = new Map(); // body id → Float32Array(x, z per slot): who is walking (the hat sways)
   let bodies = [];
   let scanned = -1;
   let doneAt = -1; // two users tick it in one frame: the second finds it done
@@ -85,6 +122,9 @@ function createAdorn({ scene }) {
   const p = new THREE.Vector3();
   const s = new THREE.Vector3();
   const c = new THREE.Color();
+  const axis = new THREE.Vector3(0, 0, 1);
+  const swayQ = new THREE.Quaternion();
+  const HEAD_LOOK = { w: HEAD.w, h: HEAD.h, rise: 0.3, sway: 0 };
   const hash = (i) => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 
   function scan(t) {
@@ -94,39 +134,63 @@ function createAdorn({ scene }) {
   }
 
   return {
-    /** `{ hats, jackets }`: which layers are on. */
+    /** `{ hats, jackets, jerseys }`: which layers are on; `hat` the kind, `staff` hats for the club's own people only, `jerseyColors` the teams. */
+    defineHat,
     set(next) {
       Object.assign(want, next);
+      const map = kinds[want.hat] ?? kinds.santa;
+      if (hats.material.map !== map) { hats.material.map = map; hats.material.needsUpdate = true; }
       hats.visible = want.hats; // off at once, whoever ticks next
       jackets.visible = want.jackets;
+      jerseys.visible = want.jerseys;
     },
-    on: () => want.hats || want.jackets,
+    on: () => want.hats || want.jackets || want.jerseys,
     tick(t) {
       if (t === doneAt) return alive;
       doneAt = t;
-      const active = want.hats || want.jackets;
+      const active = want.hats || want.jackets || want.jerseys;
       hats.visible = want.hats;
       jackets.visible = want.jackets;
-      if (!active) { hats.count = jackets.count = 0; return (alive = false); }
+      jerseys.visible = want.jerseys;
+      if (!active) { hats.count = jackets.count = jerseys.count = 0; return (alive = false); }
       if (t - scanned > 1) scan(t); // a lower-detail mesh swaps in and out as the camera moves
+      const look = looks[want.hat] ?? HEAD_LOOK;
       let n = 0;
+      let nh = 0;
       for (const b of bodies) {
         if (!b.visible) continue;
+        const staff = STAFF(b);
         const at = b.geometry.attributes;
         const away = b.userData.flip.slide;
+        let seen = last.get(b.id);
+        if (!seen || seen.length < b.count * 3) last.set(b.id, (seen = new Float32Array(b.count * 3)));
         for (let i = 0; i < b.count && n < MAX; i++) {
           b.getMatrixAt(i, m4);
           const e = m4.elements;
           if (e[0] === 0 && e[5] === 0) continue; // hidden slot
           const top = Math.max(at.aBox.getW(i), at.aBox2.getW(i)); // the frame's top edge
-          standing += Math.sign(top - standing) * 0.0015;
+          standing += Math.sign(top - standing) * 0.0015; // everyone feeds the median, staff or not
+          if (want.staff && !staff && !want.jerseys) continue;
           const head = Math.min(top, standing * 1.08);
           const seed = hash(i + b.id * 17);
           p.set(e[12], e[13], e[14]);
-          s.set(HEAD.w, HEAD.h, 1);
-          if (want.hats) {
-            m4.compose(p.clone().addScaledVector(up, head - HEAD.drop + HEAD.h * 0.3).addScaledVector(back, away + 0.03), tilt, s);
-            hats.setMatrixAt(n, m4);
+          s.set(look.w, look.h, 1);
+          if (want.hats && (!want.staff || staff)) {
+            let q = tilt;
+            if (look.sway) { // walking: the hat rocks with the step
+              const moved = Math.hypot(e[12] - seen[i * 3], e[14] - seen[i * 3 + 2]);
+              seen[i * 3] = e[12]; seen[i * 3 + 2] = e[14];
+              seen[i * 3 + 1] += (Math.min(1, moved * 40) - seen[i * 3 + 1]) * 0.1;
+              q = swayQ.setFromAxisAngle(axis, Math.sin(t * 7 + seed * 40) * look.sway * seen[i * 3 + 1]).premultiply(tilt);
+            }
+            m4.compose(p.clone().addScaledVector(up, head - HEAD.drop + look.h * look.rise).addScaledVector(back, away + 0.03), q, s);
+            hats.setMatrixAt(nh++, m4);
+          }
+          if (want.jerseys && !(want.staff && staff)) {
+            s.set(TORSO.w, TORSO.h, 1);
+            m4.compose(p.clone().addScaledVector(up, head - TORSO.below).addScaledVector(back, away + 0.02), tilt, s);
+            jerseys.setMatrixAt(n, m4);
+            jerseys.setColorAt(n, c.set(want.jerseyColors[Math.floor(seed * 7.13) % want.jerseyColors.length]));
           }
           if (want.jackets) {
             s.set(TORSO.w, TORSO.h, 1);
@@ -137,10 +201,12 @@ function createAdorn({ scene }) {
           n++;
         }
       }
-      hats.count = want.hats ? n : 0;
+      hats.count = want.hats ? nh : 0;
       jackets.count = want.jackets ? n : 0;
-      hats.instanceMatrix.needsUpdate = jackets.instanceMatrix.needsUpdate = true;
+      jerseys.count = want.jerseys ? n : 0;
+      hats.instanceMatrix.needsUpdate = jackets.instanceMatrix.needsUpdate = jerseys.instanceMatrix.needsUpdate = true;
       if (jackets.instanceColor) jackets.instanceColor.needsUpdate = true;
+      if (jerseys.instanceColor) jerseys.instanceColor.needsUpdate = true;
       return (alive = n > 0);
     },
   };

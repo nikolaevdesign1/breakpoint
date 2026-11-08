@@ -8,7 +8,6 @@ import { initReveals } from './reveal.js';
 import { initCta } from './cta.js';
 import { initDepth } from './depth.js';
 import { markPageReady } from './page-ready.js';
-import { initAmbientBed } from './ambient-bed.js';
 import { initRates } from './pricing.js';
 import { initBigmark } from './bigmark.js';
 import { initSound } from './sound.js';
@@ -20,7 +19,6 @@ import { initToTop } from './to-top.js';
 import { initBounce } from './bounce.js';
 import { initButtons } from './buttons.js';
 import { initNoise } from './noise.js';
-import { initFormControls } from './custom-select.js';
 import { playLitePreloader } from './preloader-lite.js';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -56,9 +54,10 @@ export function initSite({ holdScroll = false } = {}) {
   initSound();
   initCursor();
   initNoise();
-  initFormControls();
+  // Custom selects, date pickers and check ticks: loaded only on pages that have a form control.
+  if (document.querySelector('select, input[type="date"], .check__box')) import('./custom-select.js').then((m) => m.initFormControls());
   initButtons({ reducedMotion });
-  initAmbientBed();
+  import('./ambient-music.js').then((m) => m.initAmbientMusic()); // synthesised piece: its own chunk, off the critical path
   initCta({ reducedMotion });
   initDepth({ reducedMotion });
   initToTop({ lenis, reducedMotion });

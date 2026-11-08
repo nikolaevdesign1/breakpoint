@@ -14,6 +14,7 @@ import {
   SUN_DIR, detectQuality, setupRenderer, setupAtmosphere, createSun, loadSky, dressMaterial, createComposer,
 } from './lookdev.js';
 import { loadLightmaps, applyLightmaps } from './lightmaps.js';
+import { perf, onTier, probeFrame, setView, downgrade } from './perf.js';
 
 const MODEL_URL = '/models/clay_courts.glb';
 // edgeX: east of the car park there is only the tree belt; pulled back, the drone may pan less far
@@ -590,10 +591,15 @@ export function highlightBooked(id) {
 /** Screen rectangle of a court's apron in the current view (the coach card pins itself to it). */
 export function courtScreenRect(id) {
   const b = courtBox(id);
-  const pts = [[b.minX, b.minZ], [b.maxX, b.minZ], [b.minX, b.maxZ], [b.maxX, b.maxZ]].map(([x, z]) => rig.screenOf(x, z));
-  const xs = pts.map((p) => p.x);
-  const ys = pts.map((p) => p.y);
-  return { left: Math.min(...xs), right: Math.max(...xs), top: Math.min(...ys), bottom: Math.max(...ys) };
+  let left = Infinity; let right = -Infinity; let top = Infinity; let bottom = -Infinity;
+  for (let i = 0; i < 4; i++) {
+    const p = rig.screenOf(i & 1 ? b.maxX : b.minX, i & 2 ? b.maxZ : b.minZ);
+    if (p.x < left) left = p.x;
+    if (p.x > right) right = p.x;
+    if (p.y < top) top = p.y;
+    if (p.y > bottom) bottom = p.y;
+  }
+  return { left, right, top, bottom };
 }
 
 /** Redraws the view and hands over the canvas in the same task, while its drawing buffer still holds the frame (postcard). */
@@ -604,7 +610,15 @@ export function captureFrame(use) {
 }
 
 /** Ground rectangle of a court (its apron), read from the model. */
+const boxes = new Map(); // court id -> ground rectangle (the model does not move)
 function courtBox(id) {
+  const hit = boxes.get(id);
+  if (hit) return hit;
+  const box = courtBoxNow(id);
+  boxes.set(id, box);
+  return box;
+}
+function courtBoxNow(id) {
   const obj = overlays.get(id) || courtRoots.get(id);
   if (obj) {
     const b = new THREE.Box3().setFromObject(obj);
@@ -656,9 +670,16 @@ export const groundToScreen = (x, z) => rig.screenOf(x, z);
 export const isFlying = () => !!rig.flying?.();
 export const frameGround = (box, duration, inset) => rig.frame(box, { inset, pad: 1.3, duration });
 
-/** Round 8 (intro.js): the first visit opens with a flight over the club, settling where frameCourts(COURTS) would; null when it doesn't play. */
-export function introFlight() {
-  return createIntroFlight(rig, rig.frame(courtsBox(COURTS), { pad: 1.08, dry: true }));
+/**
+ * Row 17 (intro.js): every entry opens with a flight over the club. Without `aim` it settles where
+ * frameCourts(COURTS) would; `{ courtId, inset, pad }` settles framed on that court exactly as
+ * focusCourt would; `{ linked: true }` is a short flight to the usual view. Null when it doesn't play.
+ */
+export function introFlight(aim) {
+  const endOf = () => (aim?.courtId
+    ? rig.frame(courtBox(aim.courtId), { inset: aim.inset, pad: aim.pad, dry: true })
+    : rig.frame(courtsBox(COURTS), { pad: 1.08, dry: true }));
+  return createIntroFlight(rig, endOf, { linked: !!aim });
 }
 
 /** Current camera view, to come back to after a court has been opened. */
@@ -737,7 +758,24 @@ canvas.addEventListener('click', (e) => {
 // frame. Anything that changes the static picture (hover light, overlays, a car parking) re-bakes.
 const STILL_DELAY = 0.15; // s of stillness before effects come back
 const STILL_FADE = 0.3;
-const LIFE_HZ = 60; // players, the cat and cars move at the display rate (row 132)
+// Row 20 (perf): the life layer is redrawn, and its systems ticked, at the tier's rate (perf.js):
+// 60 Hz on a strong machine (players, the cat and cars move at the display rate, row 132), less on
+// a weak one. A 120 Hz display is not driven past 60.
+const lifeHz = () => perf.budget.spriteHz;
+let lifeAlive = false;
+let lifeLast = -1;
+let lifeAcc = 0;
+let lastDrawn = -1;
+function tickLife(time, deltaMs) {
+  lifeAcc += deltaMs / 1000;
+  if (perf.hidden) return lifeAlive;
+  if (lifeLast >= 0 && time - lifeLast < 1 / perf.budget.tickHz - 0.003) return lifeAlive;
+  lifeLast = time;
+  const dt = lifeAcc;
+  lifeAcc = 0;
+  lifeAlive = life?.tick(time, dt) ?? false;
+  return lifeAlive;
+}
 let lastView = '';
 let forceFrames = 2;
 let stillSince = 0;
@@ -752,8 +790,8 @@ const PIXEL_BUDGET = 3.2e6;
 const res = { ema: 16, slow: 0, fast: 0, wait: 0, moving: false };
 function resolutionRange() {
   const fit = Math.sqrt(PIXEL_BUDGET / (innerWidth * innerHeight));
-  res.max = Math.max(0.75, Math.min(window.devicePixelRatio, 1.5, fit));
-  res.min = Math.min(res.max, Math.max(0.75, res.max * 0.7));
+  res.max = Math.max(0.75, Math.min(window.devicePixelRatio, perf.budget.pixelCap, fit));
+  res.min = Math.min(res.max, perf.tier === 'high' ? Math.max(0.75, res.max * 0.7) : Math.max(0.6, res.max * 0.55)); // weaker tiers may go lower
 }
 resolutionRange();
 res.cur = res.max;
@@ -768,6 +806,7 @@ window.addEventListener('resize', () => {
 function adaptResolution(deltaMs) {
   if (!res.moving) { res.moving = true; return; } // the first frame after a pause has a stale delta
   res.ema += (Math.min(deltaMs, 100) - res.ema) * 0.15;
+  probeFrame(deltaMs, res.cur <= res.min + 0.01); // frames that stay long at the lowest scale lower the tier
   if (res.wait > 0) { res.wait--; return; }
   res.slow = res.ema > 20 ? res.slow + 1 : 0;
   res.fast = res.ema < 13 ? res.fast + 1 : 0;
@@ -785,6 +824,31 @@ function adaptResolution(deltaMs) {
 
 window.addEventListener('resize', () => { forceFrames = 2; });
 
+// A lower tier (perf.js) trims what the machine cannot hold: render scale cap, and at 'low' the
+// AO and bloom of the still frame. Nothing is switched back on in the same visit.
+onTier((tier) => {
+  document.documentElement.dataset.tier = tier;
+  resolutionRange();
+  res.cur = Math.min(res.cur, res.max);
+  renderer.setPixelRatio(res.cur);
+  renderer.setSize(innerWidth, innerHeight);
+  post.setSize();
+  post.setEffects(tier !== 'low');
+  forceFrames = 2;
+});
+
+// The ground rectangle in view, for systems that can idle when their place is off screen (perf.js).
+let viewAt = -1;
+function publishView(time) {
+  if (time - viewAt < 0.1) return;
+  viewAt = time;
+  const pts = [[0, 0], [innerWidth, 0], [0, innerHeight], [innerWidth, innerHeight]].map(([x, y]) => rig.groundAt(x, y));
+  setView({
+    minX: Math.min(...pts.map((p) => p.x)), maxX: Math.max(...pts.map((p) => p.x)),
+    minZ: Math.min(...pts.map((p) => p.z)), maxZ: Math.max(...pts.map((p) => p.z)),
+  });
+}
+
 function bake(amount) {
   if (shadowsPending) drawShadowsNow();
   post.bake(amount);
@@ -794,7 +858,9 @@ function bake(amount) {
 }
 
 gsap.ticker.add((time, deltaMs) => {
-  const alive = life?.tick(time, deltaMs / 1000) ?? false;
+  const alive = tickLife(time, deltaMs);
+  if (perf.fpsCap && time - lastDrawn < 1 / perf.fpsCap - 0.004) return; // a machine that cannot hold 40 fps gets a steady 30
+  lastDrawn = time;
   const s = rig.state;
   const view = `${s.x.toFixed(3)}|${s.z.toFixed(3)}|${s.dist.toFixed(3)}|${innerWidth}x${innerHeight}`;
   if (view !== lastView || forceFrames > 0) {
@@ -802,6 +868,7 @@ gsap.ticker.add((time, deltaMs) => {
     forceFrames--;
     stillSince = time;
     stillDone = false;
+    publishView(time);
     adaptResolution(deltaMs);
     if (shadowsPending) drawShadowsNow();
     post.motion();
@@ -825,14 +892,21 @@ gsap.ticker.add((time, deltaMs) => {
     return;
   }
   if (dirty) { bake(stillAmount); lastLife = time; return; }
-  if (alive && time - lastLife >= 1 / LIFE_HZ - 0.004) {
+  if (alive && time - lastLife >= 1 / lifeHz() - 0.004) {
     lastLife = time;
     post.life(stillAmount);
   }
 });
 
 // Dev-only hooks for the headless checks (stripped from production builds).
+function devStats() {
+  const cost = life?.cost ?? {};
+  const total = cost.$total ?? { ms: 0, n: 1 };
+  const systems = Object.entries(cost).filter(([k]) => k !== '$total').map(([name, c]) => ({ name, ms: c.ms / Math.max(1, c.n) })).sort((a, b) => b.ms - a.ms);
+  return { tickMs: total.ms / Math.max(1, total.n), ticks: total.n, systems };
+}
 if (import.meta.env.DEV) {
+  import('./dev-fps.js').then((m) => m.mountFpsOverlay({ renderer, stats: devStats }));
   window.__bp = {
     view: () => ({ x: rig.state.x, z: rig.state.z, dist: rig.state.dist }),
     screenOf(id) {
@@ -870,6 +944,11 @@ if (import.meta.env.DEV) {
     // A still-camera frame with ambient life: cached world + life layer + output.
     benchLife(n = 40) { return this.bench(n, () => post.life(1), false); },
     life: () => life?.debug(),
+    // Row 20: tier, render scale and the CPU cost of every life system since the last reset.
+    perf: () => ({ ...devStats(), tier: perf.tier, quality, budget: perf.budget, log: perf.log, scale: +renderer.getPixelRatio().toFixed(2) }),
+    perfReset: () => { if (life) life.cost = {}; },
+    tierDown: (why = 'dev') => downgrade(why),
+    setHidden: (v) => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => v }); document.dispatchEvent(new Event('visibilitychange')); },
     lit: (id, on) => setLit(id, on),
     pools: () => [...pools].map(([id, p]) => [id, +p.userData.level.v.toFixed(2), p.visible]),
     lifeDev: () => life?.dev,

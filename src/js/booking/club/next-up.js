@@ -1,3 +1,4 @@
+import { visibleInterval } from '../perf.js';
 import { COURTS, isOpenHour, isSlotTaken, isTakenByClub } from '../../shared/availability.js';
 import { isTournamentCourt } from '../../shared/tournaments.js';
 import { isOwnSlot } from '../../shared/session-bookings.js';
@@ -54,7 +55,7 @@ export function initNextUp(pins) {
     pins.sweep('next:', keep);
   }
   ['bp-hour', 'bp-booked', 'bp-booked-again', 'bp-hud'].forEach((e) => document.addEventListener(e, refresh));
-  setInterval(refresh, 30000); // the minutes left count down
+  visibleInterval(refresh, 30000); // the minutes left count down
   refresh();
   return { refresh };
 }

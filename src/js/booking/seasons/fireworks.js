@@ -17,7 +17,7 @@ const PALETTE = [
 const MAX = 1024; // instances: stars, their trails, shells, flashes
 const rand = (a, b) => a + Math.random() * (b - a);
 
-export function createFireworks({ scene, camera, pitch }) {
+export function createFireworks({ scene, camera, pitch, palette = PALETTE }) {
   const dot = glowTexture();
   const geo = new THREE.PlaneGeometry(1, 1).rotateX(-pitch); // the drone never turns: face it once
   const mat = new THREE.MeshBasicMaterial({
@@ -52,8 +52,8 @@ export function createFireworks({ scene, camera, pitch }) {
     const dist = ground * 1.15; // a little beyond the ground there: far off, past the trees
     const at = o.clone().addScaledVector(d, dist);
     const R = dist * rand(0.026, 0.036);
-    const color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
-    const color2 = Math.random() < 0.35 ? PALETTE[Math.floor(Math.random() * PALETTE.length)] : color;
+    const color = palette[Math.floor(Math.random() * palette.length)];
+    const color2 = Math.random() < 0.35 ? palette[Math.floor(Math.random() * palette.length)] : color;
     const n = Math.round(rand(56, 80));
     const stars = [];
     for (let i = 0; i < n; i++) {

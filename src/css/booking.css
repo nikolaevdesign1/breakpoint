@@ -366,8 +366,8 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
 
 .hud-ticket { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 0; }
 .hud-ticket__row { padding: 12px 14px; }
-.hud-ticket__row dt { padding-bottom: 8px; border-bottom: var(--dash); font-size: 14px; color: var(--mute); } /* perforation (row 110) */
-.hud-ticket__row dd { margin: 8px 0 0; font-size: 16px; font-weight: 500; }
+.hud-ticket__row dt { font-size: 14px; color: var(--mute); } /* air between label and value, no rule (row 18 of 2026-11-06) */
+.hud-ticket__row dd { margin: 10px 0 0; overflow-wrap: anywhere; font-size: 16px; font-weight: 500; }
 .hud-ticket__row:last-child:nth-child(odd) { grid-column: 1 / -1; } /* odd count: the last row runs full width */
 
 /* Steps 2 and 3 (row 84): game options and player details, same tiles */
@@ -443,6 +443,13 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
 .hud-input--member { flex-direction: row; align-items: center; justify-content: space-between; cursor: default; }
 .hud-input--member .hud-seg button { height: 34px; }
 .hud-input--member::after { display: none; }
+/* Contact line under the name and phone tiles, and the way to forget the saved details */
+.hud-contact-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 16px; margin: 0; padding: 6px 14px; font-size: 12px; line-height: 16px; color: var(--mute); }
+.hud-contact-clear { min-height: 32px; padding: 0 2px; color: var(--ink); font-size: 12px; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; text-decoration-color: transparent; transition: text-decoration-color 0.25s; }
+.hud-contact-clear[hidden] { display: none; }
+@media (hover: hover) { .hud-contact-clear:hover { text-decoration-color: currentColor; } }
+.hud-contact-clear:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; text-decoration-color: currentColor; }
+.hud-input--member .hud-step button { height: 34px; }
 /* Club member + card (round 9 row 5): one full-width row; "Yes" opens the card column with a spring,
    "No" folds it away. The member tile only gives up width, nothing below moves. */
 .hud-member {

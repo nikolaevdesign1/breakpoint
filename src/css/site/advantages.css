@@ -131,6 +131,8 @@
 @media (max-width: 900px) {
   .member { gap: 32px var(--gutter); }
   .member__head, .member__stage, .member__list { grid-column: 1 / -1; grid-row: auto; }
+  .member__stage { align-items: stretch; }
+  .member__stage .clubcard { max-width: 480px; }
   .member__head { grid-template-columns: minmax(0, 1fr); }
   .member__title, .member__aside { grid-column: 1 / -1; }
   .member__aside { padding-left: calc((100% + var(--grid-gap)) / 12 * 1); }

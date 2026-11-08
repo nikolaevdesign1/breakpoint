@@ -27,7 +27,7 @@
 .bp-finds__panel[hidden], .bp-finds__toast[hidden] { display: none; }
 .bp-finds__panel.is-on, .bp-finds__toast.is-on { opacity: 1; transform: none; }
 .bp-finds__panel { width: 296px; padding: 12px 0 8px; max-width: calc(100vw - 24px); }
-.bp-finds__head { display: flex; justify-content: space-between; padding: 0 16px 10px; margin: 0; font-weight: 500; border-bottom: 1px dashed rgba(14, 14, 13, 0.3); }
+.bp-finds__head { display: flex; justify-content: space-between; padding: 0 16px 14px; margin: 0; font-weight: 500; }
 .bp-finds__head span + span { color: var(--mute); font-weight: 400; }
 .bp-finds__list { list-style: none; margin: 0; padding: 4px 0 0; }
 .bp-finds__item { display: flex; flex-direction: column; gap: 2px; padding: 8px 16px; color: var(--mute-2); }

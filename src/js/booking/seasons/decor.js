@@ -181,6 +181,53 @@ export function buntingGeometry(points, colors, { w = 0.26, l = 0.34 } = {}) {
   return g;
 }
 
+/**
+ * Outlines of the small flags a garland can carry, as points in a box x -0.5…0.5, y -1…0 (the string
+ * runs along the top edge). Every outline is star-shaped round its centre, so a fan fills it.
+ */
+const SHAPES = {
+  heart: (t) => { const a = t * Math.PI * 2; return [(16 * Math.sin(a) ** 3) / 34, -0.5 + (13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a) - 2) / 34]; },
+  star: (t) => { const a = t * Math.PI * 2; const k = 0.5 + 0.5 * (Math.cos(a * 5) > 0.2 ? 1 : 0.42); return [Math.sin(a) * 0.5 * k, -0.5 + Math.cos(a) * 0.5 * k]; },
+  clover: (t) => { const a = t * Math.PI * 2; const k = 0.66 + 0.34 * Math.cos(a * 3 + Math.PI); return [Math.sin(a) * 0.5 * k, -0.5 + Math.cos(a) * 0.5 * k]; },
+  round: (t) => { const a = t * Math.PI * 2; return [Math.sin(a) * 0.5, -0.5 + Math.cos(a) * 0.5]; },
+  diamond: (t) => { const a = t * Math.PI * 2; const k = 1 / (Math.abs(Math.sin(a)) + Math.abs(Math.cos(a))); return [Math.sin(a) * 0.5 * k, -0.5 + Math.cos(a) * 0.5 * k]; },
+  square: () => null, // special-cased: two triangles
+  pennant: () => null,
+};
+export const GARLAND_SHAPES = Object.keys(SHAPES);
+
+/**
+ * Small flags under a strand (a garland of hearts, stars, clovers, diamonds, squares or pennants):
+ * flat shapes in the plane of the wire, colours cycling, hanging from the string. `w` wide, `l` long.
+ */
+export function garlandGeometry(points, colors, { shape = 'pennant', w = 0.3, l = 0.34, sway = 0 } = {}) {
+  if (shape === 'pennant') return buntingGeometry(points, colors, { w, l });
+  const pos = [];
+  const col = [];
+  const c = new THREE.Color();
+  const N = 28;
+  const outline = [];
+  if (shape === 'square') outline.push([-0.5, 0], [0.5, 0], [0.5, -1], [-0.5, -1]);
+  else for (let i = 0; i < N; i++) outline.push(SHAPES[shape](i / N));
+  const centre = outline.reduce((m, q) => [m[0] + q[0] / outline.length, m[1] + q[1] / outline.length], [0, 0]);
+  points.forEach(({ p, tan }, i) => {
+    c.set(colors[i % colors.length]);
+    const at = ([u, v]) => new THREE.Vector3(p.x, p.y, p.z).addScaledVector(tan, u * w).add(new THREE.Vector3(0, v * l, 0));
+    const mid = at(centre);
+    for (let k = 0; k < outline.length; k++) {
+      const a = at(outline[k]);
+      const b = at(outline[(k + 1) % outline.length]);
+      pos.push(mid.x, mid.y, mid.z, b.x, b.y, b.z, a.x, a.y, a.z);
+      for (let q = 0; q < 3; q++) col.push(c.r, c.g, c.b);
+    }
+  });
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  g.computeVertexNormals();
+  return g;
+}
+
 /** A C9-style bulb: a short, pointed glass drop, 1 unit = real size. */
 export function bulbGeometry() {
   return new THREE.LatheGeometry([

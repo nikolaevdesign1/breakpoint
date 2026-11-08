@@ -389,16 +389,23 @@ export function createCameraRig(canvas, { bounds }) {
     stopMotion();
     const P = (k) => new THREE.Vector3(k.x, k.dist, k.z);
     const A = (k) => new THREE.Vector3(k.pitch ?? 0, k.yaw ?? 0, 0);
-    const path = new THREE.CatmullRomCurve3(keys.map(P), false, 'centripetal');
-    const turn = new THREE.CatmullRomCurve3(keys.map(A), false, 'centripetal');
-    const end = { ...keys[keys.length - 1] };
+    let path;
+    let turn;
+    const build = (list) => {
+      path = new THREE.CatmullRomCurve3(list.map(P), false, 'centripetal');
+      turn = new THREE.CatmullRomCurve3(list.map(A), false, 'centripetal');
+      if (cine) cine.end = { ...list[list.length - 1] };
+    };
     const k = { u: 0 };
     const p = new THREE.Vector3();
     const a = new THREE.Vector3();
     const done = new Promise((resolve) => {
       const onInput = () => endCinematic(skip);
-      cine = { end, done: resolve, finishing: false, onInput };
-      INPUTS.forEach((t) => window.addEventListener(t, onInput, { capture: true, passive: true }));
+      // Listeners go on when the flight starts: a key pressed behind the loader must not spend it.
+      const arm = () => INPUTS.forEach((t) => window.addEventListener(t, onInput, { capture: true, passive: true }));
+      cine = { end: null, done: resolve, finishing: false, onInput, arm, armed: false };
+      build(keys);
+      if (!paused) { arm(); cine.armed = true; }
       const step = () => {
         path.getPoint(k.u, p);
         turn.getPoint(k.u, a);
@@ -407,11 +414,22 @@ export function createCameraRig(canvas, { bounds }) {
       };
       step();
       apply();
+      cine.step = step;
       cine.tween = gsap.to(k, { u: 1, duration, ease, paused, onUpdate: step, onComplete: () => { k.u = 1; step(); finishCinematic(); } });
     });
     const flight = cine;
     const live = () => cine === flight && !flight.finishing;
-    return { done, play: () => { if (live()) flight.tween.play(); }, seek: (p) => { if (live()) flight.tween.progress(p).pause(); } };
+    return {
+      done,
+      play: () => {
+        if (!live()) return;
+        if (!flight.armed) { flight.armed = true; flight.arm(); }
+        flight.tween.play();
+      },
+      seek: (q) => { if (live()) flight.tween.progress(q).pause(); },
+      /** New keys for the same flight (the window was resized): it carries on from the same progress. */
+      retarget: (next) => { if (live()) { build(next); flight.step(); } },
+    };
   }
 
   apply();

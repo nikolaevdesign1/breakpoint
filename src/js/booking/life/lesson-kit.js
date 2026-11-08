@@ -324,6 +324,7 @@ export function hoppers(scene, count, sun) {
   scene.add(shade, legs, baskets, inside);
   const m4 = new THREE.Matrix4();
   const zero = new THREE.Matrix4().makeScale(0, 0, 0);
+  const sPos = new THREE.Vector3(); const sScale = new THREE.Vector3(); const sQuat = new THREE.Quaternion();
   const spots = [];
   for (let l = 0; l < 3; l++) {
     for (let i = 0; i < PER; i++) {
@@ -344,7 +345,7 @@ export function hoppers(scene, count, sun) {
       legs.setMatrixAt(i, m4);
       const s = sun.dir;
       const off = (HOP_TOP * 0.8) / Math.max(0.25, s.y);
-      shade.setMatrixAt(i, m4.compose(new THREE.Vector3(x - s.x * off * 0.5, y + 0.003, z - s.z * off * 0.5), new THREE.Quaternion(), new THREE.Vector3(0.5 + off * 0.5, 1, 0.5)));
+      shade.setMatrixAt(i, m4.compose(sPos.set(x - s.x * off * 0.5, y + 0.003, z - s.z * off * 0.5), sQuat, sScale.set(0.5 + off * 0.5, 1, 0.5)));
       const n = Math.round(THREE.MathUtils.clamp(fill, 0, 1) * spots.length);
       spots.forEach(([bx, by, bz], k) => {
         inside.setMatrixAt(i * spots.length + k, k < n ? m4.makeTranslation(x + bx, y + by, z + bz) : zero);

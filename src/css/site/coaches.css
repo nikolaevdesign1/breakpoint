@@ -141,11 +141,7 @@
   .studio .mt { opacity: 1; transform: none; transition: none; }
 }
 
-/* Tablet: two to a row. Phone: one */
-@media (max-width: 1000px) {
-  .studio { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .studio .mt--promo { grid-column: 1 / -1; min-height: 160px; }
-}
+/* Tablet and up: three to a row. Phone (up to 640px): two to a row, tiles stay 4:5, 8px apart, 12px page edge (page-coaches.css) */
 @media (max-width: 640px) {
-  .studio { grid-template-columns: minmax(0, 1fr); }
+  .studio { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

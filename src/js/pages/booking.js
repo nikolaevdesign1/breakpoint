@@ -1,7 +1,7 @@
 import gsap from 'gsap';
 import { COURTS, readBookingParams, dayKeyForOffset } from '../shared/availability.js';
 import { isTournamentCourt } from '../shared/tournaments.js';
-import { sceneEvents, setDimmed, setSelected, focusCourt, frameCourts, introCamera, introFlight, saveView, restoreView, highlightBooked, courtScreenRect } from '../booking/scene.js';
+import { sceneEvents, setDimmed, setSelected, focusCourt, frameCourts, introCamera, introFlight, saveView, restoreView, highlightBooked, courtScreenRect, isFlying } from '../booking/scene.js';
 import { sessionBookings, isOwnSlot } from '../shared/session-bookings.js';
 import { createCoachHover } from '../booking/interact/coach-hover.js';
 import { initPostcard } from '../booking/interact/postcard.js';
@@ -77,7 +77,7 @@ const dock = createDock({
     // A court booked by this visitor is not faded as busy: it stays lit and clear (round 7).
     const mine = (id) => isOwnSlot(id, dayKeyForOffset(offset), dock.focusHour());
     setDimmed(faded.filter((id) => !(busy.includes(id) && mine(id))), busy.filter((id) => !mine(id)));
-    if (!firstFilter && !hud.isOpen() && !holdFrame) frameCourts(filter === 'all' ? COURTS : pool);
+    if (!firstFilter && !hud.isOpen() && !holdFrame && !isFlying()) frameCourts(filter === 'all' ? COURTS : pool);
     firstFilter = false;
   },
   onNext: ({ court, offset, hour, minutes }) => openCourt(court.id, { offset, hour, minutes }), // round 9: a span from the scrubber
@@ -106,7 +106,12 @@ sceneEvents.onReady = async () => {
   dock.update();
   const invite = readInvite(); // round 9 (row 6): a friend's link lands on their court
   const link = invite ? null : readBookingParams();
-  const flight = link || invite ? null : introFlight(); // round 8: a first visit opens with a flight over the club (booking/intro.js)
+  // Row 17: every entry opens with a flight (booking/intro.js); a link to a court ends it framed on that court.
+  const phone = window.innerWidth <= 640;
+  const coachLink = /[?&](coach|slot)=/.test(location.search);
+  const flight = introFlight(invite ? { courtId: invite.courtId, pad: 1.6 }
+    : link ? { courtId: link.courtId, pad: phone ? 1.15 : 1.08, inset: phone ? { bottom: Math.min(window.innerHeight * 0.62, 520) } : {} }
+      : coachLink ? { linked: true } : undefined);
   if (!flight) introCamera();
   // Row 48: the first sprite sheets (players, cat, keeper) reach the GPU behind the loader, not in the intro's first frames; capped at 2 s.
   await Promise.race([sceneEvents.lifeStarted, new Promise((resolve) => setTimeout(resolve, 2000))]);
@@ -114,8 +119,14 @@ sceneEvents.onReady = async () => {
   performance.mark('bp-loader-done');
   gsap.fromTo('[data-top]', { autoAlpha: 0, y: -16 }, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'expo.out' });
   dock.reveal();
-  if (invite) { focusCourt(invite.courtId, {}, 1.6, 2.2); markInviteShown(); }
-  else if (link) { openCourt(link.courtId, { offset: link.offset, hour: link.hour }); returnView = null; } // leaving frames the courts
+  const showInvite = () => { focusCourt(invite.courtId, {}, 1.6, flight ? 0 : 2.2); markInviteShown(); };
+  const showLink = () => {
+    if (hud.isOpen()) return; // the visitor already opened a court during the flight
+    openCourt(link.courtId, { offset: link.offset, hour: link.hour });
+    returnView = null; // leaving frames the courts
+  };
+  if (invite) flight ? flight.play().then(showInvite) : showInvite();
+  else if (link) flight ? flight.play().then(showLink) : showLink();
   else if (flight) flight.play();
   else frameCourts(COURTS, undefined, 2.2);
   initCookies({ delay: 1.6 });

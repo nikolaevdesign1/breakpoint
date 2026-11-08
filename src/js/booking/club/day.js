@@ -10,6 +10,8 @@ import { club, save } from './store.js';
 import { joinNames } from './people.js';
 import { kitChips } from './kit.js';
 import { initSelects } from '../../site/custom-select.js';
+import { contactStep, ticketBox, peopleLabel } from './contact-step.js';
+import { PARTY_LIMITS } from '../../shared/contact.js';
 
 // Club panel, "Your day at the club" (round 10): a timeline of what the visitor has on the shown
 // day: booked courts, open games joined, a lesson and dinner at the café, which they add here.
@@ -40,9 +42,9 @@ function entries(dayKey) {
     if (d.dayKey !== dayKey) continue;
     if (d.kind === 'lesson') {
       const coach = COACHES.find((c) => c.slug === d.coach);
-      out.push({ id: d.id, kind: 'lesson', courtId: d.courtId, start: d.hour, end: d.hour + 1, title: `Lesson with ${coach?.name ?? 'your coach'}`, sub: `${courtOf(d.courtId).label} · $${coach?.price ?? 0} for 1 h`, remove: true });
+      out.push({ id: d.id, kind: 'lesson', courtId: d.courtId, start: d.hour, end: d.hour + 1, title: `Lesson with ${coach?.name ?? 'your coach'}`, sub: `${courtOf(d.courtId).label} · $${coach?.price ?? 0} for 1 h${d.name ? ` · ${d.name}, ${peopleLabel(d.party || 1)}` : ''}`, remove: true });
     } else {
-      out.push({ id: d.id, kind: 'dinner', cafe: true, start: d.hour, end: d.hour + 1.5, title: 'Dinner at the café', sub: `Table for ${d.party}`, remove: true });
+      out.push({ id: d.id, kind: 'dinner', cafe: true, start: d.hour, end: d.hour + 1.5, title: 'Dinner at the café', sub: `Table for ${d.party}${d.name ? ` · ${d.name}` : ''}`, remove: true });
     }
   }
   out.sort((a, b) => a.start - b.start);
@@ -68,7 +70,7 @@ function lessonForm(ctx, dayKey, list, today) {
   f.innerHTML = `
     <label class="cl-wide">Coach<select name="coach">${COACHES.map((c) => `<option value="${c.slug}"${c.slug === d.coach ? ' selected' : ''}>${c.name} · $${c.price}</option>`).join('')}</select></label>
     <label>Time<select name="hour"${hours.length ? '' : ' disabled'}>${hours.map((h) => `<option value="${h}"${h === d.hour ? ' selected' : ''}>${fmtHour(h)}</option>`).join('') || '<option>No free court</option>'}</select></label>
-    <button type="submit" class="cl-btn is-solid"${hours.length ? '' : ' disabled'}>Add lesson</button>`;
+    <button type="submit" class="cl-btn is-solid"${hours.length ? '' : ' disabled'}>Continue</button>`;
   initSelects(f);
   f.elements.coach.addEventListener('change', () => { d.coach = f.elements.coach.value; ctx.render(); });
   f.elements.hour.addEventListener('change', () => { d.hour = +f.elements.hour.value; });
@@ -77,11 +79,9 @@ function lessonForm(ctx, dayKey, list, today) {
     const h = +f.elements.hour.value;
     const court = courtFor(h);
     if (!court) return;
-    ctx.adding = null;
-    ctx.coachLink = null;
-    ctx.nearest = null;
-    ctx.notice = `Lesson booked: ${coach().name}, ${fmtHour(h)} on ${court.label}, $${coach().price}. It is on your day.`;
-    save({ day: [...club().day, { id: `lesson:${Date.now()}`, kind: 'lesson', dayKey, hour: h, coach: d.coach, courtId: court.id }] });
+    // Next comes the data step (who is coming). Nothing is booked until it is confirmed.
+    ctx.pending = { kind: 'lesson', dayKey, hour: h, coach: d.coach, courtId: court.id };
+    ctx.render();
   });
   return f;
 }
@@ -94,20 +94,52 @@ function dinnerForm(ctx, dayKey, list, today) {
   const last = list.filter((e) => e.kind !== 'dinner').at(-1);
   const wish = last ? Math.ceil((last.end + 0.5) * 2) / 2 : 19; // half an hour after the last game, on the half hour
   d.time = times.includes(+d.time) ? +d.time : times.find((h) => h >= wish) ?? times[0];
-  d.party ??= 2;
   f.innerHTML = `
     <label>Time<select name="time"${times.length ? '' : ' disabled'}>${times.map((h) => `<option value="${h}"${h === d.time ? ' selected' : ''}>${clock(h)}</option>`).join('') || '<option>Booked out</option>'}</select></label>
-    <label>Table for<select name="party">${[1, 2, 3, 4, 5, 6].map((n) => `<option${n === d.party ? ' selected' : ''}>${n}</option>`).join('')}</select></label>
-    <button type="submit" class="cl-btn is-solid"${times.length ? '' : ' disabled'}>Reserve</button>`;
+    <button type="submit" class="cl-btn is-solid"${times.length ? '' : ' disabled'}>Continue</button>`;
   initSelects(f);
   f.elements.time.addEventListener('change', () => { d.time = +f.elements.time.value; });
-  f.elements.party.addEventListener('change', () => { d.party = +f.elements.party.value; });
   f.addEventListener('submit', (e) => {
     e.preventDefault();
-    ctx.adding = null;
-    save({ day: [...club().day, { id: `dinner:${Date.now()}`, kind: 'dinner', dayKey, hour: +f.elements.time.value, party: +f.elements.party.value }] });
+    ctx.pending = { kind: 'dinner', dayKey, hour: +f.elements.time.value };
+    ctx.render();
   });
   return f;
+}
+
+/** The data step for a lesson or a table: who is coming, how to reach them. Booked only after it. */
+function pendingStep(ctx) {
+  const p = ctx.pending;
+  const isLesson = p.kind === 'lesson';
+  const coach = isLesson ? COACHES.find((c) => c.slug === p.coach) : null;
+  const court = isLesson ? courtOf(p.courtId) : null;
+  const lim = isLesson ? PARTY_LIMITS.lesson : PARTY_LIMITS.table;
+  const title = isLesson ? `Lesson with ${coach.name}` : 'Table at the café';
+  const sub = isLesson ? `${fmtHour(p.hour)} on ${court.label} · $${coach.price} for 1 h` : `${dayName(hourState.offset ?? 0)}, ${clock(p.hour)} · pay at the café`;
+  const back = () => { ctx.pending = null; ctx.cdraft = null; ctx.render(); };
+  return contactStep(ctx, {
+    id: `${p.kind}:${p.dayKey}:${p.hour}:${p.coach ?? ''}`,
+    title, sub,
+    party: { ...lim, n: isLesson ? 1 : 2 },
+    partyLabel: isLesson ? 'People in the lesson' : 'Table for',
+    confirm: isLesson ? `Book lesson · $${coach.price}` : 'Reserve the table',
+    onBack: back,
+    onConfirm: (who) => {
+      const id = `${p.kind}:${Date.now()}`;
+      const entry = isLesson
+        ? { id, kind: 'lesson', dayKey: p.dayKey, hour: p.hour, coach: p.coach, courtId: p.courtId, name: who.name, party: who.party, contact: who.contact }
+        : { id, kind: 'dinner', dayKey: p.dayKey, hour: p.hour, party: who.party, name: who.name, contact: who.contact };
+      const when = `${dayName(hourState.offset ?? 0)}, ${isLesson ? fmtHour(p.hour) : clock(p.hour)}`;
+      ctx.ticket = isLesson
+        ? { title: 'Lesson booked', rows: [['Coach', coach.name], ['When', `${when}, 1 h`], ['Court', court.label], ['Name', who.name], ['People', peopleLabel(who.party)], ['Contact', who.contact], ['Price', `$${coach.price}`]] }
+        : { title: 'Table reserved', rows: [['Where', 'The café'], ['When', `${when}, 1 h 30 min`], ['Name', who.name], ['People', peopleLabel(who.party)], ['Contact', who.contact], ['Price', 'Pay at the café']] };
+      ctx.pending = null;
+      ctx.adding = null;
+      ctx.coachLink = null;
+      ctx.nearest = null;
+      save({ day: [...club().day, entry] });
+    },
+  });
 }
 
 export function renderDay(box, ctx) {
@@ -120,13 +152,7 @@ export function renderDay(box, ctx) {
   head.className = 'cl-lead';
   head.textContent = list.length ? `Your plan for ${word}, in order. The map shows the route.` : `Nothing planned ${word}. Book a court or join an open game, then add a lesson or dinner here.`;
   box.append(head);
-  if (ctx.notice) {
-    const n = document.createElement('p');
-    n.className = 'cl-result';
-    n.setAttribute('role', 'status');
-    n.textContent = ctx.notice;
-    box.append(n);
-  }
+  if (ctx.ticket) box.append(ticketBox(ctx.ticket, () => { ctx.ticket = null; ctx.render(); }));
 
   const ol = document.createElement('ol');
   ol.className = 'cl-line';
@@ -174,7 +200,9 @@ export function renderDay(box, ctx) {
     <button type="button" class="cl-btn" data-add="dinner" aria-expanded="${ctx.adding === 'dinner'}">Table at the café</button>`;
   adds.querySelectorAll('[data-add]').forEach((b) => b.addEventListener('click', () => { ctx.adding = ctx.adding === b.dataset.add ? null : b.dataset.add; ctx.render(); }));
   box.append(adds);
-  if (ctx.adding) {
+  if (ctx.pending && ctx.pending.dayKey === dayKey) {
+    box.append(pendingStep(ctx));
+  } else if (ctx.adding) {
     const form = ctx.adding === 'lesson' ? lessonForm(ctx, dayKey, list, today) : dinnerForm(ctx, dayKey, list, today);
     if (ctx.adding === 'lesson' && ctx.nearest) {
       const m = document.createElement('p');

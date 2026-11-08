@@ -113,7 +113,6 @@
           </div>
         </div>
         <div class="hud-tile hud-field" data-depth="0.8"><span class="hud-field__k">Length</span><div class="hud-seg" data-opt="minutes" role="group" aria-label="Length"></div></div>
-        <div class="hud-tile hud-field" data-depth="0.7"><span class="hud-field__k">Players</span><div class="hud-seg" data-opt="players" role="group" aria-label="Players"></div></div>
         <div class="hud-tile hud-field" data-depth="0.65"><span class="hud-field__k">Balls</span><div class="hud-seg" data-opt="balls" role="group" aria-label="Balls"></div></div>
         <div class="hud-tile hud-field" data-depth="0.6"><span class="hud-field__k">Rental rackets<small>{{fact:price.racket}} each</small></span>
           <div class="hud-step" data-opt="rackets"><button type="button" data-step="-1" aria-label="Fewer rackets">−</button><b data-rackets>0</b><button type="button" data-step="1" aria-label="More rackets">+</button></div></div>
@@ -137,9 +136,13 @@
           </div>
         </div>
         <div class="hud-row hud-form" data-depth="0.8">
-          <label class="hud-tile hud-input"><span>Full name</span><input name="name" autocomplete="name" required minlength="3" /></label>
-          <label class="hud-tile hud-input"><span>Phone</span><input name="phone" type="tel" autocomplete="tel" required /></label>
-          <label class="hud-tile hud-input hud-input--wide"><span>E-mail</span><input name="email" type="email" autocomplete="email" required /></label>
+          <label class="hud-tile hud-input"><span>First name</span><input name="first" autocomplete="given-name" autocapitalize="words" required /></label>
+          <label class="hud-tile hud-input"><span>Last name</span><input name="last" autocomplete="family-name" autocapitalize="words" required /></label>
+          <label class="hud-tile hud-input"><span>Phone</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+1 (305) 555-0142" /></label>
+          <label class="hud-tile hud-input"><span>E-mail</span><input name="email" type="email" autocomplete="email" placeholder="you@example.com" /></label>
+          <p class="hud-tile hud-contact-note hud-input--wide" data-contact-note>We confirm by phone or e-mail. One of the two is enough.<button type="button" class="hud-contact-clear" data-contact-clear hidden>Not you? Clear</button></p>
+          <div class="hud-tile hud-input hud-input--member" data-party><span>People<small data-party-hint></small></span>
+            <div class="hud-step"><button type="button" data-party-step="-1" aria-label="Fewer people">−</button><b data-party-n aria-live="polite">2</b><button type="button" data-party-step="1" aria-label="More people">+</button></div></div>
           <div class="hud-member" data-member-row>
             <div class="hud-tile hud-input hud-input--member"><span>Club member</span>
               <div class="hud-seg" role="group" aria-label="Club member"><button type="button" data-member="no" aria-pressed="true">No</button><button type="button" data-member="weekday" aria-pressed="false">Weekday</button><button type="button" data-member="club" aria-pressed="false">Club</button><button type="button" data-member="family" aria-pressed="false">Family</button></div></div>

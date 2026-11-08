@@ -1,5 +1,6 @@
 import '../../../css/booking-seasons.css';
 import { MODES, SEASON_NAMES, seasonMode, setSeasonMode, currentSeason, datedSeason } from './season.js';
+import { HOLIDAYS } from './calendar.js';
 
 // Holiday decor switcher (round 8, "seasons"): a square button in the top bar, beside the postcard,
 // opens a small menu. "Auto" follows the date in Miami; the others force a look for the session.
@@ -9,18 +10,10 @@ import { MODES, SEASON_NAMES, seasonMode, setSeasonMode, currentSeason, datedSea
 
 const ICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M1.75 3.75c3.5 3.4 9 3.4 12.5 0"/><path d="M4.75 6.25v1.5M8 7.25v1.5M11.25 6.25v1.5"/><rect class="bp-season__bulb" x="3.75" y="8.25" width="2" height="3"/><rect class="bp-season__bulb" x="7" y="9.25" width="2" height="3"/><rect class="bp-season__bulb" x="10.25" y="8.25" width="2" height="3"/></svg>';
 
-const HINTS = {
-  halloween: 'Pumpkins and orange lights',
-  holidays: 'Lights, a tree and gifts',
-  july4: 'Bunting, flags, fireworks at night',
-  off: 'No decor',
-};
+// Row 1 (round 11): the list is the registry's, in the order of the year (seasons/calendar.js).
+const HINTS = { ...Object.fromEntries(HOLIDAYS.map((h) => [h.id, h.hint])), off: 'No decor' };
 const LABELS = { auto: 'Auto', ...SEASON_NAMES, off: 'Off' };
-const NOTES = {
-  halloween: ['Halloween at the club', 'Pumpkins at every gate, orange lights at night'],
-  holidays: ['Holidays at the club', 'Lights, a tree, and a sleigh overhead'],
-  july4: ['July 4th at the club', 'Flags on the walkway, fireworks after dark'],
-};
+const NOTES = Object.fromEntries(HOLIDAYS.map((h) => [h.id, h.note]));
 const NOTE_MS = 4200;
 
 function autoHint() {

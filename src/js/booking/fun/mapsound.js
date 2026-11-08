@@ -1,5 +1,6 @@
 import { createCourtMix } from '../sound/court-mix.js';
 import { createCafeMusic } from '../sound/cafe-music.js';
+import { createMariachi } from '../sound/mariachi.js';
 import { createRainFront } from '../life/rain-front.js';
 import { createSqueegee } from '../life/squeegee.js';
 import { createAchievements } from './achievements.js';
@@ -13,6 +14,7 @@ export function createMapSound(ctx, { still, dev }) {
   const add = (name, sys) => { if (sys) out.push([name, sys]); return sys; };
   add('courtMix', createCourtMix({ ...ctx, players: dev.players }));
   add('cafeMusic', createCafeMusic({ ...ctx, clubhouse: dev.clubhouse }));
+  add('mariachi', createMariachi({ ...ctx, clubhouse: dev.clubhouse }));
   add('rainFront', createRainFront(ctx, { still }));
   const squeegee = add('squeegee', createSqueegee({ ...ctx, keeper: dev.keeper, players: dev.players }, { still }));
   add('finds', createAchievements({ ...ctx, players: dev.players, keeper: dev.keeper, squeegee, clubhouse: dev.clubhouse }));

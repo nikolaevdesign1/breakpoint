@@ -4,14 +4,18 @@ import { EXPOSURE } from '../lookdev.js';
 import { weatherSky, decorLight } from './sky.js';
 import { adorn } from './adorn.js';
 import { createSnowCrew } from './snow-crew.js';
-import { onSeason } from '../seasons/season.js';
+import { onSeason, seasonMode } from '../seasons/season.js';
 import { createPlacement } from '../seasons/placement.js';
 import { createFireworks } from '../seasons/fireworks.js';
-import { createSnow } from '../seasons/snow.js';
-import { buildWinter } from '../seasons/winter.js';
+import { createSnowfall, buildSnowWorld } from '../seasons/snow.js';
+import { createParticles } from '../seasons/particles.js';
 import { buildGhosts } from '../seasons/halloween.js';
 import { buildDeath } from '../seasons/death.js';
 import * as D from '../seasons/decor.js';
+import { perf } from '../perf.js';
+import { createKit, TINTS, GATES, NIGHT_STEPS } from '../seasons/kit.js';
+import { loadPack } from '../seasons/packs/index.js';
+import { holidayById } from '../seasons/calendar.js';
 
 // Holiday decor on the map (round 8, "seasons"), by the date in Miami or as picked in the top bar
 // (seasons/season.js, season-menu.js):
@@ -30,31 +34,16 @@ import * as D from '../seasons/decor.js';
 // their halos light up, read from the exposure the clock sets (lookdev/daylight are not touched),
 // in a few quantised steps, each one re-bake.
 
-const ORANGE = { glass: '#e9792b', glow: new THREE.Color(1, 0.3, 0.02), gain: 0.45 };
-const PURPLE = { glass: '#8a4fd8', glow: new THREE.Color(0.55, 0.18, 1), gain: 0.5 };
-const WARM = { glass: '#efe2c4', glow: new THREE.Color(1, 0.7, 0.36), gain: 1 };
-const RED = { glass: '#e0312b', glow: new THREE.Color(1, 0.08, 0.04), gain: 0.55 };
-const GREEN = { glass: '#2fb85a', glow: new THREE.Color(0.1, 1, 0.25), gain: 0.5 };
-const GOLD = { glass: '#f2c24a', glow: new THREE.Color(1, 0.62, 0.12), gain: 0.7 };
+const { ORANGE, PURPLE, WARM, RED, GREEN, GOLD } = TINTS;
 const FLAG_COLORS = ['#b22234', '#f2efe6', '#3c3b6e'];
 const SPOOKY_COLORS = ['#e8701f', '#161412', '#7a3fc4', '#e8701f', '#161412']; // Halloween pennants
-// Round 9 (row 2): the decor has to read from the drone at normal zoom, to someone not looking
-// for it. Bulbs are oversized (a C9 is 7 cm) and glow a little by day too, pumpkins are larger and
-// many more, a few giant ones mark the walkway ends, pennants are flag-sized.
-const BULB_SCALE = 2.8;
-const HALO = 1.2; // m, glow card per bulb
-const DAY_GLOW = 3.2; // bulb emission by day (night adds to it)
-const DAY_HALO = 0.16;
 const PUMPKIN_K = 1.6; // every placed pumpkin, against its listed size
 const FIR_K = 1.7; // the holiday fir, against its 3.5 m model
-const BUNTING = { w: 0.56, l: 0.7 };
 const FLAG_K = 2.2;
-const NIGHT_STEPS = 6;
 const PALMS = [[6.6, -50.4], [12.4, -50.4], [57.85, -49.05], [57.85, -44.95]]; // potted palms by the clubhouse (props)
 const TREE_AT = [15.6, -46.2]; // lawn east of the plaza, by the front door
 
 // Halloween. Pumpkins: x, z, size (m across), lit, yaw (deg); bales: x, z, yaw (deg).
-const GATES = [[-19, 1], [19, 1], [57, 1], [0, -1], [38, -1]]; // gate x, fence side (z = ±2.1)
 const DOOR_PUMPKINS = [
   [-12.3, -50.95, 0.66, true, 8], [-12.85, -50.3, 0.46, false, -20], [-7.3, -50.95, 0.62, true, -6], [-6.75, -50.35, 0.42, false, 30],
   [8.05, -50.95, 0.6, true, 4], [11.2, -50.95, 0.5, false, 12], [13.5, -50.6, 0.66, true, -8], [17.0, -50.95, 0.48, false, 24],
@@ -82,102 +71,10 @@ export function createSeasons(ctx, { still }) {
   const shared = {}; // textures and geometries reused by every season
 
   const once = (k, make) => (shared[k] ??= make());
-  const glowTex = () => once('glow', D.glowTexture);
+  const kit = createKit(ctx, { r, once });
+  const { courtBoxes, walkwayFences, strands, bunting, lights } = kit;
 
   // --- Pieces --------------------------------------------------------------------------------
-
-  /** The fence boxes of the clay and hard courts (their `_hl` meshes). */
-  function courtBoxes() {
-    const out = [];
-    root.traverse((o) => { if (o.isMesh && /^(clay|hard)-\d_hl$/.test(o.name)) out.push(new THREE.Box3().setFromObject(o)); });
-    return out;
-  }
-
-  /** Fences along the main walkway (z ≈ ±2.1): x from, x to, z, the walkway side (−1 / +1). */
-  function walkwayFences() {
-    return courtBoxes().map((b) => {
-      const north = b.min.z + b.max.z > 0;
-      return { x0: b.min.x, x1: b.max.x, z: north ? b.min.z : b.max.z, side: north ? -1 : 1 };
-    }).sort((a, b) => a.z - b.z || a.x0 - b.x0);
-  }
-
-  /** Strands of anchors: every walkway fence (post tops, 3.5 m up) and the clubhouse eave. */
-  function strands({ fences = true, eave = true, y = 3.5, out = 0.16 } = {}) {
-    const list = [];
-    if (fences) {
-      for (const f of walkwayFences()) {
-        const z = f.z + f.side * out; // on hooks just in front of the chain link, clear of the gate headers
-        const n = 4;
-        list.push({ anchors: Array.from({ length: n + 1 }, (_, k) => [f.x0 + 0.1 + ((f.x1 - f.x0 - 0.2) * k) / n, y, z]), sag: 0.26 });
-      }
-    }
-    if (eave) {
-      const x0 = -24.6;
-      const x1 = 59.6;
-      const n = 24;
-      list.push({ anchors: Array.from({ length: n + 1 }, (_, k) => [x0 + ((x1 - x0) * k) / n, 3.14 + (y - 3.5) * 0.5, -51.42]), sag: 0.3 });
-    }
-    return list;
-  }
-
-  /** Pennant bunting along `sets` of strands, colours cycling, with its wire. */
-  function bunting(group, sets, colors, { step = 0.62, size = BUNTING } = {}) {
-    const pos = [];
-    const wire = [];
-    for (const st of sets) {
-      const h = D.hangStrand(st.anchors, { sag: st.sag + 0.05, step });
-      pos.push(D.buntingGeometry(h.points, colors, size));
-      wire.push(...h.wire);
-    }
-    const mesh = new THREE.Mesh(D.merge(pos), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, side: THREE.DoubleSide }));
-    mesh.castShadow = true;
-    mesh.userData.noAO = true;
-    group.add(mesh);
-    const w = new THREE.BufferGeometry();
-    w.setAttribute('position', new THREE.Float32BufferAttribute(wire, 3));
-    const line = new THREE.LineSegments(w, new THREE.LineBasicMaterial({ color: 0x2a2926 }));
-    line.userData.noAO = true;
-    group.add(line);
-  }
-
-  /** Bulbs, wire and glow cards for a set of strands. */
-  function lights(group, sets, tint, glowList, { halo: haloK = 1 } = {}) {
-    const bulbs = [];
-    const wire = [];
-    for (const s of sets) {
-      if (s.points) { bulbs.push(...s.points); wire.push(...s.wire); continue; }
-      const h = D.hangStrand(s.anchors, { sag: s.sag, step: s.step ?? 0.5 });
-      bulbs.push(...h.points);
-      wire.push(...h.wire);
-    }
-    const w = new THREE.BufferGeometry();
-    w.setAttribute('position', new THREE.Float32BufferAttribute(wire, 3));
-    const line = new THREE.LineSegments(w, new THREE.LineBasicMaterial({ color: 0x1c1b19 }));
-    line.userData.noAO = true;
-    group.add(line);
-
-    const glass = new THREE.MeshStandardMaterial({ color: tint.glass, roughness: 0.25, metalness: 0, emissive: tint.glow, emissiveIntensity: 0 });
-    const bulb = new THREE.InstancedMesh(once('bulb', D.bulbGeometry), glass, bulbs.length);
-    const haloGeo = once('haloGeo', () => new THREE.PlaneGeometry(HALO, HALO).rotateX(-rig.pitch));
-    const haloMat = new THREE.MeshBasicMaterial({ map: glowTex(), color: 0x000000, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
-    const halo = new THREE.InstancedMesh(haloGeo, haloMat, bulbs.length);
-    const m4 = new THREE.Matrix4();
-    const q = new THREE.Quaternion();
-    const sc = new THREE.Vector3().setScalar(BULB_SCALE);
-    bulbs.forEach(({ p }, i) => {
-      q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), r() * Math.PI);
-      m4.compose(p, q, sc);
-      bulb.setMatrixAt(i, m4);
-      halo.setMatrixAt(i, m4.makeScale(haloK, haloK, haloK).setPosition(p.x, p.y - 0.05, p.z));
-    });
-    for (const m of [bulb, halo]) { m.userData.noAO = true; m.computeBoundingSphere(); group.add(m); }
-    halo.renderOrder = 3;
-    glowList.push((level, k) => {
-      glass.emissiveIntensity = (DAY_GLOW * (1 - level) + level * 3.4 * k) * tint.gain;
-      haloMat.color.copy(tint.glow).multiplyScalar(Math.max(DAY_HALO * (1 - level), level * 0.5) * haloK * Math.min(k, 3));
-    });
-    return bulbs.length;
-  }
 
   /** Pumpkins (instanced), carved faces on the lit ones and a pool of candle light before them. */
   function pumpkins(group, list, glowList) {
@@ -400,8 +297,9 @@ export function createSeasons(ctx, { still }) {
     [RED, GREEN, GOLD].forEach((tint, k) => lights(group, fences.filter((_, i) => i % 3 === k), tint, glow));
     lights(group, sets.slice(-1), WARM, glow);
     lights(group, wraps, WARM, glow, { halo: 0.42 });
-    group.add(buildWinter({ root, plan, fences: walkwayFences(), courts: courtBoxes(), gaps: GATES.map(([x]) => x), at: [20.5, -47.2], r }));
-    return { group, glow, snow: true, hats: true, crew: true, windows: true };
+    const world = buildSnowWorld({ root, plan, fences: walkwayFences(), courts: courtBoxes(), gaps: GATES.map(([x]) => x), at: [20.5, -47.2], r, amount: 1, quality: ctx.quality });
+    group.add(world.group);
+    return { group, glow, snow: 1, hats: true, crew: true, windows: true, world };
   }
 
   function buildJuly4(plan) {
@@ -441,7 +339,19 @@ export function createSeasons(ctx, { still }) {
     return { group, glow, fireworks: true };
   }
 
+  // Built in this file; every other holiday is a pack (seasons/packs/<id>.js) or a stub.
   const BUILD = { halloween: buildHalloween, holidays: buildHolidays, july4: buildJuly4 };
+
+  /** Hanukkah rides inside the Holidays (seasons/hanukkah.js, a lazy chunk): the menorah, the stars, the dreidels. Shown on the days of Hanukkah (or when the season is picked by hand). */
+  async function addHanukkah(entry, plan) {
+    const mod = await import('../seasons/hanukkah.js').catch((err) => { console.warn('Hanukkah failed', err); return null; });
+    if (!mod) return;
+    const hk = mod.default({ ...kit, ctx, scene, plan, still });
+    entry.group.add(hk.group);
+    entry.glow.push(...(hk.glow ?? []));
+    entry.live = hk.live;
+    entry.hanukkah = hk;
+  }
 
   // --- Switching ---------------------------------------------------------------------------------
 
@@ -454,7 +364,14 @@ export function createSeasons(ctx, { still }) {
       if (next && !entry) {
         placement ??= createPlacement(root);
         const plan = placement.fork();
-        entry = BUILD[next](plan);
+        if (BUILD[next]) {
+          entry = BUILD[next](plan);
+          if (next === 'holidays') await addHanukkah(entry, plan);
+        } else {
+          // Row 1 (round 11): a holiday pack (seasons/packs/<id>.js), loaded now; no file: a stub with no decor yet.
+          const mod = await loadPack(next).catch((err) => { console.warn('Holiday pack failed', next, err); return null; });
+          entry = mod ? mod.default({ ...kit, ctx, scene, plan, still, burst: (x, y, z, n) => getParticles()?.burst(x, y, z, n), groundAt: (x, y) => rig.groundAt(x, y) }) : { group: new THREE.Group(), glow: [] };
+        }
         plan.restore();
         entry.group.name = `seasons_${next}`;
         entry.group.traverse((o) => { o.matrixAutoUpdate = false; o.updateMatrix(); });
@@ -465,6 +382,7 @@ export function createSeasons(ctx, { still }) {
         pending = null;
         if (want !== next) continue;
       }
+      if (entry?.hanukkah) entry.hanukkah.group.visible = entry.hanukkah.wanted(seasonMode() !== 'auto');
       if (shown) { built.get(shown).live?.off?.(); scene.remove(built.get(shown).group); }
       shown = next;
       if (entry) {
@@ -485,13 +403,31 @@ export function createSeasons(ctx, { still }) {
   // crew, warm clubhouse windows by day.
   let crew = null;
   let hats = false;
+  let wasJerseys = false;
+  let tintKey = '';
+  let particlesKey = null;
   function dress(entry) {
     decorLight.windows = entry?.windows ? 0.85 : 0;
-    if (entry?.hats || hats) adorn(ctx).set({ hats: !!entry?.hats });
-    hats = !!entry?.hats;
+    // `staffHat` of the registry (calendar.js): a hat for the club's own people only; a pack's `hats`: for everyone.
+    const staff = (shown && holidayById(shown)?.staffHat) || null;
+    const hat = staff ?? (entry?.hats === true ? 'santa' : entry?.hats || null);
+    const jerseys = entry?.jerseys ?? null; // { colors }: plain team jerseys on the guests (Super Bowl)
+    if (hat || hats || jerseys || wasJerseys) adorn(ctx).set({ hats: !!hat, hat: hat ?? 'santa', staff: !!staff, jerseys: !!jerseys, ...(jerseys ? { jerseyColors: jerseys.colors } : {}) });
+    hats = !!hat || !!jerseys;
+    wasJerseys = !!jerseys;
     if (entry?.crew) crew ??= createSnowCrew(ctx, { still });
     crew?.set(!!entry?.crew);
+    // A holiday's colour on the light of the whole map (daylight.js recomposes on the next tick).
+    const tint = entry?.accent?.tint ?? null;
+    if ((tint?.join() ?? '') !== tintKey) { tintKey = tint?.join() ?? ''; decorLight.tint = tint; weatherSky.changed = true; }
+    if (entry) entry.shownAt = performance.now();
+    if (entry?.world) { entry.stage = 0; entry.world.grow(0); }
+    const pk = entry?.particles && !still ? JSON.stringify(entry.particles) : null;
+    if (pk !== particlesKey) { particlesKey = pk; if (pk) getParticles().set(entry.particles); else particles?.set(null); }
   }
+
+  let particles = null;
+  const getParticles = () => (still ? null : (particles ??= createParticles(ctx)));
 
   onSeason((season) => { show(season); });
 
@@ -515,6 +451,8 @@ export function createSeasons(ctx, { still }) {
       park: (x, z) => built.get('halloween')?.live?.park(x, z),
       burst: (sx, sy) => { fireworks?.launch(performance.now() / 1000, sx, sy); },
       built: () => [...built.keys()],
+      snowGrow: (k) => { const e = built.get(shown); if (e?.world) { e.shownAt = performance.now() - k * 8 * 45000; e.stage = Math.round(k * 8); e.world.grow(e.stage / 8); staticDirty = true; refreshShadows(); } },
+      snowfall: () => snow?.heaviness(),
     };
   }
 
@@ -525,10 +463,16 @@ export function createSeasons(ctx, { still }) {
       let alive = entry?.live ? entry.live.update(t, dt, Math.max(night, 0)) : false;
       if (hats) alive = adorn(ctx).tick(t) || alive;
       if (crew) alive = crew.tick(t) || alive;
-      if (entry?.snow && !still) snow ??= createSnow(ctx);
+      if (entry?.snow && !still) snow ??= createSnowfall(ctx);
       if (snow) {
-        snow.set(!!entry?.snow && !document.body.classList.contains('hud-open'));
+        snow.set(entry?.snow && !document.body.classList.contains('hud-open') ? entry.snow : 0);
         alive = snow.update(night < 0 ? 0 : night) || alive;
+      }
+      if (particles) alive = particles.update(night < 0 ? 0 : night) || alive;
+      // Row 13: the snow deepens a step every 45 s of the season shown (eight steps), and goes with it.
+      if (entry?.world) {
+        const stage = Math.min(8, Math.floor((performance.now() - entry.shownAt) / 45000));
+        if (stage !== entry.stage) { entry.stage = stage; entry.world.grow(stage / 8); staticDirty = true; }
       }
       if (!entry) return alive;
       if (t - lastPoll > 0.25 && !(weatherSky.flash > 0)) {
@@ -541,7 +485,7 @@ export function createSeasons(ctx, { still }) {
           staticDirty = true;
         }
       }
-      if (!entry.fireworks || still) return alive;
+      if (!entry.fireworks || still || !perf.budget.heavyFx) return alive; // fireworks are the first holiday effect a weak tier drops
       const now = performance.now() / 1000;
       fireworks ??= createFireworks({ scene, camera, pitch: rig.pitch });
       const dark = night >= 0.66 && !document.body.classList.contains('hud-open');

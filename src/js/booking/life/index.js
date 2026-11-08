@@ -1,6 +1,7 @@
 import { lifeTime, reducedMotion } from './shared.js';
 import { createCars } from './cars.js';
 import { createDaylight } from './daylight.js';
+import { perf, throttled } from '../perf.js';
 
 // Background life on the booking map (row 95): wind in the trees (life/wind.js, in the impostor
 // shader), birds crossing now and then, a car leaving or parking every minute or two, rallies on a
@@ -32,9 +33,23 @@ export function createLife(ctx) {
     tick(t, dt) {
       if (!still) lifeTime.value = t;
       let alive = !still; // the trees always move a little
+      if (import.meta.env.DEV) {
+        // Dev: CPU time of every system's tick, for the FPS overlay and scripts/perf-booking.mjs.
+        const t0 = performance.now();
+        for (const s of systems) {
+          const a = performance.now();
+          alive = s.tick(t, dt) || alive;
+          const b = (this.cost[s.name ?? '?'] ??= { ms: 0, n: 0 });
+          b.ms += performance.now() - a; b.n++;
+        }
+        this.cost.$total ??= { ms: 0, n: 0 };
+        this.cost.$total.ms += performance.now() - t0; this.cost.$total.n++;
+        return alive;
+      }
       for (const s of systems) alive = s.tick(t, dt) || alive;
       return alive;
     },
+    cost: {},
     takeStaticChange() {
       let changed = false;
       for (const s of systems) changed = (s.takeStaticChange?.() ?? false) || changed;

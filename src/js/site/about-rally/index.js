@@ -40,6 +40,7 @@ export async function startRally({ section }) {
     return { el, ...m, last: i === hawk.marks.length - 1 };
   });
 
+  const zones = [];
   let W = 1;
   let H = 1;
   const fit = () => { [W, H] = gl.resize(); hawk.setResolution(W, H); dirty = true; };
@@ -62,8 +63,9 @@ export async function startRally({ section }) {
     gl.camera.lookAt(cam.at);
     if (gl.camera.fov !== cam.fov) { gl.camera.fov = cam.fov; gl.camera.updateProjectionMatrix(); }
     gl.camera.updateMatrixWorld();
-    gl.render();
     chapters.update(p);
+    gl.setZones(chapters.zones(zones), W, H);
+    gl.render();
     for (const t of tags) {
       const age = T - t.t;
       const show = age >= 0.05 && (t.last || age < HOLD);
@@ -95,7 +97,7 @@ export async function startRally({ section }) {
     onUpdate: (self) => { target = self.progress; },
   });
   // render only while the section is on screen
-  const io = new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; dirty = true; }, { rootMargin: '10% 0px' });
+  const io = new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; dirty = true; document.documentElement.classList.toggle('in-rally', onScreen); }, { rootMargin: '10% 0px' });
   io.observe(section);
   target = cur = st.progress;
   dirty = true;
@@ -105,6 +107,7 @@ export async function startRally({ section }) {
     gsap.ticker.remove(tick);
     removeEventListener('resize', fit);
     io.disconnect();
+    document.documentElement.classList.remove('in-rally');
     st.kill();
     hawk.dispose();
     craft.dispose();

@@ -135,11 +135,11 @@ body:has(.nav:not(.is-hidden)) .cmp__head { top: var(--bar-h); }
 
 /* 5. Three steps (row 60): paper again, the score 15 / 30 / 40 on one line, the ball hops along the dashed rule */
 .join__track { position: relative; height: 72px; margin-bottom: 16px; }
-.join__line { position: absolute; left: 0; right: 0; top: 50%; border-top: var(--dash); }
+.join__line { position: absolute; left: 0; right: 0; top: 50%; border-top: var(--dash-gfx); }
 .join__ball { position: absolute; left: 0; top: calc(50% - 22px); width: 28px; height: 34px; color: var(--ink); overflow: visible; transform-origin: 50% 62%; }
 .join__steps { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px var(--grid-gap); align-items: start; }
 .join__step { grid-column: span 4; transition: opacity var(--dur-3) var(--ease-out), translate var(--dur-3) var(--ease-spring); }
-.join__n { margin-bottom: 24px; }
+.join__n { display: block; margin-bottom: 24px; font-size: var(--fs-mega); font-weight: 500; line-height: 0.88; font-variant-numeric: tabular-nums; }
 .js .join__step:not(.is-on) { opacity: 0.28; translate: 0 8px; }
 .join__title { font-size: var(--fs-lg); font-weight: 500; line-height: 1; }
 .join__text { max-width: 32ch; margin-top: 12px; font-size: 14px; line-height: 20px; color: var(--mute); }
@@ -167,7 +167,7 @@ body:has(.nav:not(.is-hidden)) .cmp__head { top: var(--bar-h); }
 /* Tablet */
 @media (max-width: 1000px) {
   .mhero__copy, .mhero__card { grid-column: 1 / -1; }
-  .mhero__card { max-width: 400px; }
+  .mhero__card { max-width: 480px; }
   .mhero__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .mhero__facts li:nth-child(odd) { padding-left: 0; border-left: 0; }
   .mhero__facts li:nth-child(n + 3) { border-top: var(--dash); }
@@ -178,7 +178,7 @@ body:has(.nav:not(.is-hidden)) .cmp__head { top: var(--bar-h); }
   .join__step { grid-column: span 4; }
   .perks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .mapply__aside { position: static; }
-  .mapply__card { max-width: 360px; }
+  .mapply__card { max-width: 480px; }
 }
 
 /* Phone: the comparison stacks (privilege on its own line, four values under the plan row),
@@ -187,7 +187,7 @@ body:has(.nav:not(.is-hidden)) .cmp__head { top: var(--bar-h); }
   .mhero { padding-top: calc(var(--bar-h) + 56px); }
   .mhero__l { display: block; }
   .mhero__title br { display: none; }
-  .mhero__card { max-width: 340px; }
+  .mhero__card { max-width: none; }
   .mhero__facts li { padding: 16px 12px 16px 0; }
   .mhero__facts li:nth-child(even) { padding-left: 12px; }
   .mhero__facts b small { font-size: 14px; }
@@ -212,7 +212,7 @@ body:has(.nav:not(.is-hidden)) .cmp__head { top: var(--bar-h); }
 
   .join { display: grid; grid-template-columns: 44px minmax(0, 1fr); }
   .join__track { grid-row: 1; grid-column: 1; height: auto; margin: 0; }
-  .join__line { left: 14px; right: auto; top: 0; bottom: 0; border-top: 0; border-left: var(--dash); }
+  .join__line { left: 14px; right: auto; top: 0; bottom: 0; border-top: 0; border-left: var(--dash-gfx); }
   .join__ball { top: 0; }
   .join__steps { grid-row: 1; grid-column: 2; grid-template-columns: minmax(0, 1fr); gap: 48px; padding-bottom: 8px; }
   .join__step { grid-column: 1; }

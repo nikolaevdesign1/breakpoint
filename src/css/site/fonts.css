@@ -1,0 +1,18 @@
+/* Anton (OFL, from @fontsource/anton), the heading face. Served from /fonts and preloaded in partials/head.html,
+   so it arrives with the first paint. While it loads, "Anton Fallback" (Impact scaled to Anton's width and
+   vertical metrics) holds the same line boxes, so headings do not shift when the real face swaps in. */
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('/fonts/anton-latin-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Anton Fallback';
+  src: local('Impact'), local('Arial Narrow Bold'), local('Arial Narrow');
+  size-adjust: 94.6%;
+  ascent-override: 124.4%;
+  descent-override: 34.8%;
+  line-gap-override: 0%;
+}

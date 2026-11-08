@@ -1,4 +1,5 @@
 import { rallyFilters } from './rallies.js';
+import { perf } from '../perf.js';
 import { lessonsAt } from '../interact/coach-hover.js';
 import { COURTS, isOpenHour, kidsCourtOn } from '../../shared/availability.js';
 import { KIDS_HOUR } from '../../shared/academy.js';
@@ -24,7 +25,7 @@ export function lessonCourtsAt(dayKey, hour) {
     const c = COURTS.find((x) => x.id === id);
     return (c.type === 'clay' || c.type === 'hard') && !(hour === KIDS_HOUR && id === kidsCourtOn(dayKey)) && !isTournamentCourt(id, dayKey);
   });
-  return [...new Set([...forcedLessons, ...ids])].slice(0, MAX_LESSONS);
+  return [...new Set([...forcedLessons, ...ids])].slice(0, Math.max(2, Math.round(MAX_LESSONS * perf.budget.people))); // fewer lessons on screen on a weaker tier (perf.js)
 }
 
 // No rally where a lesson or the kids group is on.

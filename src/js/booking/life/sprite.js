@@ -178,14 +178,15 @@ export function spriteMesh(map, count, opts) {
 const m4 = new THREE.Matrix4();
 export function writeFrame(mesh, slot, a, b, t, x, y, z, scale = 1) {
   const at = mesh.geometry.attributes;
-  const ground = mesh.userData.ground;
-  const box = (attr, f) => (ground
-    ? attr.setXYZW(slot, f[4] * scale, -f[7] * scale, f[6] * scale, -f[5] * scale) // ground rects are x0, z0, x1, z1
-    : attr.setXYZW(slot, f[4] * scale, f[5] * scale, f[6] * scale, f[7] * scale));
   at.aRect.setXYZW(slot, a[0], a[1], a[2], a[3]);
   at.aRect2.setXYZW(slot, b[0], b[1], b[2], b[3]);
-  box(at.aBox, a);
-  box(at.aBox2, b);
+  if (mesh.userData.ground) { // ground rects are x0, z0, x1, z1
+    at.aBox.setXYZW(slot, a[4] * scale, -a[7] * scale, a[6] * scale, -a[5] * scale);
+    at.aBox2.setXYZW(slot, b[4] * scale, -b[7] * scale, b[6] * scale, -b[5] * scale);
+  } else {
+    at.aBox.setXYZW(slot, a[4] * scale, a[5] * scale, a[6] * scale, a[7] * scale);
+    at.aBox2.setXYZW(slot, b[4] * scale, b[5] * scale, b[6] * scale, b[7] * scale);
+  }
   at.aMix.setX(slot, t);
   mesh.setMatrixAt(slot, m4.makeTranslation(x, y, z));
 }
@@ -221,6 +222,7 @@ export function flush(mesh) {
  * Looping clips wrap; one-shot clips hold their last frame. `step` > 1: only every step-th frame
  * exists (the shadows), blended over the gap.
  */
+const PAIR = [0, 0, 0]; // shared result: every caller destructures it at once
 export function framePair(count, fps, seconds, loop, step = 1) {
   const f = (seconds * fps) / step;
   const n = Math.ceil(count / step);
@@ -235,5 +237,6 @@ export function framePair(count, fps, seconds, loop, step = 1) {
     if (i < 0) { i = 0; t = 0; }
     j = Math.min(n - 1, i + 1);
   }
-  return [Math.min(count - 1, i * step), Math.min(count - 1, j * step), t];
+  PAIR[0] = Math.min(count - 1, i * step); PAIR[1] = Math.min(count - 1, j * step); PAIR[2] = t;
+  return PAIR;
 }

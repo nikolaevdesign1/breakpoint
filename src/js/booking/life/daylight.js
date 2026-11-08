@@ -5,7 +5,7 @@ import { hourState } from '../hour-state.js';
 import { COURTS, isOpenHour, isSlotTaken } from '../../shared/availability.js';
 import { rallyCourtsAt } from './rallies.js';
 import './lesson-courts.js'; // registers the lesson and kids rally filters
-import { weatherSky, skyLight } from './sky.js';
+import { weatherSky, skyLight, decorLight } from './sky.js';
 
 // Miami clock drives the light (round 7). The map follows the club's local time, or the hour picked
 // on the dock's scrubber: morning (low, soft sun), midday (the original look), golden hour, dusk and
@@ -163,7 +163,7 @@ export function createDaylight({ scene, renderer, refreshShadows, sun, floodligh
     const s = weatherSky.storm;
     const hour = hourState.hour ?? Math.floor(time);
     const dayKey = hourState.dayKey;
-    const k = `${e}|${afternoon}|${o.toFixed(2)}|${s.toFixed(2)}|${dayKey}|${hour}|${still}`;
+    const k = `${e}|${afternoon}|${o.toFixed(2)}|${s.toFixed(2)}|${dayKey}|${hour}|${still}|${decorLight.tint ?? ''}`;
     if (k === key) return;
     key = k;
     const c = current = mixKeys(afternoon ? KEYS.pm : KEYS.am, e);
@@ -197,6 +197,7 @@ export function createDaylight({ scene, renderer, refreshShadows, sun, floodligh
     const exp = c.exp * (1 - 0.4 * s);
     baseExposure = EXPOSURE * exp;
     lifeGrade.uTint.value.set(...c.tint).lerp(new THREE.Vector3(0.94, 0.97, 1.04), s);
+    if (decorLight.tint) lifeGrade.uTint.value.multiply(new THREE.Vector3(...decorLight.tint)); // a holiday's colour on the light
     baseTint.copy(lifeGrade.uTint.value);
     baseNight = lifeGrade.uNight.value = Math.max(c.night, s * 0.35);
     skyLight.value = THREE.MathUtils.clamp(c.light * (1 - 0.3 * s), 0.2, 1);

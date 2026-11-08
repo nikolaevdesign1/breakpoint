@@ -70,12 +70,20 @@ export function createScoreboard(ctx, { players, padel, tournament }) {
       m = { game, doubles: !!pad, seen: pad ? game.points : (game.played ?? 0), s: midMatch(id, !!pad), restartAt: 0 };
       matches.set(id, m);
     }
+    // Row 19: a tennis rally keeps its own score by the rules (players.js game.score: the serve, the side
+    // and the ends follow it), so the board shows that one, with this court's names.
+    if (tennis) {
+      const sc = game.score;
+      if (sc.names[0] === 'A') sc.names = midMatch(`${id}|${game.games ?? 0}|${game.idx}`, false).names;
+      m.s = sc;
+    }
     return m;
   }
 
   /** New points since the last look go on the board. */
   function follow(m) {
     const now = performance.now() / 1000;
+    if (!m.doubles) { const count = m.game.played ?? 0; const moved = count !== m.seen; m.seen = count; return moved; } // the rally's own score (see live())
     if (m.s.over) {
       if (now > m.restartAt) { m.s = midMatch(`${m.game.court?.id ?? m.game.id}|${Math.floor(now)}`, m.doubles); m.s.sets = [[0, 0]]; m.s.won = [0, 0]; m.s.points = [0, 0]; }
       return false;

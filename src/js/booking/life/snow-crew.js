@@ -10,6 +10,8 @@ import { box, merge, part } from './geom.js';
 // walk the club's footpaths pushing a snow shovel, stop now and then and dig (the blade lifts and
 // drops), then set off again. The same flipbook man as the clay keeper and the squeegee (shared
 // textures, one card each), the shovel is real geometry. They are alive only while `set(true)`.
+// Round 11 (row 13): what they dig goes into heaps beside the path: each stop starts a pile that
+// grows while he digs (up to 1.1 m); the oldest of the nine heaps is taken away for the next.
 
 const COUNT = 3;
 const SPEED = 1.15; // m/s
@@ -48,6 +50,10 @@ export function createSnowCrew(ctx, { still }) {
   let shadow = null;
   let data = null;
   const tools = [];
+  const PILES = 9;
+  let piles = null; // InstancedMesh of heaps: { x, z, y, size }
+  const heaps = [];
+  let pileAt = 0;
   let on = false;
   let level = 0;
   let last = performance.now() / 1000;
@@ -76,6 +82,14 @@ export function createSnowCrew(ctx, { still }) {
     }
     scene.add(shadow, body);
     flush(body); flush(shadow);
+    const g = new THREE.SphereGeometry(0.5, 14, 9);
+    const p = g.attributes.position;
+    for (let i = 0; i < p.count; i++) p.setY(i, Math.max(p.getY(i), -0.03) * (1 + 0.1 * Math.sin(p.getX(i) * 9 + p.getZ(i) * 7)));
+    g.computeVertexNormals();
+    piles = new THREE.InstancedMesh(g, gradeLife(new THREE.MeshStandardMaterial({ color: '#f1f5f9', roughness: 0.6, emissive: '#f1f5f9', emissiveIntensity: 0.5 })), PILES);
+    piles.name = 'life_snow_piles';
+    piles.layers.set(LIFE_LAYER); piles.frustumCulled = false; piles.userData.noAO = true; piles.count = 0;
+    scene.add(piles);
     return true;
   }
 
@@ -90,6 +104,14 @@ export function createSnowCrew(ctx, { still }) {
       if (r && r.length > 3) { w.path = r; return; }
     }
     w.dig = rand(1, 3); // nowhere to go from here: dig a while longer
+  }
+
+  /** A heap for the stop he has just made: beside the blade, off the path's line. */
+  function startPile(w) {
+    const fx = Math.sin(w.heading); const fz = -Math.cos(w.heading);
+    const heap = { x: w.pos.x + fx * (REACH + 0.35) - fz * 0.7, z: w.pos.z + fz * (REACH + 0.35) + fx * 0.7, y: w.pos.y ?? 0, size: 0.25 };
+    heaps[pileAt++ % PILES] = heap;
+    w.pile = heap;
   }
 
   function place(w) {
@@ -135,20 +157,28 @@ export function createSnowCrew(ctx, { still }) {
       if (!body) return false;
       const show = level > 0.01;
       body.visible = shadow.visible = show;
-      if (!show) { tools.forEach((m) => { m.visible = false; }); return false; }
+      if (!show) { tools.forEach((m) => { m.visible = false; }); if (piles) piles.visible = false; heaps.length = 0; pileAt = 0; return false; }
       crew.forEach((w, i) => {
         const walking = step(w, dt);
+        if (!walking) { if (!w.digging) { w.digging = true; startPile(w); } if (w.pile) w.pile.size = Math.min(1.1, w.pile.size + dt * 0.045); } else w.digging = false;
         poseMan(data, body, shadow, i, 'walk', w.heading, walking ? w.clipT : 0, w.pos.x, w.pos.y, w.pos.z);
         const tool = tools[i];
         tool.visible = true;
         tool.position.copy(w.pos);
         tool.rotation.set(walking ? 0 : Math.max(0, Math.sin(t * 2.4 + i * 2)) * 0.5, -w.heading, 0, 'YXZ'); // digging: the blade lifts and drops
       });
+      if (piles) {
+        const m = new THREE.Matrix4();
+        heaps.forEach((h, i) => piles.setMatrixAt(i, m.compose(new THREE.Vector3(h.x, h.y, h.z), new THREE.Quaternion(), new THREE.Vector3(h.size * 1.3, h.size * 0.9, h.size))));
+        piles.count = heaps.length;
+        piles.instanceMatrix.needsUpdate = true;
+        piles.visible = true;
+      }
       body.material.opacity = level;
       shadow.material.opacity = 0.6 * level;
       flush(body); flush(shadow);
       return true;
     },
-    debug: () => ({ on, level: +level.toFixed(2), crew: crew.map((w) => [+w.pos.x.toFixed(1), +w.pos.z.toFixed(1), w.dig > 0 ? 'dig' : 'walk']) }),
+    debug: () => ({ piles: heaps.map((h) => +h.size.toFixed(2)), on, level: +level.toFixed(2), crew: crew.map((w) => [+w.pos.x.toFixed(1), +w.pos.z.toFixed(1), w.dig > 0 ? 'dig' : 'walk']) }),
   };
 }

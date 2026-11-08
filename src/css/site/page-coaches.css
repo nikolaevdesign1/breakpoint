@@ -74,6 +74,23 @@
   .studio-bar__count { grid-column: 1 / -1; margin: 4px 0 0; }
 }
 
+/* Phone tiles (up to 640px, and any touch screen): two to a row, the caption sits on a dark fade at the foot of the
+   tile, the same way for portraits and video tiles. No backdrop-filter; the cut is shallower on a narrow tile. */
+@media (max-width: 640px), (hover: none) {
+  .studio .mt { --cut-x: 8%; }
+  .mt__cap { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; display: block; max-width: none; padding: 32px 10px 10px; color: var(--snow); pointer-events: none; }
+  .mt__cap .mt__name { font-size: 16px; line-height: 20px; }
+  .mt__cap .mt__role, .mt--video .mt__cap .mt__role { margin-top: 2px; color: rgba(244, 243, 239, 0.82); font-size: 12px; line-height: 16px; }
+  .mt:not(.mt--video):not(.mt--promo)::after { content: ''; position: absolute; inset: auto 0 0; z-index: 1; height: 48%; background: linear-gradient(to top, rgba(14, 14, 13, 0.78), rgba(14, 14, 13, 0)); pointer-events: none; }
+  .mt--video .mt__cap { left: 0; bottom: 0; max-width: none; }
+  .mt--video .mt__cap .mt__name { font-size: 16px; line-height: 20px; }
+}
+@media (max-width: 640px) {
+  .studio .mt--promo { padding: 12px; }
+  .studio .mt--promo .mt__name { font-size: 20px; line-height: 24px; }
+  .studio .mt--promo .mt__role { font-size: 12px; line-height: 16px; }
+}
+
 
 /* ---------- Coach profile: the tile grown into a spread (coaches-profile.js) ----------
    Not a modal <dialog>: the top layer would sit above the custom cursor. z-index stays under the grain and the cursor.

@@ -13,12 +13,18 @@ const SKIP = /^(car_|.*_fence$|.*_sign_post$)/; // heavy or in the way of the ca
 
 // Render-side grade for the words: a vignette plus a dark band at the top and bottom, drawn after the scene.
 // White headlines sit on the bands, so no card is needed behind them (no CSS blur either).
+// Under each big word (uZone: centre and half size in uv, uAmt: how present it is) the picture is darkened a little
+// more, in a soft oval with no edge, so white letters keep their contrast on the light sky.
+const ZONES = 4;
 const GRADE = new THREE.ShaderMaterial({
+  uniforms: { uZone: { value: Array.from({ length: ZONES }, () => new THREE.Vector4()) }, uAmt: { value: new Array(ZONES).fill(0) } },
   transparent: true,
   depthTest: false,
   depthWrite: false,
   vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
   fragmentShader: `varying vec2 vUv;
+    uniform vec4 uZone[4];
+    uniform float uAmt[4];
     void main() {
       vec2 d = vUv - 0.5;
       float vig = smoothstep(0.35, 0.85, length(d * vec2(1.1, 1.0)));
@@ -28,7 +34,12 @@ const GRADE = new THREE.ShaderMaterial({
       float n = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
       vec3 base = vec3(0.07, 0.05, 0.04);
       vec3 tone = base + (n - 0.5) * 0.06;
-      float a = clamp(vig * 0.45 + top * 0.5 + bot * 0.55, 0.0, 0.8) + 0.012;
+      float word = 0.0;
+      for (int i = 0; i < 4; i++) {
+        vec2 q = (vUv - uZone[i].xy) / (uZone[i].zw * 1.7 + 0.04);
+        word = max(word, uAmt[i] * (1.0 - smoothstep(0.2, 1.0, length(q))));
+      }
+      float a = clamp(vig * 0.45 + top * 0.5 + bot * 0.55 + word * 0.34, 0.0, 0.8) + 0.012;
       gl_FragColor = vec4(tone, a);
     }`,
 });
@@ -91,6 +102,17 @@ export async function createStage(canvas, onProgress) {
     camera,
     renderer,
     resize: size,
+    // zones: [{ x, y, w, h, a }] in canvas pixels (from chapters.zones)
+    setZones(zones, w, h) {
+      const z = GRADE.uniforms.uZone.value;
+      const a = GRADE.uniforms.uAmt.value;
+      for (let i = 0; i < ZONES; i++) {
+        const q = zones[i];
+        if (!q) { a[i] = 0; continue; }
+        z[i].set(q.x / w, 1 - q.y / h, q.w / 2 / w, q.h / 2 / h);
+        a[i] = q.a;
+      }
+    },
     render() {
       renderer.autoClear = true;
       renderer.render(scene, camera);

@@ -57,6 +57,20 @@ function pinWidths(chars) {
   chars.forEach((c) => { c.textContent = c.dataset.char; c.style.width = ''; });
   const widths = chars.map((c) => c.getBoundingClientRect().width);
   if (widths.every((w) => w === 0)) return;
+  // Letter boxes lose kerning, so a word is a hair wider than the same word set as plain text. Spread the difference
+  // over its letters: when the words are folded back at the end the line breaks stay where they were (no layout shift).
+  const byWord = new Map();
+  chars.forEach((c, i) => { const w = c.parentElement; if (!byWord.has(w)) byWord.set(w, []); byWord.get(w).push(i); });
+  byWord.forEach((idx, word) => {
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;pointer-events:none';
+    probe.textContent = idx.map((i) => chars[i].dataset.char).join('');
+    word.appendChild(probe);
+    const natural = probe.getBoundingClientRect().width;
+    probe.remove();
+    const diff = natural - idx.reduce((a, i) => a + widths[i], 0);
+    if (natural > 0 && Math.abs(diff) < idx.length * 2) idx.forEach((i) => { widths[i] += diff / idx.length; });
+  });
   chars.forEach((c, i) => { c.style.width = `${widths[i]}px`; });
 }
 

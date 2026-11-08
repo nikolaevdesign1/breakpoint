@@ -8,8 +8,12 @@ let master = null;
 let noiseBuffer = null;
 let muted = readMuted();
 
+// No stored choice yet: off for reduced motion and data saver, on otherwise.
 function readMuted() {
-  try { return sessionStorage.getItem(KEY) === '1'; } catch { return false; }
+  let stored = null;
+  try { stored = sessionStorage.getItem(KEY); } catch { /* private mode */ }
+  if (stored !== null) return stored === '1';
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches || !!navigator.connection?.saveData;
 }
 function writeMuted(value) {
   try { sessionStorage.setItem(KEY, value ? '1' : '0'); } catch { /* private mode */ }
@@ -23,6 +27,12 @@ function ensureContext() {
   master = ctx.createGain();
   master.gain.value = 0.55;
   master.connect(ctx.destination);
+  if (import.meta.env.DEV) {
+    const an = ctx.createAnalyser();
+    an.fftSize = 2048;
+    master.connect(an);
+    window.__bpPock = { analyser: an, ctx };
+  }
   noiseBuffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.04), ctx.sampleRate);
   const data = noiseBuffer.getChannelData(0);
   for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
@@ -82,6 +92,9 @@ function syncToggles() {
 }
 
 const EVENT = 'bp-sound-change';
+// ambient-music.js can claim a click on the bars (play the piece again) before it toggles the mute.
+let toggleHook = null;
+export const setToggleHook = (fn) => { toggleHook = fn; };
 export const isMuted = () => muted;
 export function setMuted(value) {
   muted = value;
@@ -100,6 +113,7 @@ export function initSound() {
   }, { capture: true, passive: true });
 
   document.querySelectorAll('[data-sound-toggle]').forEach((b) => b.addEventListener('click', () => {
+    if (toggleHook?.()) return;
     setMuted(!muted);
     if (!muted) pock();
   }));

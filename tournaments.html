@@ -14,7 +14,7 @@
     <!-- Calendar -->
     <section class="section cal-section" id="calendar" aria-labelledby="calendar-title">
       <div class="grid grid--rows cal-section__head">
-        <h2 class="h2 h-xl col-8" id="calendar-title" data-lines data-parallax="0.5">Fourteen events four <em>months</em></h2>
+        <h2 class="h2 h-xl col-8" id="calendar-title" data-lines data-parallax="0.5">Fourteen events, four <em>months</em></h2>
         <p class="note cal-section__lead col-3 start-10 p-shift-1">Fourteen amateur events over the next four months. Filter by how long you’ve played and your age, then pick a date.</p>
       </div>
 
@@ -28,17 +28,25 @@
           </div>
         </div>
 
-        <div class="cal__bar">
-          <h3 class="cal__month" aria-live="polite"><span data-cal-month></span></h3>
-          <p class="cal__count" data-cal-count aria-live="polite"></p>
-          <p class="cal__hint" aria-hidden="true"><span class="cal__hint-keys">Swipe or press <kbd>←</kbd> <kbd>→</kbd></span><span class="cal__hint-touch">Swipe for more</span></p>
-          <div class="cal__nav">
-            <button class="cal__arrow" type="button" data-cal-prev aria-label="Previous month"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M9 2L4 7l5 5"/></svg></button>
-            <button class="cal__arrow" type="button" data-cal-next aria-label="Next month"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5 2l5 5-5 5"/></svg></button>
+        <div class="cal__top">
+          <div class="cal__bar">
+            <h3 class="cal__month" aria-live="polite"><span data-cal-month></span></h3>
+            <p class="cal__count" data-cal-count aria-live="polite"></p>
+            <p class="cal__hint" aria-hidden="true"><span class="cal__hint-keys">Swipe or press <kbd>←</kbd> <kbd>→</kbd></span><span class="cal__hint-touch">Swipe for more</span></p>
+            <div class="cal__views" role="group" aria-label="Calendar view">
+              <button class="cal__view" type="button" data-cal-view="week" aria-pressed="true">Week</button>
+              <button class="cal__view" type="button" data-cal-view="month" aria-pressed="false">Month</button>
+            </div>
+            <div class="cal__nav">
+              <button class="cal__arrow" type="button" data-cal-prev aria-label="Previous month"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M9 2L4 7l5 5"/></svg></button>
+              <button class="cal__arrow" type="button" data-cal-next aria-label="Next month"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M5 2l5 5-5 5"/></svg></button>
+            </div>
           </div>
+          <div class="cal__strip" data-cal-strip role="group" aria-label="Days of the week"></div>
         </div>
 
         <div class="cal__body" data-cal-body>
+          <div class="wk" data-cal-wk></div>
           <div class="cal__week" aria-hidden="true"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
           <div class="cal__grid" data-cal-grid></div>
           <div class="cal__empty" data-cal-empty hidden>
@@ -56,7 +64,6 @@
           <li class="cal__legend-fill"><i></i>The darker part shows spots taken</li>
         </ul>
       </div>
-      <div class="score-rule" aria-hidden="true"><span>15</span><span>30</span><span>40</span><span>Adv</span></div>
     </section>
 
     <!-- FAQ (shared component) -->

@@ -20,7 +20,7 @@ export const AMBLE = { vmax: 0.95, acc: 1.2, dec: 1.6, min: 0.8 };
 
 const BREAKS = { chat: 3, water: 3, tidy: 3, stroll: 3, stretch: 2, rest: 2 };
 
-export function createRoutine({ has, switchClip, pickup, places, flight, toCorridor, BASELINE, BALL_R, BLEND, onTournament }) {
+export function createRoutine({ nowS, has, switchClip, pickup, places, flight, toCorridor, BASELINE, BALL_R, BLEND, onTournament }) {
   const half = (p) => (p.near ? 1 : -1);
   const baseZ = (c, p, d = 0.4) => c.z + half(p) * (BASELINE + d);
 
@@ -123,9 +123,9 @@ export function createRoutine({ has, switchClip, pickup, places, flight, toCorri
     begin(game, 'tidy', 1);
     let left = 2 + Math.floor(Math.random() * 3);
     const next = () => {
-      if (left-- <= 0) { finish(game, performance.now() / 1000); return; }
+      if (left-- <= 0) { finish(game, nowS()); return; }
       const at = new THREE.Vector3(c.x + rand(-3.6, 3.6), c.y + BALL_R, c.z + half(p) * rand(3, 10.5));
-      game.ball = flight(at, new THREE.Vector3(), performance.now() / 1000, c.y);
+      game.ball = flight(at, new THREE.Vector3(), nowS(), c.y);
       p.path = [{ x: at.x + p.right * 0.14, z: at.z - p.fwd * 0.42, stop: true, m: AMBLE, then: (t) => pickup(game, p, t, p.home, () => next()) }];
     };
     next();
@@ -226,9 +226,9 @@ export function createRoutine({ has, switchClip, pickup, places, flight, toCorri
       if (s.warm > 0) s.warm--;
       game.tempo = s.warm > 0 ? 1.25 : rand(0.92, 1.2);
       if (busy) return false;
-      if (!onTournament(game) && s.since >= s.changeAt) {
+      if (!onTournament(game) && game.owesChange) { // row 19: the ends change after every odd game
+        game.owesChange = false;
         s.since = 0;
-        s.changeAt = 5 + Math.floor(Math.random() * 4);
         changeover(game);
         s.last = 'changeover';
         return true;

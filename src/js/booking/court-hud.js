@@ -7,6 +7,7 @@ import { revealText } from '../site/type-reveal.js';
 import { PRICES, LEVELS, levelLabel, racketPrice, memberOff, defaultGame, durationsFor, playerChoices, fits, priceOf, describeGame } from './extras.js';
 import { CANCEL, COACH_RATE, PLAN } from '../shared/club-facts.js';
 import { createPlayerForm } from './player-form.js';
+import { contactLine, peopleLabel } from '../shared/contact.js';
 import { addSessionBooking, isOwnSlot } from '../shared/session-bookings.js';
 import { loadForecast, forecastAt, windWord, isWet } from './forecast.js';
 import { inviteUrl } from './flow/invite.js';
@@ -83,6 +84,7 @@ export function createCourtHud({ onBack, onBooked, onGroup }) {
   const form = createPlayerForm(el.view.details, {
     onSubmit: () => confirm(),
     onPromo: (code) => { state.promo = code; if (state.game) renderSums(); }, // row 134
+    onParty: (n) => { state.game.players = n; renderSums(); },
     onMember: (card, plan) => { state.member = card ? { card, plan } : null; if (state.court) { renderTotal(); if (state.hour !== null) renderSums(); } }, // round 9 row 35
   });
   state.member = form.memberCard() ? { card: form.memberCard(), plan: form.memberPlan() } : null;
@@ -312,7 +314,6 @@ export function createCourtHud({ onBack, onBooked, onGroup }) {
     const g = state.game;
     const fitsAll = (m) => courts().every((c) => fitsOn(c, state.hour, m));
     seg('minutes', durationsFor(g.minutes).map((m) => ({ value: m, label: lengthLabel(m), disabled: !fitsAll(m) })));
-    seg('players', playerChoices(state.court).map((n) => ({ value: n, label: String(n) })));
     seg('balls', [{ value: 'own', label: 'My own' }, { value: 'new', label: `New can <small>+$${PRICES.balls}</small>` }]);
     seg('partner', [{ value: null, label: 'No' }, ...LEVELS.map((l) => ({ value: l, label: levelLabel(l) }))]);
     renderKit(el.kit, g, renderGame, state.court.type); // round 10: ball kit & rental
@@ -466,7 +467,7 @@ export function createCourtHud({ onBack, onBooked, onGroup }) {
     const { total, full, discount, off } = price();
     const player = form.value();
     const ids = courts().map((c) => c.id);
-    const first = String(player.name || '').trim().split(/\s+/)[0].slice(0, 16);
+    const first = String(player.first || '').slice(0, 16);
     const dayKey = dayKeyForOffset(offset);
     // Your booking on the map (round 7): the slot is held for this visit, and the court gets its sign.
     // Round 9: one booking per court of a group; the member mark and the partner flag ride along.
@@ -485,10 +486,11 @@ export function createCourtHud({ onBack, onBooked, onGroup }) {
       ['Game', describeGame(game)],
     ];
     const name = player.card ? `${player.name} · member` : player.name;
+    const people = peopleLabel(game.players);
     // With a promo the code sits next to the total it lowered; an odd last row runs full width (CSS).
     const rows = discount
-      ? [...head, ['Name', name], ['Promo', `${state.promo}, −${Math.round(off * 100)}%`], ['Total', priceText], ['Confirmation to', player.email]]
-      : [...head, ['Total', priceText], ['Name', name], ['Confirmation to', player.email]];
+      ? [...head, ['Name', name], ['People', people], ['Promo', `${state.promo}, −${Math.round(off * 100)}%`], ['Total', priceText], ['Contact', contactLine(player)], ['Cancellation', CANCEL.head]]
+      : [...head, ['Total', priceText], ['Name', name], ['People', people], ['Contact', contactLine(player)], ['Cancellation', CANCEL.head]];
     el.ticket.replaceChildren(...rows.map(([k, v]) => tile('div', 'hud-ticket__row', `<dt>${k}</dt><dd>${v}</dd>`)));
     el.view.done.dataset.ics = JSON.stringify({ label: names(), offset, hour, minutes: game.minutes });
     state.last = { ids, offset, hour, minutes: game.minutes, first, dayKey, extra: { ...(player.card ? { member: true } : {}), ...(game.partner ? { partner: game.partner } : {}), ...(kitOf(game) ? { kit: kitOf(game) } : {}) } };
@@ -583,7 +585,12 @@ export function createCourtHud({ onBack, onBooked, onGroup }) {
   el.scrim.addEventListener('click', close);
   el.finish.addEventListener('click', close);
   el.book.addEventListener('click', toGame);
-  q('[data-hud-next2]').addEventListener('click', () => { renderSums(); go('details'); });
+  q('[data-hud-next2]').addEventListener('click', () => {
+    const ch = playerChoices(state.court);
+    state.game.players = form.setParty(Math.min(...ch), Math.max(...ch), state.game.players); // the limits of this court
+    renderSums();
+    go('details');
+  });
   q('[data-hud-prev]').addEventListener('click', () => { renderPick(); go('pick'); });
   q('[data-hud-prev2]').addEventListener('click', () => { renderGame(); go('game'); });
   el.ics.addEventListener('click', downloadIcs);

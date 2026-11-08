@@ -29,6 +29,7 @@ export default defineConfig({
   server: { watch: { ignored: NOT_SITE } },
   optimizeDeps: { entries: PAGES.map((p) => `${p}.html`) },
   build: {
+    reportCompressedSize: false, // gzip of every chunk only to print a size: skipped
     rollupOptions: {
       input: Object.fromEntries(PAGES.map((p) => [p, resolve(__dirname, `${p}.html`)])),
     },

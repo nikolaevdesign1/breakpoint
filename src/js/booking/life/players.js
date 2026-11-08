@@ -8,6 +8,8 @@ import { hourState } from '../hour-state.js';
 import { RALLY_COURTS, rallyCourtsAt, rallyFilters } from './rallies.js';
 import { createRoutine } from './player-routine.js';
 import { clubSlot } from './clock.js';
+import { confine, inCourt, violations } from './court-bounds.js';
+import { addPoint } from './tournament.js';
 
 // Rallies on a few courts (row 95.4). The players are flipbook sprites rendered offline from the
 // drone's exact direction (scripts/life/render_players.py): MakeHuman people, footwork from Mixamo
@@ -273,6 +275,10 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
       return s.x > -120 && s.x < innerWidth + 120 && s.y > -200 && s.y < innerHeight + 120;
     };
     const random = rng(95);
+    // Row 19: the clock can be replaced by the headless check (simulate), which runs minutes in a second.
+    let simNow = null;
+    const nowS = () => simNow ?? performance.now() / 1000;
+    const newScore = () => ({ names: ['A', 'B'], sets: [[0, 0]], won: [0, 0], points: [0, 0], over: false });
     const games = courts.map((c, k) => makeGame(c, k));
     const m4 = new THREE.Matrix4();
     const tmp = new THREE.Vector3();
@@ -300,6 +306,9 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
         heading: near ? 0 : Math.PI, // round 9: rad clockwise from 'away'; the body turns through it
         path: null, // round 9: waypoints walked one after the other (out through the gate and back)
         slot: 0,
+        pid: near ? 0 : 1, // row 19: the person, whichever end they play from (the score follows it)
+        out: false, // row 19: outside the court on an errand (the gate, the footpath); see court-bounds.js
+        side: 0, // which side of the net they were last seen on
         pace: OLD ? 1 : rand(0.88, 1.12), // round 10: each player has their own tempo (footwork, breathing, reaction)
         react: rand(-0.04, 0.1), // s later (or earlier) than the average into the split step
       };
@@ -308,9 +317,14 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
     function makeGame(court, k) {
       const near = makePlayer(court, true, k);
       const far = makePlayer(court, false, k);
-      const game = { log: [], court, players: [near, far], ball: null, server: k % 2 ? near : far, deuce: true, shots: 0, maxShots: 0, next: performance.now() / 1000 + rand(0.5, 6), idx: k };
+      const game = { log: [], court, players: [near, far], ball: null, server: k % 2 ? near : far, deuce: true, shots: 0, maxShots: 0, next: nowS() + rand(0.5, 6), idx: k, faults: 0, gamePts: 0, score: newScore() };
       places(game, 0, true);
       return game;
+    }
+
+    /** Row 19: after a mistake the player turns away from the net for a moment (places() brings them round). */
+    function vent(p) {
+      p.wantHeading = homeHeading(p) + Math.PI;
     }
 
     function other(game, p) { return game.players[0] === p ? game.players[1] : game.players[0]; }
@@ -323,6 +337,7 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
       const s = game.server;
       const r = other(game, s);
       const c = game.court;
+      game.deuce = game.gamePts % 2 === 0; // row 19: deuce court on even points of a game, ad court on odd ones
       const side = game.deuce ? 1 : -1;
       game.side = side;
       const spots = [
@@ -397,6 +412,7 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
       const opp = other(game, hitter);
       const c = game.court;
       game.shots++;
+      game.faults = 0;
       const from = game.ball ? ballAt(game.ball, now, new THREE.Vector3()) : hitter.contactPos.clone();
       const miss = game.shots >= game.maxShots;
       const side = Math.sign(opp.z - c.z); // the half the ball goes to
@@ -472,6 +488,8 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
         opp.plan = null;
         game.pointOver = now + T + 2.2;
         game.winner = opp;
+        if (!netMiss && !shank && Math.random() < 0.5) vent(hitter); // a long ball: a shake of the head, turning away
+        else if (Math.random() < 0.35) vent(hitter);
       }
       // The hitter recovers towards the middle once the stroke is done (row 181: unhurried, and the
       // follow-through is cut a little short to start the first step).
@@ -512,7 +530,6 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
       const v = new THREE.Vector3((s.contactPos.x - from.x) / tossT, (s.contactPos.y - from.y + 0.5 * G * tossT * tossT) / tossT, (s.contactPos.z - from.z) / tossT);
       game.toss = { f: flight(from, v, tr, c.y), until: tc, from: tr };
       game.serveAt = tc;
-      game.deuce = !game.deuce;
     }
 
     /** Row 181: before the serve the server bounces the ball two to four times, then serves. */
@@ -532,7 +549,10 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
       const s = game.server;
       const c = game.court;
       const side = s.near ? -1 : 1;
-      const fault = Math.random() < 0.12;
+      // Row 19: the rules of a serve. A first serve in the net or long is replayed from the same side;
+      // a second one that misses is a double fault (the server turns away, annoyed). An ace is never a fault.
+      const second = game.faults > 0;
+      const fault = game.maxShots > 1 && Math.random() < (second ? 0.07 : 0.16);
       // Cross-court into the service box diagonally opposite the server.
       const to = new THREE.Vector3(c.x - s.right * game.side * rand(0.6, 3.6), 0, c.z + side * (fault ? SERVICE + rand(0.3, 1.5) : rand(SERVICE - 3.5, SERVICE - 0.4)));
       const from = ballAt(game.toss.f, now, new THREE.Vector3());
@@ -554,10 +574,20 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
       game.toss = null;
       playHit(c, 1.1);
       game.shots = 1;
+      if (fault && !second) {
+        // First fault: the ball is dead, the server steps back to the line and serves again.
+        game.faults = 1;
+        game.faultsTotal = (game.faultsTotal ?? 0) + 1;
+        game.again = now + T + 1.5;
+        s.goal = { x: s.spot.x, z: s.spot.z, walk: true };
+        r.plan = null;
+        return;
+      }
       splitStep(r, now);
       if (fault || game.maxShots <= 1) {
         game.pointOver = now + T + 2;
         game.winner = fault ? r : s;
+        if (fault) { game.doubleFault = true; game.doublesTotal = (game.doublesTotal ?? 0) + 1; vent(s); }
         r.plan = null;
       } else {
         const plan = meet(game, r, game.ball);
@@ -580,6 +610,7 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
     /** Waypoints from p's end of the court out through the gate to the corridor between the rows
      *  (round the net post first when the gate is in the other half). */
     function toCorridor(c, p) {
+      p.out = true; // row 19: on an errand outside the court until back inside (see court-bounds.js)
       const gz = gateZ(c);
       const s = Math.sign(gz - c.z);
       const pts = [];
@@ -587,7 +618,8 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
       // round the nearer net post (on the +x side behind the umpire's chair and the benches)
       const px = p.x > c.x + 3 ? c.x + 7.7 : c.x - 7;
       if (half !== s) pts.push({ x: px, z: c.z + half * 1.4 }, { x: px, z: c.z - half * 1.4 });
-      pts.push({ x: c.x, z: gz - s * 1.2 }, { x: c.x, z: gz + s * 0.9 }, { x: c.x, z: gz + s * 2.0 });
+      // row 19: line up on the gate inside the court first, then through it (never across the fence band)
+      pts.push({ x: c.x, z: c.z + s * 13 }, { x: c.x, z: gz - s * 1.2 }, { x: c.x, z: gz + s * 0.9 }, { x: c.x, z: gz + s * 2.0 });
       return pts;
     }
 
@@ -796,7 +828,7 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
         const neighbour = /^h\d$/.test(facing) && /^h\d$/.test(p.facing);
         switchClip(p, clip, facing, now, turn && neighbour ? TURN_STEP : facing === p.facing || neighbour ? BLEND : TURN, { t });
       }
-      p.rate = THREE.MathUtils.clamp(rate, 0.5, 2);
+      p.rate = THREE.MathUtils.clamp(rate, 0.25, 2.4); // row 19: wide enough for a slow shuffle not to skate (was 0.5..2)
       p.clipT += dt * p.rate;
     }
 
@@ -863,7 +895,7 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
     const STRIDE = { run: 3.3, shuffle_l: 1.9, shuffle_r: 1.9 };
     const speedOf = (clip, fallback) => Math.max(Math.abs(data.clips[clip]?.speed || 0) || fallback, STRIDE[clip] ?? 0);
     const homeHeading = (p) => (p.near ? 0 : Math.PI);
-    const routine = createRoutine({ has, switchClip, pickup, places, flight, toCorridor, BASELINE, BALL_R, BLEND, onTournament: (g) => points.has(g.court.id) });
+    const routine = createRoutine({ nowS, has, switchClip, pickup, places, flight, toCorridor, BASELINE, BALL_R, BLEND, onTournament: (g) => points.has(g.court.id) });
 
     /** Round 9: the body turns towards `want` (rad) at a human rate. */
     function turnTo(p, want, dt) {
@@ -933,6 +965,7 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
 
     function footwork(p, now, dt) {
       const [clip, facing, rate] = gait(p, p.clip === 'ready', dt);
+      p.wantRate = rate;
       playLoop(p, clip, facing, rate, now, dt);
     }
 
@@ -1186,28 +1219,14 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
       });
     }
 
-    let devMiss = null;
-    let last = performance.now() / 1000;
-    return {
-      devMiss: (k) => { devMiss = k; },
-      setCourts,
-      courts: () => games.filter((g) => !g.off).map((g) => g.court.id),
-      /** Round 7 (life/tournament.js): the rally on a court, read only, and where its ball is now. */
-      game: (id) => games.find((g) => !g.off && g.court.id === id) ?? null,
-      ballOf(id, out) {
-        const g = games.find((x) => !x.off && x.court.id === id);
-        const f = g && (g.toss?.f ?? g.ball);
-        return f ? ballAt(f, performance.now() / 1000, out) : null;
-      },
-      tick() {
-        const now = performance.now() / 1000;
-        const dt = Math.min(0.1, now - last);
-        last = now;
+    /** One step of every court's game (no drawing): the head of the old tick, also run by simulate(). */
+    function update(now, dt) {
         for (const game of games) {
           if (game.off) continue;
           if (!OLD && !game.session) routine.init(game, now);
           // Point flow.
-          if (!game.toss && !game.ball && !game.bouncing && !game.chore && !game.ended && now > game.next && game.players.every((p) => !p.goal && !p.stroke && !p.path?.length)) startServe(game, now);
+          if (!game.toss && !game.ball && !game.again && !game.bouncing && !game.chore && !game.ended && now > game.next && game.players.every((p) => !p.goal && !p.stroke && !p.path?.length)) startServe(game, now);
+          if (game.again && now > game.again && game.players.every((p) => !p.goal && !p.stroke && !p.path?.length)) { game.again = 0; game.ball = null; startServe(game, now); }
           if (game.toss && now >= game.serveAt) serveShot(game, now);
           for (const p of game.players) {
             if (p.hitAt && now >= p.hitAt) {
@@ -1219,8 +1238,20 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
             game.pointOver = 0;
             game.next = now + (OLD ? rand(1.2, 3.5) : rand(2, 4.5));
             game.played = (game.played ?? 0) + 1;
+            game.faults = 0;
+            game.doubleFault = false;
             const heard = points.get(game.court.id); // round 7: the tournament scoreboard keeps the score
-            if (heard ? heard(game.winner === game.players[0]) : Math.random() < 0.2) game.server = other(game, game.server); // a new game
+            // Row 19: the score is kept by the rules (shared with the tournament board): the serve changes
+            // every game, the side every point, the ends after every odd game.
+            const endsGame = heard ? heard(game.winner === game.players[0]) : addPoint(game.score, (game.winner ?? game.players[0]).pid);
+            if (game.score.over) game.score = newScore();
+            game.gamePts++;
+            if (endsGame) {
+              game.gamePts = 0;
+              game.games = (game.games ?? 0) + 1;
+              if (game.games % 2 === 1) game.owesChange = true;
+              game.server = other(game, game.server);
+            }
             places(game, now);
             // Round 9: what happens between this point and the next (rows 25, 29, 31).
             if (closing(game)) startLeave(game, now);
@@ -1233,7 +1264,11 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
           }
           if (game.chore) choreTick(game, now);
           game.players.forEach((p) => updatePlayer(game, p, now, dt));
+          keepIn(game, dt);
         }
+    }
+
+    function draw(now) {
         const sharp = hiWanted();
         if (sharp) hiOffSince = now;
         else if (hi && now - hiOffSince > HI_RELEASE && Object.keys(hiSets).length) hiRelease();
@@ -1251,6 +1286,90 @@ export function createPlayers({ scene, rig, camera, renderer, courtSurface, qual
         balls.instanceMatrix.needsUpdate = true;
         ballShadows.instanceMatrix.needsUpdate = true;
         return true;
+    }
+
+    // Row 19: the check of the limits, see court-bounds.js. keepIn confines a game's players after every step.
+    const stats = { clamped: 0, maxOver: 0, hard: 0 };
+    function keepIn(game, dt) {
+      const c = game.court;
+      for (const p of game.players) {
+        if (p.gone) continue;
+        const over = confine(c, p, game.players, dt);
+        if (over > 0) { stats[p.why ?? 'edge'] = (stats[p.why ?? 'edge'] ?? 0) + 1; p.why = null; stats.clamped++; stats.maxOver = Math.max(stats.maxOver, over); if (over > 0.3) stats.hard++; }
+        if (p.out && !p.goal && !p.path?.length && inCourt(c, p.x, p.z, -0.4)) p.out = false;
+      }
+    }
+
+    let devMiss = null;
+    let last = performance.now() / 1000;
+    return {
+      devMiss: (k) => { devMiss = k; },
+      setCourts,
+      courts: () => games.filter((g) => !g.off).map((g) => g.court.id),
+      /** Round 7 (life/tournament.js): the rally on a court, read only, and where its ball is now. */
+      game: (id) => games.find((g) => !g.off && g.court.id === id) ?? null,
+      ballOf(id, out) {
+        const g = games.find((x) => !x.off && x.court.id === id);
+        const f = g && (g.toss?.f ?? g.ball);
+        return f ? ballAt(f, performance.now() / 1000, out) : null;
+      },
+      tick() {
+        const now = nowS();
+        const dt = Math.min(0.1, now - last);
+        last = now;
+        update(now, dt);
+        return draw(now);
+      },
+      stats,
+      /**
+       * Row 19 (dev): plays `seconds` of the courts' time at once (no drawing) and checks every `every` s
+       * that nobody is outside the limits of court-bounds.js. Returns the violations, the clamp counts and
+       * every sampled position (court-relative) for the heat map. The games start afresh afterwards.
+       */
+      simulate(seconds = 600, { dt = 1 / 30, every = 0.1, hour = null, reset = true } = {}) {
+        if (!import.meta.env.DEV) return null;
+        const t0 = nowS();
+        let t = t0;
+        const keep = hourState.hour;
+        if (hour != null) hourState.hour = hour;
+        Object.assign(stats, { clamped: 0, maxOver: 0, hard: 0 });
+        const out = { seconds, courts: games.filter((g) => !g.off).map((g) => g.court.id), violations: [], samples: [], slip: { moving: 0, off: 0 }, points: 0, serves: { faults: 0, doubles: 0 }, steps: 0 };
+        const lastF = new Map();
+        let nextSample = 0;
+        for (let k = 0; k < seconds / dt; k++) {
+          t += dt;
+          simNow = t;
+          update(t, dt);
+          out.steps++;
+          if (t - t0 < nextSample) continue;
+          nextSample += every;
+          for (const game of games) {
+            if (game.off) continue;
+            const c = game.court;
+            const ps = game.players.filter((p) => !p.gone).map((p) => ({ out: p.out, dx: p.x - c.x, dz: p.z - c.z, clip: p.clip }));
+            const bad = violations(ps);
+            for (const b of bad) out.violations.push(`${(t - t0).toFixed(1)}s ${c.id} ${b}`);
+            out.samples.push([game.idx, +(t - t0).toFixed(1), ...ps.flatMap((p) => [+p.dx.toFixed(2), +p.dz.toFixed(2), p.out ? 1 : 0])]);
+            for (const p of game.players) {
+              const sp = Math.hypot(p.vx, p.vz);
+              if (sp > 0.5 && data.clips[p.clip]?.loop && p.clip !== 'ready' && p.clip !== 'idle' && p.wantRate) {
+                out.slip.moving++;
+                if (Math.abs(p.rate - p.wantRate) / p.wantRate > 0.15) { out.slip.off++; const k = `${p.clip}:${p.wantRate < 0.5 ? 'slow' : p.wantRate > 2 ? 'fast' : 'xfade'}`; out.slip[k] = (out.slip[k] ?? 0) + 1; }
+              }
+            }
+          }
+        }
+        out.points = games.reduce((a, g) => a + (g.played ?? 0), 0);
+        out.faults = games.reduce((a, g) => a + (g.faultsTotal ?? 0), 0);
+        out.doubles = games.reduce((a, g) => a + (g.doublesTotal ?? 0), 0);
+        out.scores = games.filter((g) => !g.off).map((g) => ({ court: g.court.id, games: g.games ?? 0, sets: JSON.stringify(g.score.sets), played: g.played ?? 0 }));
+        out.stats = { ...stats };
+        simNow = null;
+        hourState.hour = keep;
+        last = nowS();
+        // fresh games on the same courts: their timers belonged to the simulated clock
+        if (reset) games.forEach((g, k) => { if (!g.off) games[k] = makeGame(g.court, k); });
+        return out;
       },
       /** Row 32 (life/follow-cam.js): the player drawn under a screen point, as a live position getter. */
       personAt(x, y) {

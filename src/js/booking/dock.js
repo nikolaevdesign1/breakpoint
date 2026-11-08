@@ -1,3 +1,4 @@
+import { visibleInterval } from './perf.js';
 import gsap from 'gsap';
 import { COURTS, HOURS, hoursOn, isOpenHour, isSlotTaken, dayKeyForOffset } from '../shared/availability.js';
 import { fmtHour, dayName, dateFor, weekday, DAYS_AHEAD } from '../shared/slot-ui.js';
@@ -69,7 +70,7 @@ export function createDock({ onChange, onNext }) {
   }
   // The live clock moves on: follow it across the hour (and a pinned preview time, ?time= / __bp.setTime).
   let lastLiveHour = miamiHour();
-  setInterval(() => { if (state.live && miamiHour() !== lastLiveHour) update(); }, 20000);
+  visibleInterval(() => { if (state.live && miamiHour() !== lastLiveHour) update(); }, 20000);
   document.addEventListener('bp-clock', () => { if (state.live) update(); });
 
   // Round 9 (row 23): "Played before" keeps the courts this visitor has booked.

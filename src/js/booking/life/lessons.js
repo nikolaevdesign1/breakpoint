@@ -82,7 +82,7 @@ export function createLessons(ctx, { still, players }) {
     function makeLesson(id, coach) {
       const c = courtSurface(id);
       if (!c) return null;
-      const bounds = { x0: c.x - 7.9, x1: c.x + 7.9, z0: c.z - 16.9, z1: c.z + 16.9 };
+      const bounds = { x0: c.x - 7.9, x1: c.x + 7.9, z0: c.z - 15.2, z1: c.z + 15.2 };
       const F = { x: c.x + 0.7, z: c.z + 5.2 }; // feeding spot, just inside the service line
       const H = { x: F.x + 0.5, z: F.z + 0.32 }; // hopper: to his right, a step behind
       const S = { x: c.x - 0.3, z: c.z - BASELINE + 1.0 }; // student's place
@@ -392,6 +392,8 @@ export function createLessons(ctx, { still, players }) {
         sync();
         return lessons.map((l) => l.id);
       },
+      /** Row 19 (dev): everybody on the lesson courts, for the bounds check: { court: [x, z], who: [[x, z, role]] }. */
+      people: () => lessons.map((l) => ({ id: l.id, c: [l.c.x, l.c.z], who: [[l.co.x, l.co.z, 'coach'], [l.st.x, l.st.z, 'student']] })),
       /** Dev: start the pickup on a court now. */
       pickup(id) {
         const l = lessons.find((x) => x.id === id) ?? lessons[0];

@@ -1,8 +1,10 @@
 import * as THREE from 'three';
 import { LIFE_LAYER } from './shared.js';
 import { gradeLife } from '../lookdev.js';
-import { curve, envelope, stroke } from './bird-flight.js';
+import { curve, soarCurve, envelope, stroke } from './bird-flight.js';
 import { createRest } from './bird-rest.js';
+import { createPond } from './pond.js';
+import { perf } from '../perf.js';
 
 // Birds over the club (row 95.2): now and then a small flock crosses the grounds. Two Miami
 // regulars, modelled at their real sizes and colours: brown pelicans in a loose line, flapping a
@@ -232,7 +234,7 @@ export function shadowMaterial(sunDir, opacity) {
 const SPECIES = {
   pelican: {
     geometry: pelicanGeometry, max: 7, speed: 10.5, beat: 1.45, amp: 0.55, wrist: 0.45, heave: 0.14, speedSpread: 0.012,
-    flaps: [3, 6], glide: [2.5, 5.5], glideFold: [0.03, -0.1], shadow: 0.3, swing: [14, 26], period: [26, 40],
+    flaps: [3, 6], glide: [2.5, 5.5], glideFold: [0.03, -0.1], shadow: 0.3, swing: [14, 26], period: [26, 40], soar: 0.45,
     flock: () => {
       const n = 3 + Math.floor(Math.random() * 4);
       const side = Math.random() < 0.5 ? -1 : 1;
@@ -276,7 +278,8 @@ export function createBirds({ scene, sunDir, rig }, { still }) {
     kinds[name] = { sp, mesh, shadow, fold: geo.attributes.aFold };
   }
 
-  const rest = createRest({ scene, sunDir, rig, kinds, foldAt, makeCycle, lib: { builder, loft, birdMaterial, shadowMaterial, gradeLife } });
+  const pond = createPond({ scene }); // row 12: the pelicans' water (life/pond.js)
+  const rest = createRest({ scene, sunDir, rig, kinds, foldAt, makeCycle, pond, lib: { builder, loft, birdMaterial, shadowMaterial, gradeLife } });
   let flock = null; // { kind, birds: [{ off, phase, ... }], origin, dir, t0, length }
   let next = performance.now() / 1000 + rand(...FIRST);
   const m4 = new THREE.Matrix4();
@@ -288,7 +291,7 @@ export function createBirds({ scene, sunDir, rig }, { still }) {
   const e = new THREE.Euler();
   const UP = new THREE.Vector3(0, 1, 0);
 
-  function launch(kind) {
+  function launch(kind, opts = {}) {
     const name = kind ?? (Math.random() < 0.55 ? 'pelican' : 'ibis');
     const { sp } = kinds[name];
     // A line across whatever the visitor is looking at, from off screen to off screen.
@@ -298,7 +301,7 @@ export function createBirds({ scene, sunDir, rig }, { still }) {
     const side = new THREE.Vector3(dir.z, 0, -dir.x);
     const reach = 150;
     const origin = new THREE.Vector3(x, rand(...ALT[name]), z).addScaledVector(side, rand(-22, 22)).addScaledVector(dir, -reach);
-    const birds = sp.flock().slice(0, sp.max).map(([sx, dy, dz, lag]) => ({
+    const birds = sp.flock().slice(0, Math.max(4, Math.round(sp.max * perf.budget.birds))).map(([sx, dy, dz, lag]) => ({
       off: new THREE.Vector3().addScaledVector(side, sx).addScaledVector(dir, dz).setY(dy),
       lag: lag * (name === 'pelican' ? 0.9 : 1),
       jitter: rand(0.94, 1.06),
@@ -307,8 +310,13 @@ export function createBirds({ scene, sunDir, rig }, { still }) {
       swell: rand(0, 6.28), // each rides its own slow rise and fall: the flock spreads over several heights
       beatK: rand(0.96, 1.05),
     }));
-    const path = curve({ dir, speed: sp.speed, amp: rand(...sp.swing) * (Math.random() < 0.5 ? -1 : 1), period: rand(...sp.period), phase: rand(0, 6.28) });
-    flock = { name, birds, origin, dir, path, yaw: path.base, t0: performance.now() / 1000, duration: (reach * 2 + 30) / sp.speed, cycle: makeCycle(sp), climb: rand(-0.6, 0.6) };
+    const line = { dir, speed: sp.speed, amp: rand(...sp.swing) * (Math.random() < 0.5 ? -1 : 1), period: rand(...sp.period), phase: rand(0, 6.28) };
+    // Row 12: now and then a pelican flock finds a thermal over the grounds: it leaves its line, circles
+    // one behind the other with the wings spread and still, climbs, and carries on.
+    const soar = !!sp.soar && (opts.soar ?? Math.random() < sp.soar);
+    const path = soar ? soarCurve({ ...line, hand: Math.random() < 0.5 ? -1 : 1, turns: Math.random() < 0.5 ? 1 : 2, radius: rand(20, 28), at: reach / sp.speed - rand(1, 3), rise: rand(4, 6.5) }) : curve(line);
+    if (soar) birds.forEach((b, i) => { b.delay = Math.max(0, -b.off.dot(dir)) / sp.speed + i * 0.15; b.off.setY(b.off.y); });
+    flock = { name, birds, origin, dir, path, soar, yaw: path.base, t0: performance.now() / 1000, duration: ((reach * 2 + 30) / sp.speed) + (soar ? path.hold : 0), cycle: makeCycle(sp), climb: rand(-0.6, 0.6) };
     kinds[name].mesh.count = kinds[name].shadow.count = birds.length;
     kinds[name].mesh.visible = kinds[name].shadow.visible = true;
   }
@@ -346,6 +354,7 @@ export function createBirds({ scene, sunDir, rig }, { still }) {
     name: 'birds',
     tick() {
       const now = performance.now() / 1000;
+      const wet = pond.tick(); // the sky in the water, the rings still spreading
       if (rest.active) {
         if (!rest.tick(now)) next = now + rand(...EVERY);
         return true;
@@ -354,7 +363,7 @@ export function createBirds({ scene, sunDir, rig }, { still }) {
         if (now > next) {
           if (Math.random() < REST_P) { rest.launch(Math.random() < 0.5 ? 'pelican' : 'ibis'); return true; }
           launch();
-        } else return false;
+        } else return wet;
       }
       const { sp, mesh, shadow, fold } = kinds[flock.name];
       const t = now - flock.t0;
@@ -362,22 +371,40 @@ export function createBirds({ scene, sunDir, rig }, { still }) {
         mesh.visible = shadow.visible = false;
         flock = null;
         next = now + rand(...EVERY);
-        return false;
+        return wet;
       }
-      const { path } = flock;
+      const { path, soar } = flock;
       path.at(t, centre);
-      const yaw = path.yaw(t);
+      const yaw0 = path.yaw(t);
       flock.birds.forEach((b, i) => {
         const tb = t * b.jitter;
-        // The slot in the formation, swung round with the flock's heading (not all the way: the line stays a line).
-        slot.copy(b.off).applyAxisAngle(UP, (yaw - flock.yaw) * 0.8);
+        // Row 12: in a thermal each bird follows the leader's track, one behind the other (its own delay),
+        // else it holds its slot in the formation.
+        const ti = soar ? Math.max(0, t - b.delay) : t;
+        let yaw = yaw0;
+        if (soar) {
+          path.at(ti, centre);
+          yaw = path.yaw(ti);
+          slot.set(Math.cos(yaw) * b.off.x * 0.45, 0, -Math.sin(yaw) * b.off.x * 0.45);
+        } else {
+          // The slot in the formation, swung round with the flock's heading (not all the way: the line stays a line).
+          slot.copy(b.off).applyAxisAngle(UP, (yaw - flock.yaw) * 0.8);
+        }
         p.copy(flock.origin).add(centre).add(slot);
         p.addScaledVector(flock.dir, (b.pace - 1) * t * sp.speed);
-        const [s, w, heave] = foldAt(sp, flock.cycle, Math.max(0, t - b.lag), b.beatK);
+        let [s, w, heave] = foldAt(sp, flock.cycle, Math.max(0, ti - b.lag), b.beatK);
+        if (soar) {
+          // Wings spread and still in the thermal, the hand trimming a little: the beats fade out and back in.
+          const k = path.soaring(ti);
+          s = THREE.MathUtils.lerp(s, sp.glideFold[0] + 0.05 + 0.03 * Math.sin(t * 0.7 + b.swell), k);
+          w = THREE.MathUtils.lerp(w, sp.glideFold[1] + 0.06 * Math.sin(t * 0.5 + b.bob), k);
+          heave *= 1 - k;
+          p.y += path.lift(ti);
+        }
         // Height: a slow swell, the flock's own climb, and the body rising on each downstroke.
         p.y += Math.sin(tb * 0.45 + b.swell) * 0.9 + flock.climb * Math.sin(t * 0.12) * 2 + heave * sp.heave;
         const rise = Math.cos(tb * 0.45 + b.swell) * 0.9 * 0.45 / sp.speed;
-        const bank = path.bank(t) * 0.9 + Math.sin(tb * 0.31 + b.bob) * 0.04;
+        const bank = path.bank(ti) * 0.9 + Math.sin(tb * 0.31 + b.bob) * 0.04;
         q.setFromEuler(e.set(-0.04 - rise * 1.5 - heave * 0.05, yaw + Math.sin(tb * 0.5 + b.bob) * 0.03, bank, 'YXZ'));
         m4.compose(p, q, one);
         mesh.setMatrixAt(i, m4);
@@ -391,15 +418,16 @@ export function createBirds({ scene, sunDir, rig }, { still }) {
     },
     debug: () => (flock ? { kind: flock.name, n: flock.birds.length, t: +(performance.now() / 1000 - flock.t0).toFixed(1) } : { next: +(next - performance.now() / 1000).toFixed(1) }),
     /** Dev: a flock that lands, stands and takes off. */
-    land(kind = 'ibis') {
+    land(kind = 'ibis', opts = {}) {
       if (flock) { kinds[flock.name].mesh.visible = kinds[flock.name].shadow.visible = false; flock = null; }
-      if (!rest.active) rest.launch(kind);
+      if (!rest.active) rest.launch(kind, opts);
     },
+    pond: () => ({ rings: pond.count() }),
     rest: () => rest.debug(),
     /** Dev: send a flock over now. */
-    trigger(kind) {
+    trigger(kind, opts) {
       if (flock) kinds[flock.name].mesh.visible = kinds[flock.name].shadow.visible = false;
-      launch(kind);
+      launch(kind, opts);
     },
   };
 }
