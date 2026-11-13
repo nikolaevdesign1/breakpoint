@@ -4,8 +4,8 @@ import { pixelReveal } from '../booking/pixel-reveal.js';
 // Buttons assemble from small squares when they scroll into view, like the booking tiles (row 78).
 // Hover and press live in components.css and bounce.js.
 
-// Blocks with their own entrance keep their buttons as they are.
-const OWN_INTRO = '.hero, .cookies, .menu, [data-hero-fade]';
+// Blocks with their own entrance keep their buttons as they are. The gallery's Back button starts hidden and appears with the zoom.
+const OWN_INTRO = '.hero, .cookies, .menu, [data-hero-fade], [data-mapg-back]';
 
 function plateColor(btn) {
   const bg = getComputedStyle(btn.querySelector('.btn__bg') || btn).backgroundColor;

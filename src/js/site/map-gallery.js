@@ -3,13 +3,15 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { GALLERY, TILES } from './gallery-data.js';
 import { layoutWide, layoutNarrow } from './gallery-layout.js';
 
-// Club life: one big field of small pictures, laid out like a map. Over the field the cursor is a "+":
-// a click (a tap on a phone) zooms the field in on that spot until three to five pictures fill the frame; a
-// click on those, or any picture, zooms in further, down to a single picture. While zoomed the page does not
-// scroll and the map moves freely in both directions: wheel and trackpad (deltaX sideways, deltaY up and
-// down, Shift turns the wheel sideways), a drag with inertia, the arrow keys, Home / End / Page keys, a pinch
-// or Ctrl + wheel for zoom, the + and − buttons and the small chart in the corner. The edges give way like
-// rubber and pull back. "Back to all" or Esc returns to the overview and the page scrolls on again.
+// Club life: one big field of small pictures, laid out like a map. Three levels:
+//   1  the whole field (cursor "+")
+//   2  one zoom: a cell of three to five pictures fills the frame (cursor "+")
+//   3  second zoom: a single picture or clip, the clip plays (cursor "−", it only leads back)
+// A click or tap on the cursor, on a picture or on the empty space goes one level further (1 → 2 → 3); on level 3
+// the same click goes one level back. Esc and "Back to all" go one level back too (3 → 2, 2 → 1).
+// While zoomed the page does not scroll and the map moves freely in both directions: wheel and trackpad, a drag
+// with inertia, the arrow keys, Home / End / Page keys, a pinch or Ctrl + wheel. Zoom gestures settle on the
+// nearest level; the small chart in the bottom left corner moves the window. The edges give way like rubber.
 //
 // Two canvases: a landscape field on wide screens, a dense portrait field on phones and tablets in portrait.
 // One transform (x, y, scale) on the field does all the zooming; pictures load only near the window.
@@ -34,11 +36,12 @@ export function initMapGallery({ reducedMotion }) {
   const items = GALLERY.slice(0, TILES);
 
   // ---------- DOM: tiles, controls, chart, hint ----------
+  const zoomInLabel = (src) => (src.alt ? `Zoom in: ${src.alt}` : 'Zoom in on this part of the club');
   const tiles = items.map((src) => {
     const el = document.createElement('button');
     el.type = 'button';
     el.className = 'mapg__tile';
-    el.setAttribute('aria-label', src.alt ? `Zoom in: ${src.alt}` : 'Zoom in on this part of the club');
+    el.setAttribute('aria-label', zoomInLabel(src));
     el.innerHTML = src.video
       ? '<video muted loop playsinline preload="none"></video>'
       : `<img alt="" decoding="async" width="${Math.round(src.ar * 100)}" height="100" />`;
@@ -46,10 +49,6 @@ export function initMapGallery({ reducedMotion }) {
     return { el, src, media: el.firstElementChild, x: 0, y: 0, w: 1, h: 1, cx: 0, cy: 0, state: 0 };
   });
 
-  const zoomBox = document.createElement('div');
-  zoomBox.className = 'mapg__zoom';
-  zoomBox.hidden = true;
-  zoomBox.innerHTML = '<button class="mapg__zb" type="button" data-z="in" aria-label="Zoom in">+</button><button class="mapg__zb" type="button" data-z="out" aria-label="Zoom out">−</button>';
   const mini = document.createElement('div');
   mini.className = 'mapg__mini';
   mini.hidden = true;
@@ -60,13 +59,18 @@ export function initMapGallery({ reducedMotion }) {
   hint.className = 'mapg__hint';
   hint.hidden = true;
   hint.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><span></span>';
-  stage.append(zoomBox, mini, hint);
+  const status = document.createElement('p');
+  status.className = 'visually-hidden';
+  status.setAttribute('role', 'status');
+  stage.append(mini, hint, status);
 
   // ---------- Layout and geometry ----------
   let sw = 0; let sh = 0;
   let FW = 1600; let FH = 900;
   let narrow = false;
   let focus = null; // tiles in frame while zoomed
+  let cell = null; // the level 2 group, kept while a single picture (level 3) is open
+  const level = () => (!focus ? 1 : focus.length === 1 ? 3 : 2);
   const st = { x: 0, y: 0, s: 1 };
 
   function relayout() {
@@ -84,8 +88,10 @@ export function initMapGallery({ reducedMotion }) {
       i.style.cssText = `left:${(t.x / FW) * 100}%;top:${(t.y / FH) * 100}%;width:${(t.w / FW) * 100}%;height:${(t.h / FH) * 100}%`;
       return i;
     }), miniView);
-    const mh = narrow ? 140 : 72; // the chart keeps the field's proportions
-    mini.style.height = `${mh}px`; mini.style.width = `${even((mh * FW) / FH)}px`;
+    const mh = narrow ? 96 : 72; // the chart keeps the field's proportions
+    const mw = even((mh * FW) / FH);
+    mini.style.height = `${mh}px`; mini.style.width = `${mw}px`;
+    root.style.setProperty('--mini-w', `${mw}px`);
   }
 
   const view = (scale, cx, cy) => ({ s: scale, x: sw / 2 - cx * scale, y: sh / 2 - cy * scale });
@@ -212,8 +218,36 @@ export function initMapGallery({ reducedMotion }) {
   }
   function measure() {
     setSize();
-    if (focus) { const g = focus.map((t) => t); zoom(g, true); } else tweenTo(overview(), true);
+    if (focus) zoom(focus, true); else tweenTo(overview(), true);
     root.classList.toggle('is-narrow', narrow);
+  }
+
+  // The view that frames a group of pictures: three to five (level 2) or one (level 3).
+  function viewFor(group) {
+    const x0 = Math.min(...group.map((t) => t.x)); const x1 = Math.max(...group.map((t) => t.x + t.w));
+    const y0 = Math.min(...group.map((t) => t.y)); const y1 = Math.max(...group.map((t) => t.y + t.h));
+    const scale = Math.min(sw / (x1 - x0), sh / (y1 - y0)) * (1 - PAD * 2);
+    return view(clamp(scale, narrow && group.length > 1 ? startScale() * 1.5 : minScale(), 7), (x0 + x1) / 2, (y0 + y1) / 2);
+  }
+
+  // Everything that depends on the level lives here: classes, buttons, cursor, labels for assistive tech.
+  const LABELS = {
+    1: '',
+    2: 'Level 2 of 3, a few photos in frame. Click a photo to see it alone, press Escape to go back.',
+    3: 'Level 3 of 3, one photo in frame. Click or press Escape to go back.',
+  };
+  function syncLevel() {
+    const L = level();
+    root.dataset.level = String(L);
+    root.classList.toggle('is-zoomed', L > 1);
+    back.hidden = L === 1; mini.hidden = L === 1;
+    if (L === 1) hint.hidden = true;
+    back.querySelector('.btn__label').textContent = L === 3 ? 'Back' : 'Back to all';
+    back.setAttribute('aria-label', L === 3 ? 'Back to the group of photos' : 'Back to all photos');
+    tiles.forEach((t) => t.el.setAttribute('aria-label', L === 3 ? 'Zoom out' : zoomInLabel(t.src)));
+    status.textContent = LABELS[L];
+    setCursor(L === 3 ? '−' : '+'); // level 3 can only lead back: always the minus
+    setTimeout(refreshCursor, 0);
   }
 
   function zoom(group, instant) {
@@ -221,37 +255,49 @@ export function initMapGallery({ reducedMotion }) {
     const off = stage.getBoundingClientRect().top;
     const align = !focus && Math.abs(off) > 2; // bring the whole map into the window, so no other block shows under it
     focus = group;
-    const x0 = Math.min(...group.map((t) => t.x)); const x1 = Math.max(...group.map((t) => t.x + t.w));
-    const y0 = Math.min(...group.map((t) => t.y)); const y1 = Math.max(...group.map((t) => t.y + t.h));
-    const scale = Math.min(sw / (x1 - x0), sh / (y1 - y0)) * (1 - PAD * 2);
-    tweenTo(view(clamp(scale, narrow && group.length > 1 ? startScale() * 1.5 : minScale(), 7), (x0 + x1) / 2, (y0 + y1) / 2), instant);
-    root.classList.add('is-zoomed');
-    back.hidden = false; zoomBox.hidden = false; mini.hidden = false;
-    showHint();
+    if (group.length > 1) cell = group; else if (!cell || !cell.includes(group[0])) cell = nearest(group[0].cx, group[0].cy);
+    tweenTo(viewFor(group), instant);
+    syncLevel();
+    if (level() > 1) showHint();
     if (align && lenis) lenis.scrollTo(lenis.scroll + off, { duration: 0.8, force: true, onComplete: () => { if (focus) lenis.stop(); } });
     else if (align) scrollTo({ top: scrollY + off, behavior: 'smooth' });
     else lenis?.stop();
-    setCursor(group.length === 1 ? '−' : '+');
-    setTimeout(refreshCursor, 0);
   }
   function reset() {
-    focus = null;
+    focus = null; cell = null;
     tweenTo(overview());
-    root.classList.remove('is-zoomed');
-    back.hidden = true; zoomBox.hidden = true; mini.hidden = true; hint.hidden = true;
+    syncLevel();
     driftHold = performance.now() + 1500;
     window.__lenis?.start();
-    setCursor('+');
-    setTimeout(refreshCursor, 0);
   }
-  // Zoom by a factor around a point of the frame (button, pinch, Ctrl + wheel).
-  function zoomAt(factor, px, py, animate) {
+  // One level back: 3 → 2, 2 → 1. On level 1 there is nothing to leave.
+  function stepBack() {
+    const L = level();
+    if (L === 3) zoom(cell || nearest(focus[0].cx, focus[0].cy));
+    else if (L === 2) reset();
+  }
+  // Zoom by a factor around a point of the frame (Ctrl + wheel).
+  function zoomAt(factor, px, py) {
     const s = clamp(st.s * factor, minScale(), MAX_SCALE);
     const fx = (px - st.x) / st.s; const fy = (py - st.y) / st.s;
     const L = limits(s);
-    const v = { s, x: clamp(px - fx * s, L.x0, L.x1), y: clamp(py - fy * s, L.y0, L.y1) };
-    if (animate && !reducedMotion) { stopTween(); mode = 'tween'; gsap.killTweensOf(st); gsap.to(st, { ...v, duration: 0.5, ease: 'power3.out', onUpdate: apply, onComplete: () => { mode = 'idle'; apply(); } }); } else { stopTween(); Object.assign(st, v); mode = 'idle'; apply(); }
+    stopTween(); Object.assign(st, { s, x: clamp(px - fx * s, L.x0, L.x1), y: clamp(py - fy * s, L.y0, L.y1) }); mode = 'idle'; apply();
   }
+  // After a pinch or Ctrl + wheel the map lands on the nearest level (by scale), around what is in the middle of the frame.
+  function settle() {
+    if (!focus) return;
+    const cx = (sw / 2 - st.x) / st.s; const cy = (sh / 2 - st.y) / st.s;
+    const [t3] = [...tiles].sort((a, b) => Math.hypot(a.cx - cx, a.cy - cy) - Math.hypot(b.cx - cx, b.cy - cy));
+    const g2 = nearest(cx, cy);
+    const scales = [overview().s, viewFor(g2).s, viewFor([t3]).s];
+    const d = scales.map((v) => Math.abs(Math.log(st.s / v)));
+    const pick = d.indexOf(Math.min(...d)) + 1;
+    if (pick === 1) reset();
+    else if (pick === 2) zoom(g2);
+    else { cell = g2.includes(t3) ? g2 : nearest(t3.cx, t3.cy); zoom([t3]); }
+  }
+  let settleTimer = 0;
+  const settleSoon = (ms) => { clearTimeout(settleTimer); settleTimer = setTimeout(settle, ms); };
 
   // The pictures around a point: the closest first, then more while the group stays compact.
   const groupBox = () => (narrow ? [300, 420] : [380, 250]);
@@ -292,36 +338,31 @@ export function initMapGallery({ reducedMotion }) {
   function hideHint() { hint.hidden = true; clearTimeout(hintTimer); }
 
   // ---------- Clicks ----------
+  // One handler on the stage. While zoomed the stage holds the pointer capture (for dragging), so a click lands on the
+  // stage itself, not on a picture: the picture under the point is found by geometry, not by event.target.
   let dragged = false;
-  tiles.forEach((t) => {
-    t.el.addEventListener('click', (e) => {
-      if (dragged) { e.preventDefault(); return; }
-      if (focus?.length === 1 && focus[0] === t) { if (!narrow) reset(); return; } // a single picture in frame: a click leaves (not on a phone: Back does)
-      if (focus?.includes(t)) { zoom([t]); return; } // a picture of the group: closer, down to that picture alone
-      const [fx, fy] = e.detail ? toField(e) : [t.cx, t.cy]; // keyboard: around the tile itself
-      const around = nearest(fx, fy);
-      zoom(around.includes(t) ? around : nearest(t.cx, t.cy));
-    });
-  });
-  // The empty space between the pictures zooms too: onto the pictures nearest to the click.
+  const hit = (fx, fy) => tiles.find((t) => fx >= t.x && fx <= t.x + t.w && fy >= t.y && fy <= t.y + t.h);
+  const closest = (fx, fy) => [...tiles].sort((a, b) => Math.hypot(a.cx - fx, a.cy - fy) - Math.hypot(b.cx - fx, b.cy - fy))[0];
   stage.addEventListener('click', (e) => {
-    if (dragged || e.target.closest('.mapg__tile, .mapg__back, .mapg__zoom, .mapg__mini')) return;
-    if (focus?.length === 1) { if (!narrow) reset(); return; }
-    const [fx, fy] = toField(e);
-    zoom(nearest(fx, fy));
+    if (dragged || e.target.closest('.mapg__back, .mapg__mini')) return;
+    const L = level();
+    if (L === 3) { stepBack(); return; } // a picture, the empty space or the minus: one level back
+    const key = !e.detail && e.target.closest('.mapg__tile'); // Enter on a focused picture: around that picture
+    const own = key && tiles.find((t) => t.el === key);
+    const [fx, fy] = own ? [own.cx, own.cy] : toField(e);
+    const t = own || hit(fx, fy);
+    if (L === 2) { zoom([t || closest(fx, fy)]); return; } // a picture or the nearest one: down to that picture alone
+    const around = nearest(fx, fy);
+    zoom(t && !around.includes(t) ? nearest(t.cx, t.cy) : around);
   });
-  back.addEventListener('click', reset);
-  zoomBox.addEventListener('click', (e) => {
-    const b = e.target.closest('[data-z]');
-    if (b) zoomAt(b.dataset.z === 'in' ? 1.6 : 1 / 1.6, sw / 2, sh / 2, true);
-  });
+  back.addEventListener('click', stepBack);
 
   // ---------- Keyboard ----------
   document.addEventListener('keydown', (e) => {
     if (!focus || e.metaKey || e.ctrlKey || e.altKey) return;
     const step = 180;
     const go = (dx, dy) => { e.preventDefault(); stopTween(); mode = 'free'; pend.x += dx; pend.y += dy; hideHint(); warm(); };
-    if (e.key === 'Escape') reset();
+    if (e.key === 'Escape') stepBack();
     else if (e.key === 'ArrowRight') go(-step, 0);
     else if (e.key === 'ArrowLeft') go(step, 0);
     else if (e.key === 'ArrowDown') go(0, -step);
@@ -343,7 +384,8 @@ export function initMapGallery({ reducedMotion }) {
     const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? sh : 1;
     if (e.ctrlKey) { // trackpad pinch: zoom around the pointer
       const r = stage.getBoundingClientRect();
-      zoomAt(Math.exp(-e.deltaY * unit * 0.01), e.clientX - r.left, e.clientY - r.top, false);
+      zoomAt(Math.exp(-e.deltaY * unit * 0.01), e.clientX - r.left, e.clientY - r.top);
+      settleSoon(220);
       return;
     }
     stopTween();
@@ -362,7 +404,8 @@ export function initMapGallery({ reducedMotion }) {
   let samples = [];
   const beginGrab = (e) => { grab = { x: e.clientX, y: e.clientY, fx: st.x, fy: st.y }; samples = [{ t: performance.now(), x: e.clientX, y: e.clientY }]; };
   stage.addEventListener('pointerdown', (e) => {
-    if (e.target.closest('.mapg__back, .mapg__zoom, .mapg__mini')) return;
+    if (e.target.closest('.mapg__back, .mapg__mini')) return;
+    clearTimeout(settleTimer);
     driftHold = performance.now() + 4000; // the drift stops at a touch
     ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
     dragged = false;
@@ -416,7 +459,7 @@ export function initMapGallery({ reducedMotion }) {
       if (ptrs.size < 2) {
         pinch = null;
         const [rest] = [...ptrs.values()];
-        if (rest) { mode = 'drag'; beginGrab({ clientX: rest.x, clientY: rest.y }); } else { mode = 'free'; }
+        if (rest) { mode = 'drag'; beginGrab({ clientX: rest.x, clientY: rest.y }); } else { mode = 'free'; settleSoon(60); }
       }
       setTimeout(() => { dragged = false; }, 0);
       return;
@@ -450,6 +493,7 @@ export function initMapGallery({ reducedMotion }) {
   // ---------- Start ----------
   new IntersectionObserver(([en]) => { inView = en.isIntersecting; if (!inView) tiles.forEach((t) => t.src.video && t.media.pause()); }, { threshold: 0.1 }).observe(stage);
   gsap.set(field, { transformOrigin: '0 0' });
+  back.dataset.cursor = ''; mini.dataset.cursor = ''; // the plates keep the ordinary cursor, only the field wears the sign
   setCursor('+');
   measure();
   new ResizeObserver(measure).observe(stage);
