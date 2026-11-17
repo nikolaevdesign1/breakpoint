@@ -6,6 +6,7 @@
 @import './site/components.css';
 @import './site/nav.css';
 @import './site/to-top.css';
+@import './site/badge.css';
 @import './site/preloader.css';
 @import './site/hero.css';
 @import './site/member-card.css';
